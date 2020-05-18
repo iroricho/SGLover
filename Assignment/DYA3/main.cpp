@@ -281,24 +281,38 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		}
 #ifndef GL_ES_VERSION_2_0
-		else if(key==GLFW_KEY_W)
-		{
-			b_wireframe = !b_wireframe;
-			glPolygonMode( GL_FRONT_AND_BACK, b_wireframe ? GL_LINE:GL_FILL );
-			printf( "> using %s mode\n", b_wireframe ? "wireframe" : "solid" );
-		}
 		else if (key == GLFW_KEY_R)
 		{
 			halt = !halt;
 			if (halt) { time_buffer = t; printf("Pause\n"); }
 			else { time_buffer = float(glfwGetTime()) - time_buffer; printf("Rotate\n"); }
 		}
+		
+		//******WASD 움직임 begin 함수들*********//
+		//사실 인자 아무것도 안넣어줘도 됨. 그냥 복붙한거 고치기 귀찮아서 냅둠.
+		else if (key == GLFW_KEY_W) { tb.begin_W(cam.view_matrix,npos); }
+		else if (key == GLFW_KEY_A) { tb.begin_A(cam.view_matrix, npos); }
+		else if (key == GLFW_KEY_S) { tb.begin_S(cam.view_matrix, npos); }
+		else if (key == GLFW_KEY_D) { tb.begin_D(cam.view_matrix, npos); }
+		else if (key == GLFW_KEY_RIGHT) { tb.begin_RIGHT(cam.view_matrix, npos); }
+		else if (key == GLFW_KEY_LEFT) { tb.begin_LEFT(cam.view_matrix, npos); }
+
 #endif
 	}
 	else if(action==GLFW_RELEASE)
 	{
 		if(key==GLFW_KEY_KP_ADD||(key==GLFW_KEY_EQUAL&&(mods&GLFW_MOD_SHIFT)))	b.add = false;
 		else if(key==GLFW_KEY_KP_SUBTRACT||key==GLFW_KEY_MINUS) b.sub = false;
+		
+		
+		//******WASD 움직임 end 함수들*********//
+		//사실 인자 아무것도 안넣어줘도 됨. 그냥 복붙한거 고치기 귀찮아서 냅둠.
+		else if (key == GLFW_KEY_W) { tb.end_W(); }
+		else if (key == GLFW_KEY_A) { tb.end_A(); }
+		else if (key == GLFW_KEY_S) { tb.end_S(); }
+		else if (key == GLFW_KEY_D) { tb.end_D(); }
+		else if (key == GLFW_KEY_RIGHT) { tb.end_RIGHT(); }
+		else if (key == GLFW_KEY_LEFT) { tb.end_LEFT(); }
 	}
 }
 
@@ -360,6 +374,16 @@ void user_finalize()
 {
 }
 
+void update_camera() {
+	if (tb.is_W()) { cam.view_matrix = tb.update_W(vec2(0)); }
+	if (tb.is_A()) { cam.view_matrix = tb.update_A(vec2(0)); }
+	if (tb.is_S()) { cam.view_matrix = tb.update_S(vec2(0)); }
+	if (tb.is_D()) { cam.view_matrix = tb.update_D(vec2(0)); }
+	if (tb.is_RIGHT()) { cam.view_matrix = tb.update_RIGHT(vec2(0)); }
+	if (tb.is_LEFT()) { cam.view_matrix = tb.update_LEFT(vec2(0)); }
+}
+
+
 int main( int argc, char* argv[] )
 {
 	// create window and initialize OpenGL extensions
@@ -379,6 +403,7 @@ int main( int argc, char* argv[] )
 	// enters rendering/event loop
 	for( frame=0; !glfwWindowShouldClose(window); frame++ )
 	{
+		update_camera();
 		glfwPollEvents();	// polling and processing of events
 		update();			// per-frame update
 		render();			// per-frame render
