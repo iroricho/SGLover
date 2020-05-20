@@ -1,14 +1,35 @@
-#ifndef __SPHERE_H__
-#define __SPHERE_H__
-#include "camera.h"		// slee's OpenGL utility
+#ifndef __AI_H__
+#define __AI_H__
+#include "cgmath.h"
+#include "cgut.h"
 
-//tank struct는 camera에 정의되어 있습니다.
+extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
-// vertex buffer for tank 
-GLuint	vertex_array_1 = 0;	// ID holder for vertex array object
+//********** Temp var for adjust tank height *********
+float CY = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
+
+struct AI
+{
+	float radius = 0.3f;	// radius of AI
+	vec3	pos;			// position of AI
+	vec4	color;			// RGBA color in [0,1]
+
+	float t0=0;				// time buffer for halt
+	float speed = 0.01f;	// velocity of AI
+
+	mat4	model_matrix;	// modeling transformation
+	
+	// public functions
+	void	update( float t, const vec3& tpos );	
+};
+
+AI ai = {0.3f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f)};
+
+// vertex buffer for AI 
+GLuint	vertex_array_5 = 0;	// ID holder for vertex array object
 
 //********** 모델링 파트 *************
-std::vector<vertex> create_sphere_vertices( uint N )
+std::vector<vertex> create_ai_vertices( uint N )
 {
 	std::vector<vertex> v;
 	
@@ -41,7 +62,7 @@ std::vector<vertex> create_sphere_vertices( uint N )
 	return v;
 }
 
-void update_vertex_buffer_sphere(const std::vector<vertex>& vertices, uint N)
+void update_vertex_buffer_ai(const std::vector<vertex>& vertices, uint N)
 {
 	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
 	static GLuint index_buffer = 0;		// ID holder for index buffer
@@ -111,21 +132,28 @@ void update_vertex_buffer_sphere(const std::vector<vertex>& vertices, uint N)
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(uint)*indices.size(), &indices[0], GL_STATIC_DRAW );
 
 	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
-	if(vertex_array_1) glDeleteVertexArrays(1,&vertex_array_1);
-	vertex_array_1 = cg_create_vertex_array( vertex_buffer, index_buffer );
-	if(!vertex_array_1){ printf("%s(): failed to create vertex aray\n",__func__); return; }
+	if(vertex_array_5) glDeleteVertexArrays(1,&vertex_array_5);
+	vertex_array_5 = cg_create_vertex_array( vertex_buffer, index_buffer );
+	if(!vertex_array_5){ printf("%s(): failed to create vertex aray\n",__func__); return; }
 }
 
-//********** tank 움직임 파트 *************
-inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
+//********** AI 움직임 파트 *************
+inline void AI::update( float t, const vec3& tpos )
 {
-	vec3 n = (eye - at).normalize();
-	// tank pos랑 정확히 일치시키면 자기몸이 안 보여요 좀 떼어놓은 겁니다.
-	pos.x = eye.x - 0.705f * n.x;
-	pos.y = eye.y - 0.705f * n.y;
-	pos.z = eye.z - 0.705f * n.z;
+	vec3 AB = tpos - pos;
+	vec3 AO = - pos;
+	//float dt = t - t0;
+	vec3 ref = vec3(0,1.0f,0);
+	vec3 h1 = (AB.cross(ref)).normalize();
+	vec2 p = vec2(pos.x,pos.z);
+	float r = length(p);
 
-	// these transformations will be explained in later transformation lecture
+	if (h1.dot(AO) >= 0) pos += h1 * speed;
+	else pos += -h1 * speed;
+	if (r >= 0.001f) printf("%f %f %f\n", pos.x, pos.z, r);
+
+	pos.y = CY + radius;
+
 	mat4 scale_matrix =
 	{
 		radius, 0, 0, 0,
@@ -134,8 +162,6 @@ inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 		0, 0, 0, 1
 	};
 
-	// n 벡터랑 일치하게 돌려주지 않으면 고개만 돌아가는 꼴이 됩니다.
-	// 수정해주세요
 	mat4 rotation_matrix =
 	{
 		1, 0, 0, 0,
@@ -155,4 +181,4 @@ inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
 
-#endif
+#endif // __AI_H__

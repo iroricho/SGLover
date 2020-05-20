@@ -1,12 +1,45 @@
-#ifndef __TRACKBALL_H__
-#define __TRACKBALL_H__
+#ifndef __CAMERA_H__
+#define __CAMERA_H__
 #include "cgmath.h"
+#include "cgut.h"		// slee's OpenGL utility
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
-struct trackball
+//********** Temp var for adjust tank height *********
+float CP = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
+
+// tank 모델 구현 헤더에 구조체를 정의하고 싶어도
+// camera 초기 값에 tank의 반지름이 필요해
+// 구조체 정의를 여기에 했습니다. 다른 방법 있으면 수정해주세요.
+struct sphere_t
 {
-	/* 마우스 파트 제거
+	float	radius=0.3f;	// radius
+	vec3	pos;			// position of tank
+	vec4	color;			// RGBA color in [0,1]
+	mat4	model_matrix;	// modeling transformation
+
+	// public functions
+	void	update( float t, const vec3& eye, const vec3& at );	
+};
+
+// tank 구조체 생성
+// 결국엔 pos를 eye에 맞게 업데이트 해야되기 때문에 radius 외에는 크게 상관 없습니다
+sphere_t tank = {0.3f, vec3(0), vec4(1.0f,0.0f,0.0f,1.0f)};
+
+//*************************************
+struct camera
+{
+	vec3	eye = vec3( 0.0f, CP+tank.radius, 0.0f );
+	vec3	at = vec3( 0.0f, CP+tank.radius, -20.0f );
+	vec3	up = vec3( 0.0f, 1.0f, 0.0f );
+	mat4	view_matrix = mat4::look_at( eye, at, up );;
+
+	float	fovy = PI/4.0f; // must be in radian
+	float	aspect;
+	float	dnear = 1.0f;
+	float	dfar = 1000.0f;
+	mat4	projection_matrix;
+	
 	bool	b_tracking = false;
 	int		button;
 	int		mods;
@@ -17,10 +50,9 @@ struct trackball
 	void begin( vec2 m );
 	void end() { b_tracking = false; }
 
-	mat4 update_rot( vec2 m, vec3& eye, vec3& at, vec3& up );
-	mat4 update_zm( vec2 m, vec3& eye, vec3& at, vec3& up );
-	mat4 update_pn( vec2 m, vec3& eye, vec3& at, vec3& up );
-	*/
+	void update_rot( vec2 m );
+	void update_zm( vec2 m );
+	void update_pn( vec2 m );
 
 	float t0=0;					// time buffer for halt
 	float speed=0.1f;			// velocity of move of camera
@@ -56,26 +88,27 @@ struct trackball
 	void end_RIGHT() { b_RIGHT= false; }
 
 	//camera의 eye, at, up 값을 받아서 바꾸고 view matrix를 반환하는 함수임
-	mat4 update_W(vec3& eye, vec3& at, vec3& up);
-	mat4 update_A(vec3& eye, vec3& at, vec3& up);
-	mat4 update_S(vec3& eye, vec3& at, vec3& up);
-	mat4 update_D(vec3& eye, vec3& at, vec3& up);
-	mat4 update_LEFT(vec3& eye, vec3& at, vec3& up);
-	mat4 update_RIGHT(vec3& eye, vec3& at, vec3& up);
+	void update_W();
+	void update_A();
+	void update_S();
+	void update_D();
+	void update_LEFT();
+	void update_RIGHT();
 
 };
 
-/* 마우스 파트 제거
-inline void trackball::begin( vec2 m )
+camera	cam;
+
+inline void camera::begin( vec2 m )
 {
-	b_tracking = true;			// enable trackball tracking
+	b_tracking = true;			// enable camera tracking
 	m0 = m;						// save current mouse position
 }
 
-inline mat4 trackball::update_rot( vec2 m, vec3& eye, vec3& at, vec3& up )
+inline void camera::update_rot( vec2 m )
 {
 	vec3 p1 = vec3(m-m0,0);					// displacement
-	if( !b_tracking || length(p1) < 0.00001f ) return mat4::look_at(eye, at, up);
+	if( !b_tracking || length(p1) < 0.00001f ) return;
 
 	vec3 n = (eye - at).normalize();
 	vec3 u = (up.cross(n)).normalize();
@@ -116,14 +149,13 @@ inline mat4 trackball::update_rot( vec2 m, vec3& eye, vec3& at, vec3& up )
 	up.z = oup.x*u.dot(ez) + oup.y*v.dot(ez) + oup.z*n.dot(ez);
 	
 	m0 = m;
-	return mat4::look_at(eye, at, up);
 }
 
-inline mat4 trackball::update_zm( vec2 m, vec3& eye, vec3& at, vec3& up )
+inline void camera::update_zm( vec2 m )
 {
 	// project a 2D mouse position to a unit sphere
 	float p1 = m.y-m0.y;					// displacement
-	if( !b_tracking || abs(p1)<0.00001f ) return mat4::look_at(eye, at, up);
+	if( !b_tracking || abs(p1)<0.00001f ) return;
 	p1 *= 0.6f;								// apply cons
 	float p = max(1.0f + p1,0.0f);
 	
@@ -140,14 +172,13 @@ inline mat4 trackball::update_zm( vec2 m, vec3& eye, vec3& at, vec3& up )
 	eye.z += z;
 
 	m0 = m;
-	return mat4::look_at(eye, at, up);
 }
 
-inline mat4 trackball::update_pn( vec2 m, vec3& eye, vec3& at, vec3& up )
+inline void camera::update_pn( vec2 m )
 {
 	// project a 2D mouse position to a unit sphere
 	vec3 p1 = vec3(m-m0,0);					// displacement
-	if( !b_tracking || length(p1)<0.00001f ) return mat4::look_at(eye, at, up);
+	if( !b_tracking || length(p1)<0.00001f ) return;
 
 	p1 *= 1.65;							// apply cons
 
@@ -168,13 +199,11 @@ inline mat4 trackball::update_pn( vec2 m, vec3& eye, vec3& at, vec3& up )
 	at.z -= z;
 	
 	m0 = m;
-	return mat4::look_at(eye, at, up);
 }
-*/
 
 // WASD는 n벡터의 시작점을 바꾸는 것과 같음
 // 즉 eye와 at을 같이 바꿔주면 됨
-inline mat4 trackball::update_W( vec3& eye, vec3& at, vec3& up )
+inline void camera::update_W()
 {
 	vec3 u = (at- eye).normalize();
 	//vec3 v = (u.cross(up)).normalize();
@@ -182,11 +211,9 @@ inline mat4 trackball::update_W( vec3& eye, vec3& at, vec3& up )
 
 	eye += u * dt * speed;
 	at += u * dt * speed;
-
-	return mat4::look_at(eye, at, up);
 }
 
-inline mat4 trackball::update_A( vec3& eye, vec3& at, vec3& up )
+inline void camera::update_A()
 {
 	vec3 u = (at- eye).normalize();
 	vec3 v = (u.cross(up)).normalize();
@@ -194,12 +221,10 @@ inline mat4 trackball::update_A( vec3& eye, vec3& at, vec3& up )
 
 	eye -= v * dt * speed;
 	at -= v * dt * speed;
-
-	return mat4::look_at(eye, at, up);
 }
 
 
-inline mat4 trackball::update_S( vec3& eye, vec3& at, vec3& up )
+inline void camera::update_S()
 {
 	vec3 u = (at- eye).normalize();
 	//vec3 v = (u.cross(up)).normalize();
@@ -207,12 +232,10 @@ inline mat4 trackball::update_S( vec3& eye, vec3& at, vec3& up )
 
 	eye -= u * dt * speed;
 	at -= u * dt * speed;
-
-	return mat4::look_at(eye, at, up);
 }
 
 
-inline mat4 trackball::update_D( vec3& eye, vec3& at, vec3& up )
+inline void camera::update_D()
 {
 	vec3 u = (at- eye).normalize();
 	vec3 v = (u.cross(up)).normalize();
@@ -220,13 +243,11 @@ inline mat4 trackball::update_D( vec3& eye, vec3& at, vec3& up )
 
 	eye += v * dt * speed;
 	at += v * dt * speed;
-
-	return mat4::look_at(eye, at, up);
 }
 
 // n를 up을 축으로 회전시키는 것임, (축이 v일 수도 있음)
 // eye를 고정하고 at을 바꾸는 것 트랙볼 반대라고 보면 됨
-inline mat4 trackball::update_LEFT( vec3& eye, vec3& at, vec3& up )
+inline void camera::update_LEFT()
 {
 	vec4 at4 = vec4(at, 1);
 
@@ -234,11 +255,9 @@ inline mat4 trackball::update_LEFT( vec3& eye, vec3& at, vec3& up )
 	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, (t-t0)*speed) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
-	
-	return mat4::look_at(eye, at, up);
 }
 
-inline mat4 trackball::update_RIGHT( vec3& eye, vec3& at, vec3& up )
+inline void camera::update_RIGHT()
 {
 	vec4 at4 = vec4(at, 1);
 
@@ -246,8 +265,6 @@ inline mat4 trackball::update_RIGHT( vec3& eye, vec3& at, vec3& up )
 	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, (t-t0)*speed) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
-	
-	return mat4::look_at(eye, at, up);
 }
 
-#endif // __TRACKBALL_H__
+#endif // __CAMERA_H__

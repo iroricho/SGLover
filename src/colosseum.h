@@ -1,4 +1,3 @@
-#pragma once
 #ifndef __COLOSSEUM_H__
 #define __COLOSSEUM_H__
 
@@ -8,9 +7,30 @@
 struct colosseum_bottom //경기장 밑면
 {
 	float radius = 10.0f;	//경기장 반지름
-	vec3 pos = (0, 0, -30.0f);	//경기장 위치
+	vec3 pos = vec3(0, 0, 0.0f);	//경기장 위치
 	GLuint	vertex_array_3 = 0;	//경기장 vertex_array
 
+	//********************************
+	// 저희 1인칭 게임이기 때문에 지금 제가 돌려놓은 것처럼 보여야 합니다.
+	// 임시로 해놨는데, 그냥 옆면도 돌려버리시거나
+	// 애초에 이 축에 맞게 점선 만드시면 됩니다.
+	float ang = PI/2.0f;
+	float c	= -cos(ang), s = sin(ang);
+	mat4 rotation_matrix =
+	{
+		1, 0, 0, 0,
+		0, c, -s, 0,
+		0, s, c, 0,
+		0, 0, 0, 1
+	};
+	mat4 temp_translate_matrix_col =
+	{
+		1,0,0,0,
+		0,1,0,-1.0f,
+		0,0,1,0,
+		0,0,0,1
+	};
+	//********************************
 
 	mat4 scale_matrix_col =
 	{
@@ -19,6 +39,7 @@ struct colosseum_bottom //경기장 밑면
 		0,0,radius,0,
 		0,0,0,1
 	};
+
 	mat4 translate_matrix_col =
 	{
 		1,0,0,0,
@@ -26,7 +47,7 @@ struct colosseum_bottom //경기장 밑면
 		0,0,1,pos.z,
 		0,0,0,1
 	};
-	mat4 model_col = translate_matrix_col * scale_matrix_col; //경기장 모델 메트릭스 - 회전, 기울기 등 활동성이 없다고 가정하고 바로 초기화
+	mat4 model_col = temp_translate_matrix_col * translate_matrix_col * rotation_matrix * scale_matrix_col; //경기장 모델 메트릭스 - 회전, 기울기 등 활동성이 없다고 가정하고 바로 초기화
 
 	std::vector<vertex> create_colosseum_vertices();	//경기장 밑면 지오메트리
 	void update_vertex_buffer_colosseum(const std::vector<vertex>& vertices);	//경기장 밑면 버퍼생성
@@ -36,7 +57,7 @@ struct colosseum_bottom //경기장 밑면
 struct colosseum_side		//경기장 옆면
 {
 	float radius = 10.0f;	//옆면 반지름
-	vec3 pos = (0, 0, -30.0f);	//옆면 위치
+	vec3 pos = vec3(0, 0, -30.0f);	//옆면 위치
 	GLuint	vertex_array_4 = 0;	//옆면 vertex_array
 
 
