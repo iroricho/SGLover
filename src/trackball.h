@@ -2,11 +2,11 @@
 #define __TRACKBALL_H__
 #include "cgmath.h"
 
-extern float t;	// ì „ì²´ ì‹œê°„, ë‹¨ ì •ì§€ ê¸°ëŠ¥ì„ ìœ„í•´ bufferê°€ ë¹ ì§„ ê°’
+extern float t;	// ÀüÃ¼ ½Ã°£, ´Ü Á¤Áö ±â´ÉÀ» À§ÇØ buffer°¡ ºüÁø °ª
 
 struct trackball
 {
-	/* ë§ˆìš°ìŠ¤ íŒŒíŠ¸ ì œê±°
+	/* ¸¶¿ì½º ÆÄÆ® Á¦°Å
 	bool	b_tracking = false;
 	int		button;
 	int		mods;
@@ -40,7 +40,7 @@ struct trackball
 	bool is_LEFT() const { return b_LEFT; }
 	bool is_RIGHT() const { return b_RIGHT; }
 
-	//êµ³ì´ í•¨ìˆ˜ callì„ í•´ì„œ overheadë¥¼ ëŠ˜ë¦´ í•„ìš”ëŠ” ì‚¬ì‹¤ ì—†ìŒ
+	//±»ÀÌ ÇÔ¼ö callÀ» ÇØ¼­ overhead¸¦ ´Ã¸± ÇÊ¿ä´Â »ç½Ç ¾øÀ½
 	void begin_W() { t0=t; b_W= true; }
 	void begin_A() { t0=t; b_A = true; }
 	void begin_S() { t0=t; b_S= true; }
@@ -55,7 +55,7 @@ struct trackball
 	void end_LEFT() { b_LEFT = false; }
 	void end_RIGHT() { b_RIGHT= false; }
 
-	//cameraì˜ eye, at, up ê°’ì„ ë°›ì•„ì„œ ë°”ê¾¸ê³  view matrixë¥¼ ë°˜í™˜í•˜ëŠ” í•¨ìˆ˜ì„
+	//cameraÀÇ eye, at, up °ªÀ» ¹Ş¾Æ¼­ ¹Ù²Ù°í view matrix¸¦ ¹İÈ¯ÇÏ´Â ÇÔ¼öÀÓ
 	mat4 update_W(vec3& eye, vec3& at, vec3& up);
 	mat4 update_A(vec3& eye, vec3& at, vec3& up);
 	mat4 update_S(vec3& eye, vec3& at, vec3& up);
@@ -65,7 +65,7 @@ struct trackball
 
 };
 
-/* ë§ˆìš°ìŠ¤ íŒŒíŠ¸ ì œê±°
+/* ¸¶¿ì½º ÆÄÆ® Á¦°Å
 inline void trackball::begin( vec2 m )
 {
 	b_tracking = true;			// enable trackball tracking
@@ -172,8 +172,8 @@ inline mat4 trackball::update_pn( vec2 m, vec3& eye, vec3& at, vec3& up )
 }
 */
 
-// WASDëŠ” në²¡í„°ì˜ ì‹œì‘ì ì„ ë°”ê¾¸ëŠ” ê²ƒê³¼ ê°™ìŒ
-// ì¦‰ eyeì™€ atì„ ê°™ì´ ë°”ê¿”ì£¼ë©´ ë¨
+// WASD´Â nº¤ÅÍÀÇ ½ÃÀÛÁ¡À» ¹Ù²Ù´Â °Í°ú °°À½
+// Áï eye¿Í atÀ» °°ÀÌ ¹Ù²ãÁÖ¸é µÊ
 inline mat4 trackball::update_W( vec3& eye, vec3& at, vec3& up )
 {
 	vec3 u = (at- eye).normalize();
@@ -224,13 +224,13 @@ inline mat4 trackball::update_D( vec3& eye, vec3& at, vec3& up )
 	return mat4::look_at(eye, at, up);
 }
 
-// në¥¼ upì„ ì¶•ìœ¼ë¡œ íšŒì „ì‹œí‚¤ëŠ” ê²ƒì„, (ì¶•ì´ vì¼ ìˆ˜ë„ ìˆìŒ)
-// eyeë¥¼ ê³ ì •í•˜ê³  atì„ ë°”ê¾¸ëŠ” ê²ƒ íŠ¸ë™ë³¼ ë°˜ëŒ€ë¼ê³  ë³´ë©´ ë¨
+// n¸¦ upÀ» ÃàÀ¸·Î È¸Àü½ÃÅ°´Â °ÍÀÓ, (ÃàÀÌ vÀÏ ¼öµµ ÀÖÀ½)
+// eye¸¦ °íÁ¤ÇÏ°í atÀ» ¹Ù²Ù´Â °Í Æ®·¢º¼ ¹İ´ë¶ó°í º¸¸é µÊ
 inline mat4 trackball::update_LEFT( vec3& eye, vec3& at, vec3& up )
 {
 	vec4 at4 = vec4(at, 1);
 
-	//eyeë¥¼ ì¤‘ì‹¬ìœ¼ë¡œ ì´ë™(translate), upê¸°ì¤€ íšŒì „(rotate), ë‹¤ì‹œ eye ì›ë˜ ìœ„ì¹˜ë¡œ ì´ë™
+	//eye¸¦ Áß½ÉÀ¸·Î ÀÌµ¿(translate), up±âÁØ È¸Àü(rotate), ´Ù½Ã eye ¿ø·¡ À§Ä¡·Î ÀÌµ¿
 	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, (t-t0)*speed) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
@@ -242,7 +242,7 @@ inline mat4 trackball::update_RIGHT( vec3& eye, vec3& at, vec3& up )
 {
 	vec4 at4 = vec4(at, 1);
 
-	//eyeë¥¼ ì¤‘ì‹¬ìœ¼ë¡œ ì´ë™(translate), upê¸°ì¤€ íšŒì „(rotate), ë‹¤ì‹œ eye ì›ë˜ ìœ„ì¹˜ë¡œ ì´ë™
+	//eye¸¦ Áß½ÉÀ¸·Î ÀÌµ¿(translate), up±âÁØ È¸Àü(rotate), ´Ù½Ã eye ¿ø·¡ À§Ä¡·Î ÀÌµ¿
 	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, (t-t0)*speed) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);

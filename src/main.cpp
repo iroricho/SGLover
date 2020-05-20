@@ -23,7 +23,7 @@ GLuint	vertex_array = 0;	// ID holder for vertex array object
 //*************************************
 // global variables
 int		frame = 0;						// index of rendering frames
-float	t = 0.0f;						// tëŠ” ì „ì²´ íŒŒì¼ì—ì„œ ë™ì¼í•˜ê²Œ ì“°ì´ê¸¸ ìš”ë§
+float	t = 0.0f;						// t´Â ÀüÃ¼ ÆÄÀÏ¿¡¼­ µ¿ÀÏÇÏ°Ô ¾²ÀÌ±æ ¿ä¸Á
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
 #ifndef GL_ES_VERSION_2_0
@@ -262,8 +262,8 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			else { time_buffer = float(glfwGetTime()) - time_buffer; printf("Rotate\n"); }
 		}
 #endif
-		// ë™ì‹œí‚¤ ë¬¸ì œëŠ” ìë™ìœ¼ë¡œ í•´ê²°ì´ ë¼ë²„ë¦¼, ì™œ ë˜ì§€?
-		// í•˜ì§€ë§Œ 8ë°©í–¥ì¼ ë¿ ìì—°ìŠ¤ëŸ½ì§€ëŠ” ëª» í•¨
+		// µ¿½ÃÅ° ¹®Á¦´Â ÀÚµ¿À¸·Î ÇØ°áÀÌ µÅ¹ö¸², ¿Ö µÇÁö?
+		// ÇÏÁö¸¸ 8¹æÇâÀÏ »Ó ÀÚ¿¬½º·´Áö´Â ¸ø ÇÔ
 		else if(key==GLFW_KEY_W) tb.begin_W();
 		else if(key==GLFW_KEY_A) tb.begin_A();
 		else if(key==GLFW_KEY_S) tb.begin_S();
@@ -284,7 +284,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 void mouse( GLFWwindow* window, int button, int action, int mods )
 {
-	/* ë§ˆìš°ìŠ¤ íŒŒíŠ¸ ì œê±°
+	/* ¸¶¿ì½º ÆÄÆ® Á¦°Å
 	tb.button = button;
 	tb.mods = mods;
 
@@ -298,7 +298,7 @@ void mouse( GLFWwindow* window, int button, int action, int mods )
 
 void motion( GLFWwindow* window, double x, double y )
 {
-	/* ë§ˆìš°ìŠ¤ íŒŒíŠ¸ ì œê±°
+	/* ¸¶¿ì½º ÆÄÆ® Á¦°Å
 	if (tb.is_tracking())
 	{
 		vec2 npos = cursor_to_ndc( dvec2(x,y), window_size );
