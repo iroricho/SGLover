@@ -2,6 +2,7 @@
 #include "cgut.h"		// slee's OpenGL utility
 #include "sphere.h"		// slee's OpenGL utility
 #include "trackball.h"
+#include "colosseum.h"		//경기장 헤더 추가
 
 //*************************************
 // global constants
@@ -34,6 +35,8 @@ struct { bool add=false, sub=false; operator bool() const { return add||sub; } }
 //*************************************
 // holder of vertices and indices of a unit sphere
 std::vector<vertex>	unit_sphere_vertices;	// host-side vertices
+std::vector<vertex>	colosseum_bottom_vertices;	//경기장 하부 vertices
+std::vector<vertex>	colosseum_side_vertices;		//경기장 옆면 vertices
 
 //*************************************
 // common structures
@@ -50,6 +53,10 @@ struct camera
 	float	dfar = 1000.0f;
 	mat4	projection_matrix;
 };
+
+
+colosseum_bottom bottom;		//경기장 하부 struct 정의
+colosseum_side side;				//경기장 옆면 struct 정의
 
 //*************************************
 // scene objects
@@ -107,6 +114,19 @@ void render()
 		// per-sphere draw calls
 		glDrawElements( GL_TRIANGLES, 4*NUM_TESS*NUM_TESS*3, GL_UNSIGNED_INT, nullptr );
 	}
+
+	GLint uloc;
+
+	//경기장 하부 그리기
+	glBindVertexArray(bottom.vertex_array_3);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bottom.model_col);
+	glDrawElements(GL_TRIANGLES, 20000, GL_UNSIGNED_INT, nullptr);
+
+	//경기장 옆면 그리기
+	glBindVertexArray(side.vertex_array_4);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, side.model_col);
+	glDrawElements(GL_TRIANGLES, 10000, GL_UNSIGNED_INT, nullptr);
+
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -331,9 +351,13 @@ bool user_init()
 	
 	// define the position of four corner vertices
 	unit_sphere_vertices = std::move(create_sphere_vertices( NUM_TESS ));
+	colosseum_bottom_vertices = std::move(bottom.create_colosseum_vertices());		//경기장하부vertice생성
+	colosseum_side_vertices = std::move(side.create_colosseum_side_vertices());		//경기장옆면vertice생성
 
 	// create vertex buffer; called again when index buffering mode is toggled
 	update_vertex_buffer( unit_sphere_vertices, NUM_TESS );
+	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
+	side.update_vertex_buffer_colosseum_side(colosseum_side_vertices);	//경기장옆면 버퍼 생성
 
 	return true;
 }
