@@ -7,6 +7,14 @@
 // vertex buffer for tank 
 GLuint	vertex_array_1 = 0;	// ID holder for vertex array object
 
+
+
+
+
+
+
+
+
 //********** 모델링 파트 *************
 std::vector<vertex> create_sphere_vertices( uint N )
 {

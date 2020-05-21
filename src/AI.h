@@ -6,7 +6,7 @@
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
 //********** Temp var for adjust tank height *********
-float CY = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
+float cy = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
 
 struct AI
 {
@@ -172,7 +172,7 @@ inline void AI::update( float t, const vec3& tpos )
 	printf("%f %f %f\n", h.x, h.y, h.z);
 	printf("%f\n", AB.dot(AO));
 
-	pos.y = CY + radius;
+	pos.y = cy + radius;
 
 	mat4 scale_matrix =
 	{

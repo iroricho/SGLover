@@ -1,3 +1,6 @@
+#pragma warning(disable: 4819)
+
+
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
 #include "sphere.h"		// slee's OpenGL utility

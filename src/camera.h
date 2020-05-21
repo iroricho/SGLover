@@ -180,7 +180,7 @@ inline void camera::update_pn( vec2 m )
 	vec3 p1 = vec3(m-m0,0);					// displacement
 	if( !b_tracking || length(p1)<0.00001f ) return;
 
-	p1 *= 1.65;							// apply cons
+	p1 = p1 * 1.65f;							// apply cons
 
 	vec3 n = (eye - at).normalize();
 	vec3 u = (up.cross(n)).normalize();
