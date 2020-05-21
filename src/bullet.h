@@ -1,25 +1,40 @@
-#ifndef __SPHERE_H__
-#define __SPHERE_H__
-#include "camera.h"		// slee's OpenGL utility
+#ifndef __BULLET_H__
+#define __BULLET_H__
+#include "cgmath.h"
+#include "cgut.h"
 
-//tank structëŠ” cameraì— ì •ì˜ë˜ì–´ ìˆìŠµë‹ˆë‹¤.
+extern float t;	// ÀüÃ¼ ½Ã°£, ´Ü Á¤Áö ±â´ÉÀ» À§ÇØ buffer°¡ ºüÁø °ª
 
-// vertex buffer for tank 
-GLuint	vertex_array_1 = 0;	// ID holder for vertex array object
+//********** Temp var for adjust tank height *********
 
+struct Bullet
+{
+	float radius = 0.1f;	// radius of Bullet
+	vec3	pos;			// position of Bullet
+	vec4	color;			// RGBA color in [0,1]
 
+	float t0 = 0;				// ÃÑ ½ğ ½ÃÁ¡¿¡¼­ÀÇ ½Ã°£
+	vec3 pos0 = 0;			//ÃÑ ½ğ ½ÃÁ¡¿¡¼­ÀÇ ÅÊÅ© À§Ä¡
+	vec3 n0 = vec3(0);   //ÃÑ ½ğ ½ÃÁ¡¿¡¼­ÀÇ ¹æÇâ. camerÀÇ n¹æÇâ. 
+	float speed = 10.0f;	// velocity of Bullet
 
+	mat4	model_matrix;	// modeling transformation
 
+	// public functions
+	void	update(float t, const vec3& tpos);
+	void launch(float t0, vec3 pos0, vec3 n0);
+};
 
+Bullet bullet = { 0.1f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f) };
 
+// vertex buffer for Bullet 
+GLuint	 vertex_array_6 = 0;	// ID holder for vertex array object
 
-
-
-//********** ëª¨ë¸ë§ íŒŒíŠ¸ *************
-std::vector<vertex> create_sphere_vertices( uint N )
+//********** ¸ğµ¨¸µ ÆÄÆ® *************
+std::vector<vertex> create_bullet_vertices(uint N)
 {
 	std::vector<vertex> v;
-	
+
 	for (uint j = 0; j <= N; j++)
 	{
 		for (uint k = 0; k <= N; k++)
@@ -32,13 +47,13 @@ std::vector<vertex> create_sphere_vertices( uint N )
 				vec2(p / (2.0f * PI),1.0f - th / PI) });	// Texture of sperical
 		}
 	}
-	
+
 	for (uint j = 0; j <= N; j++)
 	{
 		for (uint k = 0; k <= N; k++)
 		{
 			float s = 1.0f,	// radius
-				th = PI / 2.0f *  float(j) / float(N),	// theta
+				th = PI / 2.0f * float(j) / float(N),	// theta
 				p = 2.0f * PI * float(k) / float(N);	// phi
 			v.push_back({ vec3(s * sin(th) * cos(p),s * sin(th) * sin(p),s * cos(th)),	//P spherical
 				vec3(sin(th) * cos(p),sin(th) * sin(p),cos(th)),	// Normal vector of spherical
@@ -49,7 +64,7 @@ std::vector<vertex> create_sphere_vertices( uint N )
 	return v;
 }
 
-void update_vertex_buffer_sphere(const std::vector<vertex>& vertices, uint N)
+void update_vertex_buffer_bullet(const std::vector<vertex>& vertices, uint N)
 {
 	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
 	static GLuint index_buffer = 0;		// ID holder for index buffer
@@ -109,31 +124,39 @@ void update_vertex_buffer_sphere(const std::vector<vertex>& vertices, uint N)
 	}
 
 	// generation of vertex buffer: use vertices as it is
-	glGenBuffers( 1, &vertex_buffer );
-	glBindBuffer( GL_ARRAY_BUFFER, vertex_buffer );
-	glBufferData( GL_ARRAY_BUFFER, sizeof(vertex)*vertices.size(), &vertices[0], GL_STATIC_DRAW);
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
 
 	// geneation of index buffer
-	glGenBuffers( 1, &index_buffer );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, index_buffer );
-	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(uint)*indices.size(), &indices[0], GL_STATIC_DRAW );
+	glGenBuffers(1, &index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
 	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
-	if(vertex_array_1) glDeleteVertexArrays(1,&vertex_array_1);
-	vertex_array_1 = cg_create_vertex_array( vertex_buffer, index_buffer );
-	if(!vertex_array_1){ printf("%s(): failed to create vertex aray\n",__func__); return; }
+	if (vertex_array_6) glDeleteVertexArrays(1, &vertex_array_6);
+	vertex_array_6 = cg_create_vertex_array(vertex_buffer, index_buffer);
+	if (!vertex_array_6) { printf("%s(): fBulletled to create vertex aray\n", __func__); return; }
 }
 
-//********** tank ì›€ì§ì„ íŒŒíŠ¸ *************
-inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
+//********** Bullet ¿òÁ÷ÀÓ ÆÄÆ® *************
+inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 {
-	vec3 n = (eye - at).normalize();
-	// tank posë‘ ì •í™•íˆ ì¼ì¹˜ì‹œí‚¤ë©´ ìê¸°ëª¸ì´ ì•ˆ ë³´ì—¬ìš” ì¢€ ë–¼ì–´ë†“ì€ ê²ë‹ˆë‹¤.
-	pos.x = eye.x - 0.705f * (n + 0.35f*cam.up).x;
-	pos.y = eye.y - 0.705f * (n + 0.35f * cam.up).y;
-	pos.z = eye.z - 0.705f * (n + 0.35f * cam.up).z;
+	
+	t0 = _t0;
+	pos0 = _pos0;
+	n0 = _n0;
+}
 
-	// these transformations will be explained in later transformation lecture
+
+
+inline void Bullet::update(float t, const vec3& tpos)
+{
+	
+	float dt = t - t0; //ÃÑ ½ğ ½ÃÁ¡ºÎÅÍ Èê·¯°£ ½Ã°£.
+
+
+
 	mat4 scale_matrix =
 	{
 		radius, 0, 0, 0,
@@ -142,8 +165,6 @@ inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 		0, 0, 0, 1
 	};
 
-	// n ë²¡í„°ë‘ ì¼ì¹˜í•˜ê²Œ ëŒë ¤ì£¼ì§€ ì•Šìœ¼ë©´ ê³ ê°œë§Œ ëŒì•„ê°€ëŠ” ê¼´ì´ ë©ë‹ˆë‹¤.
-	// ìˆ˜ì •í•´ì£¼ì„¸ìš”
 	mat4 rotation_matrix =
 	{
 		1, 0, 0, 0,
@@ -154,13 +175,29 @@ inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 
 	mat4 translate_matrix =
 	{
-		1, 0, 0, pos.x,
-		0, 1, 0, pos.y,
-		0, 0, 1, pos.z,
+		1, 0, 0, pos0.x + n0.x * speed * dt,
+		0, 1, 0, pos0.y,
+		0, 0, 1, pos0.z + n0.z * speed * dt,
 		0, 0, 0, 1
 	};
+
+	/*
+	if (dt > 5000)
+	{
+		scale_matrix =
+		{
+			radius * 2 * sin(t), 0, 0, 0,
+			0, radius * 2 * sin(t), 0, 0,
+			0, 0, radius * 2 * sin(t), 0,
+			0, 0, 0, 1
+		};
+
+	}
+	*/
 	
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
+
+
 }
 
-#endif
+#endif // __BULLET_H__

@@ -166,12 +166,12 @@ inline void AI::update( float t, const vec3& tpos )
 		else pos += -h * speed;
 		
 	}
-	
+	/*
 	printf("%f %f %f %f\n", pos.x, pos.y, pos.z, length(vec2(pos.x,pos.z)));
 	printf("%f %f %f\n", tpos.x, tpos.y, tpos.z);
 	printf("%f %f %f\n", h.x, h.y, h.z);
 	printf("%f\n", AB.dot(AO));
-
+	*/
 	pos.y = cy + radius;
 
 	mat4 scale_matrix =

@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "colosseum.h"	// 경기장 헤더 추가
 #include "AI.h"			// AI 헤더
+#include "bullet.h"	// bullet 헤더
 
 //*************************************
 // global constants
@@ -94,6 +95,9 @@ void render()
 
 	// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
 	ai.update(t, tank.pos);
+	
+	// Bullet move update
+	bullet.update(t, tank.pos);
 
 	// bind vertex array object of tank
 	// update tank uniforms
@@ -116,6 +120,11 @@ void render()
 	glBindVertexArray( vertex_array_5 );
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*NUM_TESS*NUM_TESS*3, GL_UNSIGNED_INT, nullptr );
+
+	//Bullet 그리기
+	glBindVertexArray(vertex_array_6);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
+	glDrawElements(GL_TRIANGLES, 4 * NUM_TESS * NUM_TESS * 3, GL_UNSIGNED_INT, nullptr);
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
@@ -153,8 +162,8 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 {
 	if(action==GLFW_PRESS)
 	{
-		if(key==GLFW_KEY_ESCAPE||key==GLFW_KEY_Q)	glfwSetWindowShouldClose( window, GL_TRUE );
-		else if(key==GLFW_KEY_H||key==GLFW_KEY_F1)	print_help();
+		if (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)	glfwSetWindowShouldClose(window, GL_TRUE);
+		else if (key == GLFW_KEY_H || key == GLFW_KEY_F1)	print_help();
 #ifndef GL_ES_VERSION_2_0
 		else if (key == GLFW_KEY_R)
 		{
@@ -166,12 +175,16 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		// 동시키 문제는 자동으로 해결이 돼버림, 왜 되지?
 		// 하지만 8방향일 뿐 자연스럽지는 못 함
 		// 이동과 카메라 회전을 동시에 하면 문제가 생김
-		else if(key==GLFW_KEY_W) cam.begin_W();
-		else if(key==GLFW_KEY_A) cam.begin_A();
-		else if(key==GLFW_KEY_S) cam.begin_S();
-		else if(key==GLFW_KEY_D) cam.begin_D();
-		else if(key==GLFW_KEY_LEFT) cam.begin_LEFT();
-		else if(key==GLFW_KEY_RIGHT) cam.begin_RIGHT();
+		else if (key == GLFW_KEY_W) cam.begin_W();
+		else if (key == GLFW_KEY_A) cam.begin_A();
+		else if (key == GLFW_KEY_S) cam.begin_S();
+		else if (key == GLFW_KEY_D) cam.begin_D();
+		else if (key == GLFW_KEY_LEFT) cam.begin_LEFT();
+		else if (key == GLFW_KEY_RIGHT) cam.begin_RIGHT();
+		else if (key == GLFW_KEY_SPACE) {
+			bullet.launch(t, tank.pos, (cam.at - cam.eye).normalize());
+			printf("space\n");
+		}
 	}
 	else if(action==GLFW_RELEASE)
 	{
@@ -235,7 +248,8 @@ bool user_init()
 
 	// create vertex buffer; called again when index buffering mode is toggled
 	update_vertex_buffer_sphere( unit_sphere_vertices, NUM_TESS );
-	update_vertex_buffer_ai( unit_sphere_vertices, NUM_TESS );		// AI 버퍼 생성
+	update_vertex_buffer_ai(unit_sphere_vertices, NUM_TESS);		// AI 버퍼 생성
+	update_vertex_buffer_bullet(unit_sphere_vertices, NUM_TESS);		// bullet 버퍼 생성
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
 	side.update_vertex_buffer_colosseum_side(colosseum_side_vertices);	//경기장옆면 버퍼 생성
 

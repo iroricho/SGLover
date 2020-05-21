@@ -166,6 +166,7 @@
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />
     <ClInclude Include="defs.h" />
+    <ClInclude Include="bullet.h" />
     <ClInclude Include="gl\glad\glad.h" />
     <ClInclude Include="gl\glfw\glfw3.h" />
     <ClInclude Include="sphere.h" />
