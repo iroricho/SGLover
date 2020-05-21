@@ -140,17 +140,29 @@ void update_vertex_buffer_ai(const std::vector<vertex>& vertices, uint N)
 //********** AI 움직임 파트 *************
 inline void AI::update( float t, const vec3& tpos )
 {
-	vec3 AB = tpos - pos;
-	vec3 AO = - pos;
+	// A가 AI, B가 tank, O가 원점
+	vec3 AB = vec3(tpos.x - pos.x, 0, tpos.z - pos.z);
+	vec3 AO = vec3(-pos.x, 0, -pos.z);
+	vec3 OB = vec3(tpos.x, 0, tpos.z);
 	//float dt = t - t0;
 	vec3 ref = vec3(0,1.0f,0);
-	vec3 h1 = (AB.cross(ref)).normalize();
-	vec2 p = vec2(pos.x,pos.z);
-	float r = length(p);
+	vec3 h = (AB.cross(ref)).normalize();
 
-	if (h1.dot(AO) >= 0) pos += h1 * speed;
-	else pos += -h1 * speed;
-	if (r >= 0.001f) printf("%f %f %f\n", pos.x, pos.z, r);
+	// 삼각형 OAB에서 B가 둔각인 경우를 제외하고는 h를 이용할 경우
+	// OB를 포함하는 직선에 가까워지는 방향으로 A가 이동하게 되는데
+	// OB 주변에 A가 위치하게 되면 진동을 하게 되기 때문에
+	// B가 둔각이 아닐 경우엔 그냥 원점으로 A가 이동
+	if ( AB.dot(OB) <= 0 )
+	{
+		if ( h.dot(AO) >= 0 ) pos += h * speed;
+		else pos += -h * speed;
+	}
+	else pos += AO.normalize() * speed;
+	
+	printf("%f %f %f %f\n", pos.x, pos.y, pos.z, length(vec2(pos.x,pos.z)));
+	printf("%f %f %f\n", tpos.x, tpos.y, tpos.z);
+	printf("%f %f %f\n", h.x, h.y, h.z);
+	printf("%f\n", AB.dot(AO));
 
 	pos.y = CY + radius;
 
