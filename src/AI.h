@@ -4,6 +4,9 @@
 #include "cgut.h"
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
+extern struct Bullet bullet; //나중에 총알 여러개 생기면 수정해줘야됨. vecter<Bullet>이라던가..
+
+
 
 //********** Temp var for adjust tank height *********
 float cy = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
@@ -16,11 +19,16 @@ struct AI
 
 	float t0=0;				// time buffer for halt
 	float speed = 0.01f;	// velocity of AI
+	
+	float collision_t0=0;
+	bool collision_true = 1; // 총알이 뚫고 지나가는동안 계속 충돌 일어나는것 방지용. true 일때만 충돌함.   충돌하는 순간 0으로 바뀌고 일정 시간 후 다시 1로 바뀜.
+	vec3 collision_direction0 = vec3(0);  //충돌 시점에서의 충돌방향.
 
 	mat4	model_matrix;	// modeling transformation
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
+	void collision(vec3 bullet_pos);
 };
 
 AI ai = {0.3f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f)};
@@ -174,6 +182,14 @@ inline void AI::update( float t, const vec3& tpos )
 	*/
 	pos.y = cy + radius;
 
+
+	//********* 충돌 검사 **********//
+	collision(bullet.pos);
+
+	
+
+
+
 	mat4 scale_matrix =
 	{
 		radius, 0, 0, 0,
@@ -199,6 +215,35 @@ inline void AI::update( float t, const vec3& tpos )
 	};
 	
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
+}
+
+
+inline void AI::collision(vec3 bullet_pos)
+{
+	float n = 0.5f;		//충돌시 n초동안 이동하게 (=튕기게)
+	float collision_speed = 0.35f;
+
+	if (distance(vec4(bullet.pos, 1), vec4(pos, 1)) < (bullet.radius + radius))
+	{
+		if (collision_true==1)
+		{
+			printf("collision! %d\n",collision_true);
+			collision_t0 = t;
+			collision_direction0 = ( pos - bullet.pos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
+		}
+	}
+
+	if (t - collision_t0 < n) 
+	{
+		pos.x = pos.x + collision_direction0.x*collision_speed;
+		pos.z = pos.z + collision_direction0.z*collision_speed;
+		collision_true = 0;  //collision_true 0으로 만들어서 재충돌 안일어나게.
+		printf("settrue 0 \n");
+	}
+	else
+	{
+		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
+	}
 }
 
 #endif // __AI_H__

@@ -6,8 +6,8 @@
 #include "sphere.h"		// slee's OpenGL utility
 #include "camera.h"
 #include "colosseum.h"	// 경기장 헤더 추가
-#include "AI.h"			// AI 헤더
 #include "bullet.h"	// bullet 헤더
+#include "AI.h"			// AI 헤더
 
 //*************************************
 // global constants

@@ -25,7 +25,7 @@ struct Bullet
 	void launch(float t0, vec3 pos0, vec3 n0);
 };
 
-Bullet bullet = { 0.1f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f) };
+Bullet bullet = { 0.0f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f) };
 
 // vertex buffer for Bullet 
 GLuint	 vertex_array_6 = 0;	// ID holder for vertex array object
@@ -146,6 +146,7 @@ inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 	t0 = _t0;
 	pos0 = _pos0;
 	n0 = _n0;
+	radius = 0.1f;
 }
 
 
@@ -154,8 +155,10 @@ inline void Bullet::update(float t, const vec3& tpos)
 {
 	
 	float dt = t - t0; //ÃÑ ½ð ½ÃÁ¡ºÎÅÍ Èê·¯°£ ½Ã°£.
-
-
+	pos.x = pos0.x + n0.x * speed * dt;
+	pos.y = pos0.y + n0.y * speed * dt;
+	pos.z = pos0.z + n0.z * speed * dt;
+	
 
 	mat4 scale_matrix =
 	{
@@ -175,25 +178,14 @@ inline void Bullet::update(float t, const vec3& tpos)
 
 	mat4 translate_matrix =
 	{
-		1, 0, 0, pos0.x + n0.x * speed * dt,
-		0, 1, 0, pos0.y,
-		0, 0, 1, pos0.z + n0.z * speed * dt,
+		1, 0, 0, pos.x,
+		0, 1, 0, pos.y,
+		0, 0, 1, pos.z,
 		0, 0, 0, 1
 	};
 
-	/*
-	if (dt > 5000)
-	{
-		scale_matrix =
-		{
-			radius * 2 * sin(t), 0, 0, 0,
-			0, radius * 2 * sin(t), 0, 0,
-			0, 0, radius * 2 * sin(t), 0,
-			0, 0, 0, 1
-		};
 
-	}
-	*/
+	
 	
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 
