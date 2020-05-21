@@ -147,17 +147,25 @@ inline void AI::update( float t, const vec3& tpos )
 	//float dt = t - t0;
 	vec3 ref = vec3(0,1.0f,0);
 	vec3 h = (AB.cross(ref)).normalize();
+	float flag = h.dot(AO);
 
 	// 삼각형 OAB에서 B가 둔각인 경우를 제외하고는 h를 이용할 경우
 	// OB를 포함하는 직선에 가까워지는 방향으로 A가 이동하게 되는데
 	// OB 주변에 A가 위치하게 되면 진동을 하게 되기 때문에
-	// B가 둔각이 아닐 경우엔 그냥 원점으로 A가 이동
+	// B가 둔각이 아닐 경우엔 flag가 작아지면 원점 방향으로 A가 이동
 	if ( AB.dot(OB) <= 0 )
 	{
-		if ( h.dot(AO) >= 0 ) pos += h * speed;
+		if ( flag >= 0 ) pos += h * speed;
 		else pos += -h * speed;
 	}
-	else pos += AO.normalize() * speed;
+	else
+	{
+		if ( flag >= speed ) pos += h * speed;
+		else if ( flag >= 0 ) pos += AO.normalize() * speed;
+		else if ( flag >= -speed ) pos += AO.normalize() * speed;
+		else pos += -h * speed;
+		
+	}
 	
 	printf("%f %f %f %f\n", pos.x, pos.y, pos.z, length(vec2(pos.x,pos.z)));
 	printf("%f %f %f\n", tpos.x, tpos.y, tpos.z);
