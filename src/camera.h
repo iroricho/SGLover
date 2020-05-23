@@ -54,8 +54,15 @@ struct camera
 	void update_zm( vec2 m );
 	void update_pn( vec2 m );
 
-	float t0=0;					// time buffer for halt
-	float speed=0.1f;			// velocity of move of camera
+	// time buffer
+	float tw=0;
+	float ta=0;
+	float ts=0;
+	float td=0;
+	float tl=0;
+	float tr=0;
+	float speed=0.1f;			// velocity of move of camera 기체 별 상이
+	float max_speed=0.1f;			// max velocity of move of camera 기체 별 상이
 
 	// ************ WASD  ***************//
 	bool b_W = false;
@@ -73,12 +80,12 @@ struct camera
 	bool is_RIGHT() const { return b_RIGHT; }
 
 	//굳이 함수 call을 해서 overhead를 늘릴 필요는 사실 없음
-	void begin_W() { t0=t; b_W= true; }
-	void begin_A() { t0=t; b_A = true; }
-	void begin_S() { t0=t; b_S= true; }
-	void begin_D() { t0=t; b_D = true; }
-	void begin_LEFT() { t0=t; b_LEFT = true; }
-	void begin_RIGHT() { t0=t; b_RIGHT= true; }
+	void begin_W() { tw=t; b_W= true; }
+	void begin_A() { ta=t; b_A = true; }
+	void begin_S() { ts=t; b_S= true; }
+	void begin_D() { td=t; b_D = true; }
+	void begin_LEFT() { tl=t; b_LEFT = true; }
+	void begin_RIGHT() { tr=t; b_RIGHT= true; }
 
 	void end_W() { b_W= false; }
 	void end_A() { b_A = false; }
@@ -207,20 +214,20 @@ inline void camera::update_W()
 {
 	vec3 u = (at- eye).normalize();
 	//vec3 v = (u.cross(up)).normalize();
-	float dt = t - t0;
+	float dt = t - tw;
 
-	eye += u * dt * speed;
-	at += u * dt * speed;
+	eye += u * min(max_speed,dt * speed);
+	at += u * min(max_speed,dt * speed);
 }
 
 inline void camera::update_A()
 {
 	vec3 u = (at- eye).normalize();
 	vec3 v = (u.cross(up)).normalize();
-	float dt = t - t0;
+	float dt = t - ta;
 
-	eye -= v * dt * speed;
-	at -= v * dt * speed;
+	eye -= v * min(max_speed,dt * speed);
+	at -= v * min(max_speed,dt * speed);
 }
 
 
@@ -228,10 +235,10 @@ inline void camera::update_S()
 {
 	vec3 u = (at- eye).normalize();
 	//vec3 v = (u.cross(up)).normalize();
-	float dt = t - t0;
+	float dt = t - ts;
 
-	eye -= u * dt * speed;
-	at -= u * dt * speed;
+	eye -= u * min(max_speed,dt * speed);
+	at -= u * min(max_speed,dt * speed);
 }
 
 
@@ -239,10 +246,10 @@ inline void camera::update_D()
 {
 	vec3 u = (at- eye).normalize();
 	vec3 v = (u.cross(up)).normalize();
-	float dt = t - t0;
+	float dt = t - td;
 
-	eye += v * dt * speed;
-	at += v * dt * speed;
+	eye += v * min(max_speed,dt * speed);
+	at += v * min(max_speed,dt * speed);
 }
 
 // n를 up을 축으로 회전시키는 것임, (축이 v일 수도 있음)
@@ -250,9 +257,10 @@ inline void camera::update_D()
 inline void camera::update_LEFT()
 {
 	vec4 at4 = vec4(at, 1);
+	float dt = t - tl;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, (t-t0)*speed) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(max_speed,dt * speed)) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
 }
@@ -260,9 +268,10 @@ inline void camera::update_LEFT()
 inline void camera::update_RIGHT()
 {
 	vec4 at4 = vec4(at, 1);
+	float dt = t - tr;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, (t-t0)*speed) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(max_speed,dt * speed)) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
 }

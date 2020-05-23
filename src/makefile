@@ -8,7 +8,7 @@ NAME = $(subst .vcxproj,,$(notdir $(wildcard *.vcxproj)))
 
 # directories and header dependency
 BIN := ../bin
-INC := -I. -Igl -Igles
+INC := -I. -Igl -IirrKlang
 OBJ := .obj
 
 #**************************************
@@ -22,7 +22,7 @@ CC_OBJS  := $(addprefix $(OBJ)/,$(CC_SRC:.cpp=.o))
 # os-dependent configuration: Ubuntu/Linux or MinGW
 ifneq ($(OS), Windows_NT)
 	TARGET = $(addsuffix .out,$(BIN)/$(NAME))
-	LD_FLAGS = -lglfw -ldl # not glfw3
+	LD_FLAGS = -lglfw -ldl -lIrrKlang # not glfw3
 	MK_INT_DIR = @mkdir -p $(@D)
 	RM_INT_DIR = @rm -rf $(OBJ)
 	RM_TARGET = @rm -rf $(TARGET)
@@ -78,3 +78,9 @@ clear: clean
 #**************************************
 # force to build
 force: clean $(TARGET)
+
+#**************************************
+# temp for study
+.PHONY: temp
+temp:
+	echo $@, $(@D), $<, $^
