@@ -9,7 +9,7 @@ extern struct Bullet bullet; //나중에 총알 여러개 생기면 수정해줘야됨. vecter<Bu
 void play_sound();
 
 //********** Temp var for adjust tank height *********
-float cy = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
+float cy = -0.5f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요 => 수정완료(-1.0f + 0.5f 카메라와동일)
 
 struct AI
 {

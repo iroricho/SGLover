@@ -6,7 +6,7 @@
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
 //********** Temp var for adjust tank height *********
-float CP = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
+float CP = -0.5f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요 => 수정완료(y축으로 전체 -1.0f 내린것 + 모델의 높이 0.5f)
 
 // tank 모델 구현 헤더에 구조체를 정의하고 싶어도
 // camera 초기 값에 tank의 반지름이 필요해
@@ -29,8 +29,8 @@ sphere_t tank = {0.3f, vec3(0), vec4(1.0f,0.0f,0.0f,1.0f)};
 //*************************************
 struct camera
 {
-	vec3	eye = vec3( 0.0f, CP+tank.radius, 0.0f );
-	vec3	at = vec3( 0.0f, CP+tank.radius, -20.0f );
+	vec3	eye = vec3( 0.0f, CP + 2*tank.radius, 0.0f );	//경기장 밑면 모델 내부가 보여서 높였습니다
+	vec3	at = vec3( 0.0f, CP + 2*tank.radius, -20.0f );	//위와 같은 이유로 함께 높였습니다.
 	vec3	up = vec3( 0.0f, 1.0f, 0.0f );
 	mat4	view_matrix = mat4::look_at( eye, at, up );;
 

@@ -36,7 +36,7 @@ struct colosseum_bottom //∞Ê±‚¿Â πÿ∏È
 
 	mat4 translate_matrix_col =
 	{
-		1,0,0,0,
+		1,0,0,pos.x,
 		0,1,0,pos.y,
 		0,0,1,pos.z,
 		0,0,0,1

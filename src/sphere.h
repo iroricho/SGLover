@@ -130,7 +130,7 @@ inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 	vec3 n = (eye - at).normalize();
 	// tank pos랑 정확히 일치시키면 자기몸이 안 보여요 좀 떼어놓은 겁니다.
 	pos.x = eye.x - 0.705f * (n + 0.35f*cam.up).x;
-	pos.y = eye.y - 0.705f * (n + 0.35f * cam.up).y;
+	pos.y = eye.y - 0.705f * (n + 0.35f * cam.up).y;	 
 	pos.z = eye.z - 0.705f * (n + 0.35f * cam.up).z;
 
 	// these transformations will be explained in later transformation lecture
