@@ -6,7 +6,7 @@
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 extern struct Bullet bullet; //나중에 총알 여러개 생기면 수정해줘야됨. vecter<Bullet>이라던가..
 
-
+void play_sound();
 
 //********** Temp var for adjust tank height *********
 float cy = 0.0f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요
@@ -227,6 +227,7 @@ inline void AI::collision(vec3 bullet_pos)
 	{
 		if (collision_true==1)
 		{
+			play_sound();
 			printf("collision! %d\n",collision_true);
 			collision_t0 = t;
 			collision_direction0 = ( pos - bullet.pos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.

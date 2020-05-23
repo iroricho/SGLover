@@ -1,6 +1,5 @@
 #pragma warning(disable: 4819)
 
-
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
 #include "sphere.h"		// slee's OpenGL utility
@@ -8,6 +7,20 @@
 #include "colosseum.h"	// 경기장 헤더 추가
 #include "bullet.h"	// bullet 헤더
 #include "AI.h"			// AI 헤더
+
+#include <../irrKlang/irrKlang.h>
+#pragma comment(lib, "irrKlang.lib")
+
+//소리용 헤더 파일 추가
+/*
+#include <mmsystem.h>
+#pragma comment(lib,"winmm.lib")
+#define 효과음추가(sound) PlaySound(TEXT(#sound), 0, SND_FILENAME | SND_ASYNC)
+#define 브금추가(sound) PlaySound(TEXT(#sound), 0, SND_FILENAME | SND_ASYNC | SND_NOSTOP)
+*/
+
+
+
 
 //*************************************
 // global constants
@@ -33,6 +46,12 @@ float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
 struct { bool add=false, sub=false; operator bool() const { return add||sub; } } b; // flags of keys for smooth changes
+
+irrklang::ISoundEngine* engine = nullptr;
+irrklang::ISoundSource* sound_src_1 = nullptr;
+irrklang::ISoundSource* sound_src_2 = nullptr;
+irrklang::ISoundSource* sound_src_3 = nullptr;
+
 
 //*************************************
 // holder of vertices and indices of a unit sphere
@@ -175,6 +194,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		// 동시키 문제는 자동으로 해결이 돼버림, 왜 되지?
 		// 하지만 8방향일 뿐 자연스럽지는 못 함
 		// 이동과 카메라 회전을 동시에 하면 문제가 생김
+		
 		else if (key == GLFW_KEY_W) cam.begin_W();
 		else if (key == GLFW_KEY_A) cam.begin_A();
 		else if (key == GLFW_KEY_S) cam.begin_S();
@@ -182,6 +202,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		else if (key == GLFW_KEY_LEFT) cam.begin_LEFT();
 		else if (key == GLFW_KEY_RIGHT) cam.begin_RIGHT();
 		else if (key == GLFW_KEY_SPACE) {
+			engine->play2D(sound_src_1, false);
 			bullet.launch(t, tank.pos, (cam.at - cam.eye).normalize());
 			printf("space\n");
 		}
@@ -231,6 +252,14 @@ void motion( GLFWwindow* window, double x, double y )
 
 bool user_init()
 {
+	//sound source
+	engine = irrklang::createIrrKlangDevice();
+	if (!engine)	 return false;
+	sound_src_1 = engine->addSoundSourceFromFile("gomonster.wav");
+	sound_src_2 = engine->addSoundSourceFromFile("grandpas11month.wav");
+	sound_src_3 = engine->addSoundSourceFromFile("hit.wav");
+	engine->play2D(sound_src_2, true);
+
 	// log hotkeys
 	print_help();
 
@@ -258,6 +287,12 @@ bool user_init()
 
 void user_finalize()
 {
+	engine->drop();
+}
+
+void play_sound()
+{
+	engine->play2D(sound_src_3, false);
 }
 
 int main( int argc, char* argv[] )
