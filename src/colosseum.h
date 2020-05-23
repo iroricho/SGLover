@@ -7,7 +7,7 @@
 struct colosseum_bottom //경기장 밑면
 {
 	float radius = 10.0f;	//경기장 반지름
-	vec3 pos = vec3(0, 0, 0.0f);	//경기장 위치
+	vec3 pos = vec3(0, -1.0f, 0.0f);	//경기장 위치
 	GLuint	vertex_array_3 = 0;	//경기장 vertex_array
 
 	//********************************
@@ -23,13 +23,7 @@ struct colosseum_bottom //경기장 밑면
 		0, s, c, 0,
 		0, 0, 0, 1
 	};
-	mat4 temp_translate_matrix_col =
-	{
-		1,0,0,0,
-		0,1,0,-1.0f,
-		0,0,1,0,
-		0,0,0,1
-	};
+
 	//********************************
 
 	mat4 scale_matrix_col =
@@ -43,11 +37,11 @@ struct colosseum_bottom //경기장 밑면
 	mat4 translate_matrix_col =
 	{
 		1,0,0,0,
-		0,1,0,0,
+		0,1,0,pos.y,
 		0,0,1,pos.z,
 		0,0,0,1
 	};
-	mat4 model_col = temp_translate_matrix_col * translate_matrix_col * rotation_matrix * scale_matrix_col; //경기장 모델 메트릭스 - 회전, 기울기 등 활동성이 없다고 가정하고 바로 초기화
+	mat4 model_col =  translate_matrix_col * scale_matrix_col*rotation_matrix; //경기장 모델 메트릭스 - 회전, 기울기 등 활동성이 없다고 가정하고 바로 초기화
 
 	std::vector<vertex> create_colosseum_vertices();	//경기장 밑면 지오메트리
 	void update_vertex_buffer_colosseum(const std::vector<vertex>& vertices);	//경기장 밑면 버퍼생성
@@ -57,8 +51,22 @@ struct colosseum_bottom //경기장 밑면
 struct colosseum_side		//경기장 옆면
 {
 	float radius = 10.0f;	//옆면 반지름
-	vec3 pos = vec3(0, 0, -30.0f);	//옆면 위치
+	vec3 pos = vec3(0, -1.0f, 0.0f);	//옆면 위치
 	GLuint	vertex_array_4 = 0;	//옆면 vertex_array
+
+		//********************************
+	// 좌표계 보정 요소
+	float ang = PI / 2.0f;
+	float c = -cos(ang), s = sin(ang);
+	mat4 rotation_matrix =
+	{
+		1, 0, 0, 0,
+		0, -c, s, 0,
+		0, -s, -c, 0,
+		0, 0, 0, 1
+	};
+
+	//********************************
 
 
 	mat4 scale_matrix_col =
@@ -71,11 +79,11 @@ struct colosseum_side		//경기장 옆면
 	mat4 translate_matrix_col =
 	{
 		1,0,0,0,
-		0,1,0,0,
+		0,1,0,pos.y,
 		0,0,1,pos.z,
 		0,0,0,1
 	};
-	mat4 model_col = translate_matrix_col * scale_matrix_col;	//옆면 모델 메트릭 정의
+	mat4 model_col =  translate_matrix_col  * scale_matrix_col * rotation_matrix;	//옆면 모델 메트릭 정의
 
 	std::vector<vertex> create_colosseum_side_vertices();
 	void update_vertex_buffer_colosseum_side(const std::vector<vertex>& vertices);
