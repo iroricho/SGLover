@@ -3,13 +3,13 @@
 #include "cgmath.h"
 #include "cgut.h"
 
-extern float t;	// ì „ì²´ ì‹œê°„, ë‹¨ ì •ì§€ ê¸°ëŠ¥ì„ ìœ„í•´ bufferê°€ ë¹ ì§„ ê°’
-extern struct Bullet bullet; //ë‚˜ì¤‘ì— ì´ì•Œ ì—¬ëŸ¬ê°œ ìƒê¸°ë©´ ìˆ˜ì •í•´ì¤˜ì•¼ë¨. vecter<Bullet>ì´ë¼ë˜ê°€..
+extern float t;	// ÀüÃ¼ ½Ã°£, ´Ü Á¤Áö ±â´ÉÀ» À§ÇØ buffer°¡ ºüÁø °ª
+extern struct Bullet bullet; //³ªÁß¿¡ ÃÑ¾Ë ¿©·¯°³ »ı±â¸é ¼öÁ¤ÇØÁà¾ßµÊ. vecter<Bullet>ÀÌ¶ó´ø°¡..
 
 
 
 //********** Temp var for adjust tank height *********
-float cy = 0.0f;	// ì½œë¡œì„¸ì›€ ìœ—ë©´ ìœ„ì¹˜ì…ë‹ˆë‹¤ (yì¶•) ìˆ˜ì •í•´ì£¼ì„¸ìš”
+float cy = 0.0f;	// Äİ·Î¼¼¿ò À­¸é À§Ä¡ÀÔ´Ï´Ù (yÃà) ¼öÁ¤ÇØÁÖ¼¼¿ä
 
 struct AI
 {
@@ -21,8 +21,8 @@ struct AI
 	float speed = 0.01f;	// velocity of AI
 	
 	float collision_t0=0;
-	bool collision_true = 1; // ì´ì•Œì´ ëš«ê³  ì§€ë‚˜ê°€ëŠ”ë™ì•ˆ ê³„ì† ì¶©ëŒ ì¼ì–´ë‚˜ëŠ”ê²ƒ ë°©ì§€ìš©. true ì¼ë•Œë§Œ ì¶©ëŒí•¨.   ì¶©ëŒí•˜ëŠ” ìˆœê°„ 0ìœ¼ë¡œ ë°”ë€Œê³  ì¼ì • ì‹œê°„ í›„ ë‹¤ì‹œ 1ë¡œ ë°”ë€œ.
-	vec3 collision_direction0 = vec3(0);  //ì¶©ëŒ ì‹œì ì—ì„œì˜ ì¶©ëŒë°©í–¥.
+	bool collision_true = 1; // ÃÑ¾ËÀÌ ¶Õ°í Áö³ª°¡´Âµ¿¾È °è¼Ó Ãæµ¹ ÀÏ¾î³ª´Â°Í ¹æÁö¿ë. true ÀÏ¶§¸¸ Ãæµ¹ÇÔ.   Ãæµ¹ÇÏ´Â ¼ø°£ 0À¸·Î ¹Ù²î°í ÀÏÁ¤ ½Ã°£ ÈÄ ´Ù½Ã 1·Î ¹Ù²ñ.
+	vec3 collision_direction0 = vec3(0);  //Ãæµ¹ ½ÃÁ¡¿¡¼­ÀÇ Ãæµ¹¹æÇâ.
 
 	mat4	model_matrix;	// modeling transformation
 	
@@ -36,7 +36,7 @@ AI ai = {0.3f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f)};
 // vertex buffer for AI 
 GLuint	vertex_array_5 = 0;	// ID holder for vertex array object
 
-//********** ëª¨ë¸ë§ íŒŒíŠ¸ *************
+//********** ¸ğµ¨¸µ ÆÄÆ® *************
 std::vector<vertex> create_ai_vertices( uint N )
 {
 	std::vector<vertex> v;
@@ -145,10 +145,10 @@ void update_vertex_buffer_ai(const std::vector<vertex>& vertices, uint N)
 	if(!vertex_array_5){ printf("%s(): failed to create vertex aray\n",__func__); return; }
 }
 
-//********** AI ì›€ì§ì„ íŒŒíŠ¸ *************
+//********** AI ¿òÁ÷ÀÓ ÆÄÆ® *************
 inline void AI::update( float t, const vec3& tpos )
 {
-	// Aê°€ AI, Bê°€ tank, Oê°€ ì›ì 
+	// A°¡ AI, B°¡ tank, O°¡ ¿øÁ¡
 	vec3 AB = vec3(tpos.x - pos.x, 0, tpos.z - pos.z);
 	vec3 AO = vec3(-pos.x, 0, -pos.z);
 	vec3 OB = vec3(tpos.x, 0, tpos.z);
@@ -157,10 +157,10 @@ inline void AI::update( float t, const vec3& tpos )
 	vec3 h = (AB.cross(ref)).normalize();
 	float flag = h.dot(AO);
 
-	// ì‚¼ê°í˜• OABì—ì„œ Bê°€ ë‘”ê°ì¸ ê²½ìš°ë¥¼ ì œì™¸í•˜ê³ ëŠ” hë¥¼ ì´ìš©í•  ê²½ìš°
-	// OBë¥¼ í¬í•¨í•˜ëŠ” ì§ì„ ì— ê°€ê¹Œì›Œì§€ëŠ” ë°©í–¥ìœ¼ë¡œ Aê°€ ì´ë™í•˜ê²Œ ë˜ëŠ”ë°
-	// OB ì£¼ë³€ì— Aê°€ ìœ„ì¹˜í•˜ê²Œ ë˜ë©´ ì§„ë™ì„ í•˜ê²Œ ë˜ê¸° ë•Œë¬¸ì—
-	// Bê°€ ë‘”ê°ì´ ì•„ë‹ ê²½ìš°ì—” flagê°€ ì‘ì•„ì§€ë©´ ì›ì  ë°©í–¥ìœ¼ë¡œ Aê°€ ì´ë™
+	// »ï°¢Çü OAB¿¡¼­ B°¡ µĞ°¢ÀÎ °æ¿ì¸¦ Á¦¿ÜÇÏ°í´Â h¸¦ ÀÌ¿ëÇÒ °æ¿ì
+	// OB¸¦ Æ÷ÇÔÇÏ´Â Á÷¼±¿¡ °¡±î¿öÁö´Â ¹æÇâÀ¸·Î A°¡ ÀÌµ¿ÇÏ°Ô µÇ´Âµ¥
+	// OB ÁÖº¯¿¡ A°¡ À§Ä¡ÇÏ°Ô µÇ¸é Áøµ¿À» ÇÏ°Ô µÇ±â ¶§¹®¿¡
+	// B°¡ µĞ°¢ÀÌ ¾Æ´Ò °æ¿ì¿£ flag°¡ ÀÛ¾ÆÁö¸é ¿øÁ¡ ¹æÇâÀ¸·Î A°¡ ÀÌµ¿
 	if ( AB.dot(OB) <= 0 )
 	{
 		if ( flag >= 0 ) pos += h * speed;
@@ -183,7 +183,7 @@ inline void AI::update( float t, const vec3& tpos )
 	pos.y = cy + radius;
 
 
-	//********* ì¶©ëŒ ê²€ì‚¬ **********//
+	//********* Ãæµ¹ °Ë»ç **********//
 	collision(bullet.pos);
 
 	
@@ -220,7 +220,7 @@ inline void AI::update( float t, const vec3& tpos )
 
 inline void AI::collision(vec3 bullet_pos)
 {
-	float n = 0.5f;		//ì¶©ëŒì‹œ nì´ˆë™ì•ˆ ì´ë™í•˜ê²Œ (=íŠ•ê¸°ê²Œ)
+	float n = 0.5f;		//Ãæµ¹½Ã nÃÊµ¿¾È ÀÌµ¿ÇÏ°Ô (=Æ¨±â°Ô)
 	float collision_speed = 0.35f;
 
 	if (distance(vec4(bullet.pos, 1), vec4(pos, 1)) < (bullet.radius + radius))
@@ -229,7 +229,7 @@ inline void AI::collision(vec3 bullet_pos)
 		{
 			printf("collision! %d\n",collision_true);
 			collision_t0 = t;
-			collision_direction0 = ( pos - bullet.pos); //collision direction0 ì„ ê³ ì¹˜ë©´, ë” ë³µì¡í•œ ë¬¼ë¦¬êµ¬í˜„ë„ ê°€ëŠ¥.
+			collision_direction0 = ( pos - bullet.pos); //collision direction0 À» °íÄ¡¸é, ´õ º¹ÀâÇÑ ¹°¸®±¸Çöµµ °¡´É.
 		}
 	}
 
@@ -237,12 +237,12 @@ inline void AI::collision(vec3 bullet_pos)
 	{
 		pos.x = pos.x + collision_direction0.x*collision_speed;
 		pos.z = pos.z + collision_direction0.z*collision_speed;
-		collision_true = 0;  //collision_true 0ìœ¼ë¡œ ë§Œë“¤ì–´ì„œ ì¬ì¶©ëŒ ì•ˆì¼ì–´ë‚˜ê²Œ.
+		collision_true = 0;  //collision_true 0À¸·Î ¸¸µé¾î¼­ ÀçÃæµ¹ ¾ÈÀÏ¾î³ª°Ô.
 		printf("settrue 0 \n");
 	}
 	else
 	{
-		collision_true = 1;  //ì‹œê°„ ë‹¤ ì§€ë‚˜ë©´ ë‹¤ì‹œ ì¶©ëŒ ê°€ëŠ¥í•˜ê²Œ.
+		collision_true = 1;  //½Ã°£ ´Ù Áö³ª¸é ´Ù½Ã Ãæµ¹ °¡´ÉÇÏ°Ô.
 	}
 }
 

@@ -163,14 +163,16 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AI.h" />
+    <ClInclude Include="camera.h" />
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />
+    <ClInclude Include="colosseum.h" />
     <ClInclude Include="defs.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="gl\glad\glad.h" />
     <ClInclude Include="gl\glfw\glfw3.h" />
     <ClInclude Include="sphere.h" />
-    <ClInclude Include="trackball.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile" />

@@ -2,7 +2,7 @@
 #define __SPHERE_H__
 #include "camera.h"		// slee's OpenGL utility
 
-//tank structëŠ” cameraì— ì •ì˜ë˜ì–´ ìˆìŠµë‹ˆë‹¤.
+//tank struct´Â camera¿¡ Á¤ÀÇµÇ¾î ÀÖ½À´Ï´Ù.
 
 // vertex buffer for tank 
 GLuint	vertex_array_1 = 0;	// ID holder for vertex array object
@@ -15,7 +15,7 @@ GLuint	vertex_array_1 = 0;	// ID holder for vertex array object
 
 
 
-//********** ëª¨ë¸ë§ íŒŒíŠ¸ *************
+//********** ¸ğµ¨¸µ ÆÄÆ® *************
 std::vector<vertex> create_sphere_vertices( uint N )
 {
 	std::vector<vertex> v;
@@ -124,11 +124,11 @@ void update_vertex_buffer_sphere(const std::vector<vertex>& vertices, uint N)
 	if(!vertex_array_1){ printf("%s(): failed to create vertex aray\n",__func__); return; }
 }
 
-//********** tank ì›€ì§ì„ íŒŒíŠ¸ *************
+//********** tank ¿òÁ÷ÀÓ ÆÄÆ® *************
 inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 {
 	vec3 n = (eye - at).normalize();
-	// tank posë‘ ì •í™•íˆ ì¼ì¹˜ì‹œí‚¤ë©´ ìê¸°ëª¸ì´ ì•ˆ ë³´ì—¬ìš” ì¢€ ë–¼ì–´ë†“ì€ ê²ë‹ˆë‹¤.
+	// tank pos¶û Á¤È®È÷ ÀÏÄ¡½ÃÅ°¸é ÀÚ±â¸öÀÌ ¾È º¸¿©¿ä Á» ¶¼¾î³õÀº °Ì´Ï´Ù.
 	pos.x = eye.x - 0.705f * (n + 0.35f*cam.up).x;
 	pos.y = eye.y - 0.705f * (n + 0.35f * cam.up).y;
 	pos.z = eye.z - 0.705f * (n + 0.35f * cam.up).z;
@@ -142,8 +142,8 @@ inline void sphere_t::update( float t, const vec3& eye, const vec3& at )
 		0, 0, 0, 1
 	};
 
-	// n ë²¡í„°ë‘ ì¼ì¹˜í•˜ê²Œ ëŒë ¤ì£¼ì§€ ì•Šìœ¼ë©´ ê³ ê°œë§Œ ëŒì•„ê°€ëŠ” ê¼´ì´ ë©ë‹ˆë‹¤.
-	// ìˆ˜ì •í•´ì£¼ì„¸ìš”
+	// n º¤ÅÍ¶û ÀÏÄ¡ÇÏ°Ô µ¹·ÁÁÖÁö ¾ÊÀ¸¸é °í°³¸¸ µ¹¾Æ°¡´Â ²ÃÀÌ µË´Ï´Ù.
+	// ¼öÁ¤ÇØÁÖ¼¼¿ä
 	mat4 rotation_matrix =
 	{
 		1, 0, 0, 0,

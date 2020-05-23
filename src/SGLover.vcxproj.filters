@@ -41,10 +41,16 @@
     <ClInclude Include="sphere.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="trackball.h">
+    <ClInclude Include="bullet.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="bullet.h">
+    <ClInclude Include="AI.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="colosseum.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
