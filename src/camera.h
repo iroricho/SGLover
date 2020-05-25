@@ -2,35 +2,21 @@
 #define __CAMERA_H__
 #include "cgmath.h"
 #include "cgut.h"		// slee's OpenGL utility
+#include "colosseum.h"
+#include "cyl.h"
+// camera 움직임, 회전 그에 따른 탱크 객체 이동을 정의한 헤더입니다. tank 객체가 생성되어 있습니다.
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
-//********** Temp var for adjust tank height *********
-float CP = -0.5f;	// 콜로세움 윗면 위치입니다 (y축) 수정해주세요 => 수정완료(y축으로 전체 -1.0f 내린것 + 모델의 높이 0.5f)
-
-// tank 모델 구현 헤더에 구조체를 정의하고 싶어도
-// camera 초기 값에 tank의 반지름이 필요해
-// 구조체 정의를 여기에 했습니다. 다른 방법 있으면 수정해주세요.
-struct sphere_t
-{
-	float	radius=0.3f;	// radius
-	vec3	pos;			// position of tank
-	vec4	color;			// RGBA color in [0,1]
-	mat4	model_matrix;	// modeling transformation
-
-	// public functions
-	void	update( float t, const vec3& eye, const vec3& at );	
-};
-
-// tank 구조체 생성
-// 결국엔 pos를 eye에 맞게 업데이트 해야되기 때문에 radius 외에는 크게 상관 없습니다
-sphere_t tank = {0.3f, vec3(0), vec4(1.0f,0.0f,0.0f,1.0f)};
+// tank 객체 생성
+cyl tank = {0.3f, 0.3f, vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 
 //*************************************
 struct camera
 {
-	vec3	eye = vec3( 0.0f, CP + 2*tank.radius, 0.0f );	//경기장 밑면 모델 내부가 보여서 높였습니다
-	vec3	at = vec3( 0.0f, CP + 2*tank.radius, -20.0f );	//위와 같은 이유로 함께 높였습니다.
+	// 바닥이 보여 눈은 1.0h 만큼 올렸지만, tank 바닥은 그대로 지면에 닿아있게 조절했음
+	vec3	eye = vec3( 0.5f, colosseum.pos.y + colosseum.height * 0.5f + 1.5f * tank.height, 0.0f );
+	vec3	at = vec3( 0.0f, colosseum.pos.y + colosseum.height * 0.5f + 1.5f * tank.height, -20.0f );
 	vec3	up = vec3( 0.0f, 1.0f, 0.0f );
 	mat4	view_matrix = mat4::look_at( eye, at, up );;
 
@@ -160,7 +146,7 @@ inline void camera::update_rot( vec2 m )
 
 inline void camera::update_zm( vec2 m )
 {
-	// project a 2D mouse position to a unit sphere
+	// project a 2D mouse position to a unit tank
 	float p1 = m.y-m0.y;					// displacement
 	if( !b_tracking || abs(p1)<0.00001f ) return;
 	p1 *= 0.6f;								// apply cons
@@ -183,7 +169,7 @@ inline void camera::update_zm( vec2 m )
 
 inline void camera::update_pn( vec2 m )
 {
-	// project a 2D mouse position to a unit sphere
+	// project a 2D mouse position to a unit tank
 	vec3 p1 = vec3(m-m0,0);					// displacement
 	if( !b_tracking || length(p1)<0.00001f ) return;
 
@@ -274,6 +260,49 @@ inline void camera::update_RIGHT()
 	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(max_speed,dt * speed)) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
+}
+
+//********** tank 움직임 파트 *************
+inline void cyl::update_tank( float t, const vec3& eye, const vec3& at )
+{
+	vec3 n = (eye - at).normalize();
+	// tank pos랑 정확히 일치시키면 자기몸이 안 보여요 좀 떼어놓은 겁니다.
+	pos = eye - 2.34f * radius * n;
+	pos.y = eye.y - 1.0f * height;
+
+	// 카메라 회전에 따라 몸체도 회전시키기 위함. n,ref 둘다 단위벡터임. y축 기준 회전
+	vec3 ref = vec3(0,0,1.0f);
+	float theta = 0;
+	if (n.x >= 0) theta = acos(ref.dot(n));
+	else theta = -acos(ref.dot(n));
+	float c = cos(theta), s = sin(theta);
+
+	// these transformations will be explained in later transformation lecture
+	mat4 scale_matrix =
+	{
+		radius, 0, 0, 0,
+		0, height, 0, 0,
+		0, 0, radius, 0,
+		0, 0, 0, 1
+	};
+
+	mat4 rotation_matrix =
+	{
+		c, 0, s, 0,
+		0, 1, 0, 0,
+		-s, 0, c, 0,
+		0, 0, 0, 1
+	};
+
+	mat4 translate_matrix =
+	{
+		1, 0, 0, pos.x,
+		0, 1, 0, pos.y,
+		0, 0, 1, pos.z,
+		0, 0, 0, 1
+	};
+
+	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
 
 #endif // __CAMERA_H__

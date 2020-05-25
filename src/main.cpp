@@ -1,14 +1,12 @@
-#pragma warning(disable: 4819)
-
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
-#include "sphere.h"		// slee's OpenGL utility
-#include "camera.h"
-#include "colosseum.h"	// 경기장 헤더 추가
-#include "bullet.h"	// bullet 헤더
-#include "AI.h"			// AI 헤더
+#include "cyl.h"		// cylinder 모델링 헤더
+#include "camera.h"		// camera, 즉 player 헤더
+#include "colosseum.h"	// 경기장 헤더
+#include "bullet.h"		// bullet 헤더
+#include "ai.h"			// ai 헤더
 
-#include <../irrKlang/irrKlang.h>
+#include "./irrKlang/irrKlang.h"
 #pragma comment(lib, "irrKlang.lib")
 
 //소리용 헤더 파일 추가
@@ -19,15 +17,11 @@
 #define 브금추가(sound) PlaySound(TEXT(#sound), 0, SND_FILENAME | SND_ASYNC | SND_NOSTOP)
 */
 
-
-
-
 //*************************************
 // global constants
-static const char*	window_name = "2015312406_A3";
+static const char*	window_name = "SGLover";
 static const char*	vert_shader_path = "../bin/shaders/circ.vert";
 static const char*	frag_shader_path = "../bin/shaders/circ.frag";
-uint				NUM_TESS = 80;		// initial tessellation factor of the sphere as a polygon
 
 
 //*************************************
@@ -45,7 +39,6 @@ int		frame = 0;						// index of rendering frames
 float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
-struct { bool add=false, sub=false; operator bool() const { return add||sub; } } b; // flags of keys for smooth changes
 
 irrklang::ISoundEngine* engine = nullptr;
 irrklang::ISoundSource* sound_src_1 = nullptr;
@@ -54,17 +47,21 @@ irrklang::ISoundSource* sound_src_3 = nullptr;
 
 
 //*************************************
-// holder of vertices and indices of a unit sphere
-std::vector<vertex>	unit_sphere_vertices;		// host-side vertices
+// holder of vertices and indices of a unit tank
+std::vector<vertex>	unit_tank_vertices;			// tank vertices
+std::vector<vertex>	unit_colsseum_vertices;		// colosseum vertices
 std::vector<vertex>	unit_ai_vertices;			// ai vertices
+std::vector<vertex>	unit_bullet_vertices;		// bullet vertices
+/*
 std::vector<vertex>	colosseum_bottom_vertices;	//경기장 하부 vertices
 std::vector<vertex>	colosseum_side_vertices;	//경기장 옆면 vertices
 
-//*************************************
 // objects
-colosseum_bottom bottom;		//경기장 하부 struct 정의
-colosseum_side side;				//경기장 옆면 struct 정의
+//colosseum_bottom bottom;		//경기장 하부 객체 생성, initial 값을 그대로 따라감
+//colosseum_side side;			//경기장 옆면 객체 생성
+*/
 
+//*************************************
 // utility function
 inline vec2 cursor_to_ndc( dvec2 cursor, ivec2 window_size )
 {
@@ -78,10 +75,22 @@ inline vec2 cursor_to_ndc( dvec2 cursor, ivec2 window_size )
 	return vec2(npos.x*2.0f-1.0f,1.0f-npos.y*2.0f);
 }
 
+void update_camera() {
+	if (cam.is_W()) { cam.update_W(); }
+	if (cam.is_A()) { cam.update_A(); }
+	if (cam.is_S()) { cam.update_S(); }
+	if (cam.is_D()) { cam.update_D(); }
+	if (cam.is_RIGHT()) { cam.update_RIGHT(); }
+	if (cam.is_LEFT()) { cam.update_LEFT(); }
+}
+
 void update()
 {
 	// update global simulation parameter
 	t = halt? t : float(glfwGetTime()) - time_buffer;
+	
+	// **** update camera
+	update_camera();
 	
 	// update projection matrix
 	cam.aspect = window_size.x/float(window_size.y);
@@ -94,6 +103,15 @@ void update()
 	GLint uloc;
 	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.view_matrix );
 	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.projection_matrix );
+	
+	// **** update tank
+	tank.update_tank(t, cam.eye, cam.at);
+	
+	// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
+	ai.update(t, tank.pos);
+	
+	// Bullet move update
+	bullet.update(t, tank.pos);
 }
 
 void render()
@@ -104,58 +122,43 @@ void render()
 	// notify GL that we use our own program
 	glUseProgram( program );
 
+	// bind vertex array object of cylinder
+	glBindVertexArray( vertex_array_0 );
 
 	GLint uloc;
 	
-	// render spheres: trigger shader program to process vertex data
-	
-	// tank move update
-	tank.update(t, cam.eye, cam.at);
-
-	// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
-	ai.update(t, tank.pos);
-	
-	// Bullet move update
-	bullet.update(t, tank.pos);
-
-	// bind vertex array object of tank
-	// update tank uniforms
-	// tank draw calls
-	glBindVertexArray( vertex_array_1 );
+	// update tank uniforms and draw calls
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, tank.model_matrix );
-	glDrawElements( GL_TRIANGLES, 4*NUM_TESS*NUM_TESS*3, GL_UNSIGNED_INT, nullptr );
+	glDrawElements( GL_TRIANGLES, 4*tank.NTESS*tank.NTESS*3, GL_UNSIGNED_INT, nullptr );
+	
+	// update colosseum uniforms and draw calls
+	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, colosseum.model_matrix );
+	glDrawElements( GL_TRIANGLES, 4*colosseum.NTESS*colosseum.NTESS*3, GL_UNSIGNED_INT, nullptr );
 
+	//AI 그리기
+	glBindVertexArray( vertex_array_0 );
+	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
+	glDrawElements( GL_TRIANGLES, 4*ai.NTESS*ai.NTESS*3, GL_UNSIGNED_INT, nullptr );
+
+	//Bullet 그리기
+	glBindVertexArray(vertex_array_0);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
+	glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+	
+	/*
 	//경기장 하부 그리기
-	glBindVertexArray(bottom.vertex_array_3);
+	glBindVertexArray(vertex_array_3);
 	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bottom.model_col);
-	glDrawElements(GL_TRIANGLES, 20000, GL_UNSIGNED_INT, nullptr);
+	glDrawElements(GL_TRIANGLES, 20*bottom.NTESS, GL_UNSIGNED_INT, nullptr);
 
 	//경기장 옆면 그리기
 	glBindVertexArray(side.vertex_array_4);
 	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, side.model_col);
 	glDrawElements(GL_TRIANGLES, 10000, GL_UNSIGNED_INT, nullptr);
-
-	//AI 그리기
-	glBindVertexArray( vertex_array_5 );
-	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
-	glDrawElements( GL_TRIANGLES, 4*NUM_TESS*NUM_TESS*3, GL_UNSIGNED_INT, nullptr );
-
-	//Bullet 그리기
-	glBindVertexArray(vertex_array_6);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
-	glDrawElements(GL_TRIANGLES, 4 * NUM_TESS * NUM_TESS * 3, GL_UNSIGNED_INT, nullptr);
+	*/
 
 	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
-}
-
-void update_camera() {
-	if (cam.is_W()) { cam.update_W(); }
-	if (cam.is_A()) { cam.update_A(); }
-	if (cam.is_S()) { cam.update_S(); }
-	if (cam.is_D()) { cam.update_D(); }
-	if (cam.is_RIGHT()) { cam.update_RIGHT(); }
-	if (cam.is_LEFT()) { cam.update_LEFT(); }
 }
 
 void reshape( GLFWwindow* window, int width, int height )
@@ -172,7 +175,7 @@ void print_help()
 	printf( "- press ESC or 'q' to terminate the program\n" );
 	printf( "- press F1 or 'h' to see help\n" );
 #ifndef GL_ES_VERSION_2_0
-	printf( "- press 'r' to toggle between halt and resume the sphere\n" );
+	printf( "- press 'r' to toggle between halt and resume the game\n" );
 #endif
 	printf( "\n" );
 }
@@ -269,18 +272,29 @@ bool user_init()
 	glEnable( GL_CULL_FACE );								// turn on backface culling
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
 	
+	colosseum.update_colosseum();
+
 	// define the position of four corner vertices
-	unit_sphere_vertices = std::move( create_sphere_vertices( NUM_TESS ));
-	unit_ai_vertices = std::move( create_ai_vertices( NUM_TESS ));
+	unit_tank_vertices = std::move( create_cyl_vertices( tank.NTESS ));
+	unit_colsseum_vertices = std::move( create_cyl_vertices( colosseum.NTESS ));
+	unit_ai_vertices = std::move( create_cyl_vertices( ai.NTESS ));
+	unit_bullet_vertices = std::move( create_cyl_vertices( bullet.NTESS ));
+
+	/*
 	colosseum_bottom_vertices = std::move(bottom.create_colosseum_vertices());		//경기장하부vertice생성
-	colosseum_side_vertices = std::move(side.create_colosseum_side_vertices());		//경기장옆면vertice생성
+	//colosseum_side_vertices = std::move(side.create_colosseum_side_vertices());		//경기장옆면vertice생성
+	*/
 
 	// create vertex buffer; called again when index buffering mode is toggled
-	update_vertex_buffer_sphere( unit_sphere_vertices, NUM_TESS );
-	update_vertex_buffer_ai(unit_sphere_vertices, NUM_TESS);		// AI 버퍼 생성
-	update_vertex_buffer_bullet(unit_sphere_vertices, NUM_TESS);		// bullet 버퍼 생성
+	update_vertex_buffer_cyl( unit_tank_vertices, tank.NTESS );
+	update_vertex_buffer_cyl( unit_colsseum_vertices, colosseum.NTESS );
+	update_vertex_buffer_cyl( unit_ai_vertices, ai.NTESS);		// AI 버퍼 생성
+	update_vertex_buffer_cyl( unit_bullet_vertices, bullet.NTESS);		// bullet 버퍼 생성
+	
+	/*
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
-	side.update_vertex_buffer_colosseum_side(colosseum_side_vertices);	//경기장옆면 버퍼 생성
+	//side.update_vertex_buffer_colosseum_side(colosseum_side_vertices);	//경기장옆면 버퍼 생성
+	*/
 
 	return true;
 }
@@ -315,7 +329,6 @@ int main( int argc, char* argv[] )
 	for( frame=0; !glfwWindowShouldClose(window); frame++ )
 	{
 		glfwPollEvents();	// polling and processing of events
-		update_camera();
 		update();			// per-frame update
 		render();			// per-frame render
 	}

@@ -1,291 +1,38 @@
 #ifndef __COLOSSEUM_H__
 #define __COLOSSEUM_H__
-
-#include "cgmath.h"		// slee's simple math library
-#include "cgut.h"		// slee's OpenGL utility
-
-struct colosseum_bottom //°æ±âÀå ¹Ø¸é
+#include "cyl.h"
+// ê²½ê¸°ì¥ ê°ì²´ë¥¼ ìƒì„±í•˜ê³  ì„¤ì •í•˜ëŠ” í—¤ë”ì…ë‹ˆë‹¤.
+// user_initì—ì„œ updateë¥¼ í•œë²ˆ ì‹¤í–‰í•˜ê³  ëë‚©ë‹ˆë‹¤.
+inline void cyl::update_colosseum()
 {
-	float radius = 10.0f;	//°æ±âÀå ¹İÁö¸§
-	vec3 pos = vec3(0, -1.0f, 0.0f);	//°æ±âÀå À§Ä¡
-	GLuint	vertex_array_3 = 0;	//°æ±âÀå vertex_array
-
-	//********************************
-	// ÀúÈñ 1ÀÎÄª °ÔÀÓÀÌ±â ¶§¹®¿¡ Áö±İ Á¦°¡ µ¹·Á³õÀº °ÍÃ³·³ º¸¿©¾ß ÇÕ´Ï´Ù.
-	// ÀÓ½Ã·Î ÇØ³ù´Âµ¥, ±×³É ¿·¸éµµ µ¹·Á¹ö¸®½Ã°Å³ª
-	// ¾ÖÃÊ¿¡ ÀÌ Ãà¿¡ ¸Â°Ô Á¡¼± ¸¸µå½Ã¸é µË´Ï´Ù.
-	float ang = PI/2.0f;
-	float c	= -cos(ang), s = sin(ang);
-	mat4 rotation_matrix =
+	// these transformations will be explained in later transformation lecture
+	mat4 scale_matrix =
 	{
-		1, 0, 0, 0,
-		0, c, -s, 0,
-		0, s, c, 0,
+		radius, 0, 0, 0,
+		0, height, 0, 0,
+		0, 0, radius, 0,
 		0, 0, 0, 1
 	};
 
-	//********************************
-
-	mat4 scale_matrix_col =
-	{
-		radius,0,0,0,
-		0,radius,0,0,
-		0,0,radius,0,
-		0,0,0,1
-	};
-
-	mat4 translate_matrix_col =
-	{
-		1,0,0,pos.x,
-		0,1,0,pos.y,
-		0,0,1,pos.z,
-		0,0,0,1
-	};
-	mat4 model_col =  translate_matrix_col * scale_matrix_col*rotation_matrix; //°æ±âÀå ¸ğµ¨ ¸ŞÆ®¸¯½º - È¸Àü, ±â¿ï±â µî È°µ¿¼ºÀÌ ¾ø´Ù°í °¡Á¤ÇÏ°í ¹Ù·Î ÃÊ±âÈ­
-
-	std::vector<vertex> create_colosseum_vertices();	//°æ±âÀå ¹Ø¸é Áö¿À¸ŞÆ®¸®
-	void update_vertex_buffer_colosseum(const std::vector<vertex>& vertices);	//°æ±âÀå ¹Ø¸é ¹öÆÛ»ı¼º
-
-};
-
-struct colosseum_side		//°æ±âÀå ¿·¸é
-{
-	float radius = 10.0f;	//¿·¸é ¹İÁö¸§
-	vec3 pos = vec3(0, -1.0f, 0.0f);	//¿·¸é À§Ä¡
-	GLuint	vertex_array_4 = 0;	//¿·¸é vertex_array
-
-		//********************************
-	// ÁÂÇ¥°è º¸Á¤ ¿ä¼Ò
-	float ang = PI / 2.0f;
-	float c = -cos(ang), s = sin(ang);
 	mat4 rotation_matrix =
 	{
 		1, 0, 0, 0,
-		0, -c, s, 0,
-		0, -s, -c, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
 
-	//********************************
-
-
-	mat4 scale_matrix_col =
+	mat4 translate_matrix =
 	{
-		radius,0,0,0,
-		0,radius,0,0,
-		0,0,radius,0,
-		0,0,0,1
+		1, 0, 0, pos.x,
+		0, 1, 0, pos.y,
+		0, 0, 1, pos.z,
+		0, 0, 0, 1
 	};
-	mat4 translate_matrix_col =
-	{
-		1,0,0,0,
-		0,1,0,pos.y,
-		0,0,1,pos.z,
-		0,0,0,1
-	};
-	mat4 model_col =  translate_matrix_col  * scale_matrix_col * rotation_matrix;	//¿·¸é ¸ğµ¨ ¸ŞÆ®¸¯ Á¤ÀÇ
 
-	std::vector<vertex> create_colosseum_side_vertices();
-	void update_vertex_buffer_colosseum_side(const std::vector<vertex>& vertices);
-
-};
-
-
-//¹Ø¸é Áö¿À¸ŞÆ®¸® Á¤ÀÇ
-std::vector<vertex> colosseum_bottom::create_colosseum_vertices()
-{
-	std::vector<vertex> v;
-
-	for (int z = 0; z <= 1; z++)
-	{
-		v.push_back({ vec3(0,0,0.05f * -z), vec3(0,0,0.05f * -z), vec2(0,0) });
-
-		for (int edge = 0; edge <= 1000; edge++)
-		{
-			float t = 2.0f * PI * edge / 1000, ct = cos(t), st = sin(t);
-			v.push_back({ vec3(ct,st,0.05f * -z), vec3(ct,st,0.05f * -z), vec2(ct,st) });
-
-		}
-
-	}
-	return v;
-
-
+	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
 
-//¹Ø¸é ¹öÆÛ »ı¼º
-void colosseum_bottom::update_vertex_buffer_colosseum(const std::vector<vertex>& vertices)
-{
-	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
-	static GLuint index_buffer = 0;		// ID holder for index buffer
-
-	// clear and create new buffers
-	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
-	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
-
-	// check exceptions
-	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
-
-	// create buffers
-
-	std::vector<uint> indices;
-
-	for (int k = 0; k <= 1000; k++)
-	{
-		indices.push_back(0);
-		indices.push_back(k);
-		indices.push_back(k + 1);
-
-	} // °æ±âÀå »óºÎ
-
-	for (int k = 0; k <= 1000; k++)
-	{
-		indices.push_back(k + 1);
-		indices.push_back(k);
-		indices.push_back(k + 1004);
-		indices.push_back(k + 1);
-		indices.push_back(k + 1004);
-		indices.push_back(k + 1005);
-
-	} //°æ±âÀå ¿·Åë
-
-	for (int k = 0; k <= 1000; k++)
-	{
-		indices.push_back(k + 1003);
-		indices.push_back(1003);
-		indices.push_back(k + 1004);
-	} //°æ±âÀå ÇÏºÎ
-
-
-
-	// generation of vertex buffer: use vertices as it is
-	glGenBuffers(1, &vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-
-	// geneation of index buffer
-	glGenBuffers(1, &index_buffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
-
-
-	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
-	if (vertex_array_3) glDeleteVertexArrays(1, &vertex_array_3);
-	vertex_array_3 = cg_create_vertex_array(vertex_buffer, index_buffer);
-	if (!vertex_array_3) { printf("%s(): failed to create vertex aray\n", __func__); return; }
-}
-
-//¿·¸é Áö¿À¸ŞÆ®¸®
-std::vector<vertex> colosseum_side::create_colosseum_side_vertices()
-{
-	std::vector<vertex> v;
-
-	for (int r = 0; r <= 1; r++)
-	{
-		for (int z = 0; z <= 1; z++)
-		{
-			for (int edge = 0; edge < 10; edge++)
-			{
-				float t = 2.0f * PI * edge / 10, ct = cos(t), st = sin(t);
-				v.push_back({ vec3((1.0f - 0.1f * r) * ct,(1.0f - 0.1f * r) * st,0.2f * z), vec3(ct,st,0.2f * z), vec2(ct,st) });
-			}
-		}
-
-
-	}
-
-	return v;
-}
-
-
-//¿·¸é ¹öÆÛ »ı¼º
-void colosseum_side::update_vertex_buffer_colosseum_side(const std::vector<vertex>& vertices)
-{
-	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
-	static GLuint index_buffer = 0;		// ID holder for index buffer
-
-	// clear and create new buffers
-	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
-	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
-
-	// check exceptions
-	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
-
-	// create buffers
-
-	std::vector<uint> indices;
-
-	for (int i = 0; i < 10; i += 2)
-	{
-		indices.push_back(i);
-		indices.push_back(i + 1);
-		indices.push_back(i + 10);
-
-		indices.push_back(i + 10);
-		indices.push_back(i + 1);
-		indices.push_back(i + 11);
-	}//¹Ù±ùÂÊ¸é
-	for (int i = 0; i < 10; i += 2)
-	{
-		indices.push_back(i + 21);
-		indices.push_back(i + 20);
-		indices.push_back(i + 30);
-
-		indices.push_back(i + 21);
-		indices.push_back(i + 30);
-		indices.push_back(i + 31);
-	}//¾ÈÂÊ¸é
-	for (int i = 0; i < 10; i += 2)
-	{
-		indices.push_back(i + 20);
-		indices.push_back(i);
-		indices.push_back(i + 30);
-
-		indices.push_back(i);
-		indices.push_back(i + 10);
-		indices.push_back(i + 30);
-	}//ÁÂÃø	
-	for (int i = 0; i < 10; i += 2)
-	{
-		indices.push_back(i + 1);
-		indices.push_back(i + 21);
-		indices.push_back(i + 31);
-
-		indices.push_back(i + 11);
-		indices.push_back(i + 1);
-		indices.push_back(i + 31);
-	}//¿ìÃø
-	for (int i = 0; i < 10; i += 2)
-	{
-		indices.push_back(i + 10);
-		indices.push_back(i + 11);
-		indices.push_back(i + 30);
-
-		indices.push_back(i + 30);
-		indices.push_back(i + 11);
-		indices.push_back(i + 31);
-	}//»óºÎ
-
-
-
-
-
-	// generation of vertex buffer: use vertices as it is
-	glGenBuffers(1, &vertex_buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
-
-	// geneation of index buffer
-	glGenBuffers(1, &index_buffer);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
-
-
-	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
-	if (vertex_array_4) glDeleteVertexArrays(1, &vertex_array_4);
-	vertex_array_4 = cg_create_vertex_array(vertex_buffer, index_buffer);
-	if (!vertex_array_4) { printf("%s(): failed to create vertex aray\n", __func__); return; }
-}
-
+cyl colosseum = {20.0f, 20.0f, vec3(0,-10.5f,0), vec4(0.5f,0.5f,0.5f,1.0f), 100};
 
 #endif
