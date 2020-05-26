@@ -12,9 +12,15 @@ in vec2 tc;	// used for texture coordinate visualization
 // output of the fragment shader
 out vec4 fragColor;
 
+uniform sampler2D	TEX0;
+uniform sampler2D	TEX1;
+uniform int			mode;
+
 // shader's global variables, called the uniform variables
 
 void main()
 {
-	fragColor = vec4(normalize(norm), 1.0);
+	if (mode == 1)			fragColor = texture(TEX0, tc);
+	else if (mode == 2)	fragColor = texture(TEX1, tc);
+	else				fragColor = vec4(tc, 0, 0);
 }

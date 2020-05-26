@@ -1,6 +1,12 @@
+#pragma warning(disable: 4819)
+
 #include "cgmath.h"		// slee's simple math library
 #include "cgut.h"		// slee's OpenGL utility
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 #include "cyl.h"		// cylinder 모델링 헤더
+#include "sphere.h"
 #include "camera.h"		// camera, 즉 player 헤더
 #include "colosseum.h"	// 경기장 헤더
 #include "bullet.h"		// bullet 헤더
@@ -8,6 +14,8 @@
 
 #include "./irrKlang/irrKlang.h"
 #pragma comment(lib, "irrKlang.lib")
+
+
 
 //소리용 헤더 파일 추가
 /*
@@ -17,12 +25,14 @@
 #define 브금추가(sound) PlaySound(TEXT(#sound), 0, SND_FILENAME | SND_ASYNC | SND_NOSTOP)
 */
 
+
 //*************************************
 // global constants
 static const char*	window_name = "SGLover";
 static const char*	vert_shader_path = "../bin/shaders/circ.vert";
 static const char*	frag_shader_path = "../bin/shaders/circ.frag";
-
+static const char* lena_image_path = "../bin/images/lena.jpg";
+static const char* baboon_image_path = "../bin/images/baboon.jpg";
 
 //*************************************
 // window objects
@@ -33,12 +43,18 @@ ivec2		window_size = cg_default_window_size(); // initial window size
 // OpenGL objects
 GLuint	program = 0;		// ID holder for GPU program
 
+GLuint  vertex_array = 0;			// ID holder for vertex array object
+GLuint	LENA = 0;					// texture object
+GLuint	BABOON = 0;					// texture object
+
 //*************************************
 // global variables
 int		frame = 0;						// index of rendering frames
 float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
+uint	mode = 1;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
+
 
 irrklang::ISoundEngine* engine = nullptr;
 irrklang::ISoundSource* sound_src_1 = nullptr;
@@ -86,6 +102,10 @@ void update_camera() {
 
 void update()
 {
+	//change texture mode
+	glUniform1i(glGetUniformLocation(program, "mode"), mode);
+	
+	
 	// update global simulation parameter
 	t = halt? t : float(glfwGetTime()) - time_buffer;
 	
@@ -122,15 +142,25 @@ void render()
 	// notify GL that we use our own program
 	glUseProgram( program );
 
+	// bind textures
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, LENA);
+	glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
+
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, BABOON);
+	glUniform1i(glGetUniformLocation(program, "TEX1"), 1);
+
+
 	// bind vertex array object of cylinder
-	glBindVertexArray( vertex_array_0 );
+	glBindVertexArray( vertex_array_0 ); //여기.
 
 	GLint uloc;
 	
 	// update tank uniforms and draw calls
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, tank.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*tank.NTESS*tank.NTESS*3, GL_UNSIGNED_INT, nullptr );
-	
+
 	// update colosseum uniforms and draw calls
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, colosseum.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*colosseum.NTESS*colosseum.NTESS*3, GL_UNSIGNED_INT, nullptr );
@@ -209,6 +239,16 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			bullet.launch(t, tank.pos, (cam.at - cam.eye).normalize());
 			printf("space\n");
 		}
+
+		//그냥 텍스쳐매핑할떄 테스트용. 나중에 지워도 됨.
+		else if (key == GLFW_KEY_T)
+		{
+			mode = (mode + 1) % 3;
+			printf("using mode %d: %s (press 'd' to toggle)\n", mode,
+				mode == 0 ? "texcoord" : mode == 1 ? "lena" : "baboon");
+		}
+
+
 	}
 	else if(action==GLFW_RELEASE)
 	{
@@ -253,8 +293,42 @@ void motion( GLFWwindow* window, double x, double y )
 	}
 }
 
+GLuint create_texture(const char* image_path, bool b_mipmap)
+{
+	// load the image with vertical flipping
+	image* img = cg_load_image(image_path); if (!img) return -1;
+	int w = img->width, h = img->height;
+
+	// create a src texture (lena texture)
+	GLuint texture; glGenTextures(1, &texture);//여기!
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, img->ptr);
+	if (img) delete img; // release image
+
+	// build mipmap
+	if (b_mipmap && glGenerateMipmap)
+	{
+		int mip_levels = 0; for (int k = max(w, h); k; k >>= 1) mip_levels++;
+		for (int l = 1; l < mip_levels; l++)
+			glTexImage2D(GL_TEXTURE_2D, l, GL_RGB8, max(1, w >> l), max(1, h >> l), 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+
+	// set up texture parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, b_mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+
+	return texture;
+}
+
 bool user_init()
 {
+	// set default display mode to lena
+	keyboard(window, GLFW_KEY_T, 0, GLFW_PRESS, 0);
+
+
 	//sound source
 	engine = irrklang::createIrrKlangDevice();
 	if (!engine)	 return false;
@@ -271,6 +345,8 @@ bool user_init()
 	glClearColor( 39/255.0f, 40/255.0f, 34/255.0f, 1.0f );	// set clear color
 	glEnable( GL_CULL_FACE );								// turn on backface culling
 	glEnable( GL_DEPTH_TEST );								// turn on depth tests
+	glEnable(GL_TEXTURE_2D);			// enable texturing
+	glActiveTexture(GL_TEXTURE0);		// notify GL the current texture slot is 0
 	
 	colosseum.update_colosseum();
 
@@ -295,6 +371,10 @@ bool user_init()
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
 	//side.update_vertex_buffer_colosseum_side(colosseum_side_vertices);	//경기장옆면 버퍼 생성
 	*/
+
+	// load the Lena image to a texture
+	LENA = create_texture(lena_image_path, true);		if (LENA == -1) return false;
+	BABOON = create_texture(baboon_image_path, true);	if (BABOON == -1) return false;
 
 	return true;
 }
