@@ -8,7 +8,6 @@ extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 struct Bullet
 {
 	float	radius=0.5f;	// radius
-	float	height=0.5f;	// height
 	vec3	pos;			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
@@ -25,7 +24,7 @@ struct Bullet
 	void launch(float t0, vec3 pos0, vec3 n0);
 };
 
-Bullet bullet = { 0.0f, 0.3f, vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f), 30};
+Bullet bullet = { 0.3f,  vec3(7.0f,0,7.0f), vec4(1.0f,0.0f,0.0f,1.0f), 30};
 
 //********** Bullet 움직임 파트 *************
 inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
@@ -49,7 +48,7 @@ inline void Bullet::update(float t, const vec3& tpos)
 	mat4 scale_matrix =
 	{
 		radius, 0, 0, 0,
-		0, height, 0, 0,
+		0, radius, 0, 0,
 		0, 0, radius, 0,
 		0, 0, 0, 1
 	};

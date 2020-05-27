@@ -17,7 +17,7 @@ struct cyl
 	float	height=0.5f;	// height
 	vec3	pos;			// position of tank
 	vec4	color;			// RGBA color in [0,1]
-	uint	NTESS=30;
+	uint	NTESS=29;
 	mat4	model_matrix;	// modeling transformation
 
 	// public functions
@@ -27,29 +27,31 @@ struct cyl
 	void	update_ai( float t, const vec3& eye, const vec3& at );	
 };
 
-std::vector<vertex> create_cyl_vertices( uint N )
+
+//위쪽 매핑하는 원기둥//
+std::vector<vertex> create_cyltop_vertices(uint N)
 {
 	std::vector<vertex> v;
 
 	float theta = 2.0f * PI / N;
 
 	//upside vertices
-	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.5f,0.5f) });	//origin of upside
-	for (uint i=0; i <= N; i++)
+	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.875f) });	//origin of upside
+	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i*theta),0.5f,cos(i*theta)), vec3(sin(i*theta),0.5f,cos(i*theta)), vec2(i*theta,1) });
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
 	}
-	
+
 	//downside vertices
 	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.5f,0.5f) });	//origin of downside
-	for (uint i=0; i <= N; i++)
+	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i*theta),-0.5f,cos(i*theta)), vec3(sin(i*theta),-0.5f,cos(i*theta)), vec2(i*theta,0) });
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)), vec2(i * theta,0) });
 	}
 	return v;
 }
 
-void update_vertex_buffer_cyl(const std::vector<vertex>& vertices, uint N)
+void update_vertex_buffer_cyltop(const std::vector<vertex>& vertices, uint N)
 {
 	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
 	static GLuint index_buffer = 0;		// ID holder for index buffer
@@ -122,6 +124,33 @@ void update_vertex_buffer_cyl(const std::vector<vertex>& vertices, uint N)
 	if(vertex_array_0) glDeleteVertexArrays(1,&vertex_array_0);
 	vertex_array_0 = cg_create_vertex_array( vertex_buffer, index_buffer );
 	if(!vertex_array_0){ printf("%s(): failed to create vertex aray\n",__func__); return; }
+}
+
+
+
+
+
+//옆면 매핑하는 원기둥//
+std::vector<vertex> create_cylside_vertices(uint N)
+{
+	std::vector<vertex> v;
+
+	float theta = 2.0f * PI / N;
+
+	//upside vertices
+	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.875f) });	//origin of upside
+	for (uint i = 0; i <= N; i++)
+	{
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
+	}
+
+	//downside vertices
+	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.5f,0.5f) });	//origin of downside
+	for (uint i = 0; i <= N; i++)
+	{
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)), vec2(i * theta,0) });
+	}
+	return v;
 }
 
 #endif
