@@ -3,6 +3,7 @@
 #include "cgmath.h"
 #include "cgut.h"
 #include "colosseum.h"
+#include "camera.h"
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 extern struct Bullet bullet; //나중에 총알 여러개 생기면 수정해줘야됨. vecter<Bullet>이라던가..
@@ -16,9 +17,10 @@ struct ai_t
 	vec3	pos;			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
-
+	float	mass = radius*radius*height;
+	float	speed = 0.01f / mass;	// velocity of ai
+	
 	float t0=0;				// time buffer for halt
-	float speed = 0.01f;	// velocity of ai
 	
 	float collision_t0=0;
 	
@@ -29,10 +31,75 @@ struct ai_t
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
-	void collision(vec3 bullet_pos);
+	void collision(vec3 tpos, float tradius);
 };
 
-ai_t ai = {0.3f, 0.3f, vec3(10.0f,colosseum.pos.y + colosseum.height * 0.5f + 0.5f * ai.height,-10.0f), vec4(1.0f,0.0f,0.0f,1.0f),30};
+// 중복을 피해 ai를 만드는 함수, 난이도에 따라 anum을 조절하면 됨
+#define cosrand() cos((float)rand()) 
+inline std::vector<ai_t> create_ais(int anum)
+{
+	std::srand((unsigned int) time(0)); //for rand
+	
+	//var for comparing to avoid collision or overlaps
+	float compx = 0;
+	float compz = 0;
+	float compr = 0;
+	float tempx = 0;
+	float tempz = 0;
+	float tempr = 0;
+	float sumr = 0;
+	float Dx = 0;
+	float Dz = 0;
+
+	std::vector<ai_t> ais;
+	ai_t a;
+
+	//first ai
+	a = { 0.3f + abs(cosrand()), 0.3f + abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+	ais.push_back(a);
+
+	int canum = 1; //current ai number
+
+	int tempFlag = 0;
+
+	//make ai
+	while (canum < anum)
+	{
+		a = { 0.3f + abs(cosrand()), 0.3f + abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+
+		tempx = a.pos.x;
+		tempz = a.pos.z;
+		tempr = a.radius;
+
+		for (int i = 0; i < canum; i++)
+		{
+			compx = ais[i].pos.x;
+			compz = ais[i].pos.z;
+			compr = ais[i].radius;
+			Dx = compx - tempx;
+			Dz = compz - tempz;
+			sumr = compr + tempr;
+			if (Dx*Dx + Dz*Dz <= sumr*sumr)
+			{
+				tempFlag = 1; break;
+			}
+		}
+		
+		if (tempFlag == 0)
+		{
+			ais.push_back(a);
+			++canum;
+		}
+		
+		tempFlag = 0;
+	}
+
+	return ais;
+}
+
+// ais vector 생성
+int anum = 3;	//ai 갯수
+auto ais = std::move(create_ais(anum));
 
 //********** ai 움직임 파트 *************
 inline void ai_t::update( float t, const vec3& tpos )
@@ -57,11 +124,7 @@ inline void ai_t::update( float t, const vec3& tpos )
 	}
 	else
 	{
-		if ( flag >= speed ) pos += h * speed;
-		else if ( flag >= 0 ) pos += AO.normalize() * speed;
-		else if ( flag >= -speed ) pos += AO.normalize() * speed;
-		else pos += -h * speed;
-		
+		pos += AO.normalize() * speed;
 	}
 	/*
 	printf("%f %f %f %f\n", pos.x, pos.y, pos.z, length(vec2(pos.x,pos.z)));
@@ -70,15 +133,6 @@ inline void ai_t::update( float t, const vec3& tpos )
 	printf("%f\n", AB.dot(AO));
 	*/
 	pos.y = colosseum.pos.y + colosseum.height * 0.5f + 0.5f * height;
-
-
-	//********* 충돌 검사 **********//
-	collision(bullet.pos);
-	collision(tank.pos);
-
-	
-
-
 
 	mat4 scale_matrix =
 	{
@@ -107,19 +161,19 @@ inline void ai_t::update( float t, const vec3& tpos )
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
 
-inline void ai_t::collision(vec3 bullet_pos)
+inline void ai_t::collision(vec3 tpos, float tradius)
 {
-	float n = 0.5f;		//충돌시 n초동안 이동하게 (=튕기게)
-	float collision_speed = 0.35f;
+	float n = 0.01f;		//충돌시 n초동안 이동하게 (=튕기게)
+	float collision_speed = 0.5f / mass;	// 질량에 반비례하게 설정
 
-	if (distance(vec4(bullet.pos, 1), vec4(pos, 1)) < (bullet.radius + radius))
+	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
 		if (collision_true==1)
 		{
 			play_sound();
 			printf("collision! %d\n",collision_true);
 			collision_t0 = t;
-			collision_direction0 = ( pos - bullet.pos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
+			collision_direction0 = ( pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
 		}
 	}
 

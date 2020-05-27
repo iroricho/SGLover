@@ -129,9 +129,6 @@ void update()
 	// **** update tank
 	tank.update_tank(t, cam.eye, cam.at);
 	
-	// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
-	ai.update(t, tank.pos);
-	
 	// Bullet move update
 	bullet.update(t, tank.pos);
 
@@ -172,10 +169,35 @@ void render()
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, colosseum.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*colosseum.NTESS*colosseum.NTESS*3, GL_UNSIGNED_INT, nullptr );
 
-	//AI 그리기
-	glBindVertexArray( vertex_array_AI );
-	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
-	glDrawElements( GL_TRIANGLES, 4*ai.NTESS*ai.NTESS*3, GL_UNSIGNED_INT, nullptr );
+	for (int i=0; i<anum; i++)
+	{
+		ai_t& ai = ais[i];
+
+		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
+		//********* 충돌 검사 **********//
+		ai.collision(bullet.pos, bullet.radius);
+		ai.collision(tank.pos, tank.radius);
+		for (int j=0; j<anum; j++)
+		{
+			if (j!=i) ai.collision(ais[j].pos, ais[j].radius);
+		}
+
+		ai.update(t, tank.pos);
+	
+
+		/*
+		for (int j = i+1; j < cnum; j++)
+		{
+			c.collision(circles[j]);
+		}
+		*/
+
+		//AI 그리기
+		glBindVertexArray( vertex_array_AI );
+		uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
+		glDrawElements( GL_TRIANGLES, 4*ai.NTESS*ai.NTESS*3, GL_UNSIGNED_INT, nullptr );
+	}
+
 
 	//Bullet 그리기
 	glBindVertexArray(vertex_array_1);
@@ -365,7 +387,7 @@ bool user_init()
 	// define the position of four corner vertices
 	unit_tank_vertices = std::move( create_cyltop_vertices_tank( tank.NTESS ));
 	unit_colsseum_vertices = std::move( create_cyltop_vertices_colosseum( colosseum.NTESS ));
-	unit_ai_vertices = std::move( create_cyltop_vertices_AI( ai.NTESS ));
+	unit_ai_vertices = std::move( create_cyltop_vertices_AI( ais[0].NTESS ));
 	unit_bullet_vertices = std::move(create_sphere_vertices(bullet.NTESS));
 	unit_sky_vertices = std::move( create_sky_vertices( sky.NTESS ));
 
@@ -376,7 +398,7 @@ bool user_init()
 
 	// create vertex buffer; called again when index buffering mode is toggled
 	update_vertex_buffer_cyltop_colosseum( unit_colsseum_vertices, colosseum.NTESS );
-	update_vertex_buffer_cyltop_AI( unit_ai_vertices, ai.NTESS);		// AI 버퍼 생성
+	update_vertex_buffer_cyltop_AI( unit_ai_vertices, ais[0].NTESS);		// AI 버퍼 생성
 	update_vertex_buffer_cyltop_tank( unit_tank_vertices, tank.NTESS );
 	update_vertex_buffer_sphere(unit_bullet_vertices, bullet.NTESS);		// bullet 버퍼 생성
 	update_vertex_buffer_sky( unit_sky_vertices, sky.NTESS);		// bullet 버퍼 생성
