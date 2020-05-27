@@ -15,8 +15,8 @@ cyl tank = {0.3f, 0.3f, vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 struct camera
 {
 	// 바닥이 보여 눈은 1.0h 만큼 올렸지만, tank 바닥은 그대로 지면에 닿아있게 조절했음
-	vec3	eye = vec3( 0.5f, colosseum.pos.y + colosseum.height * 0.5f + 1.5f * tank.height, 0.0f );
-	vec3	at = vec3( 0.0f, colosseum.pos.y + colosseum.height * 0.5f + 1.5f * tank.height, -20.0f );
+	vec3	eye = vec3( 0.5f, colosseum.pos.y + colosseum.height * 0.5f + 2.0f * tank.height, 0.0f );
+	vec3	at = vec3( 0.0f, colosseum.pos.y + colosseum.height * 0.5f + 2.0f * tank.height, -20.0f );
 	vec3	up = vec3( 0.0f, 1.0f, 0.0f );
 	mat4	view_matrix = mat4::look_at( eye, at, up );;
 
@@ -267,8 +267,8 @@ inline void cyl::update_tank( float t, const vec3& eye, const vec3& at )
 {
 	vec3 n = (eye - at).normalize();
 	// tank pos랑 정확히 일치시키면 자기몸이 안 보여요 좀 떼어놓은 겁니다.
-	pos = eye - 2.34f * radius * n;
-	pos.y = eye.y - 1.0f * height;
+	pos = eye - 7.0f * radius * n;
+	pos.y = eye.y - 1.5f * height;
 
 	// 카메라 회전에 따라 몸체도 회전시키기 위함. n,ref 둘다 단위벡터임. y축 기준 회전
 	vec3 ref = vec3(0,0,1.0f);

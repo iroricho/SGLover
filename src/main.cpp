@@ -45,8 +45,8 @@ ivec2		window_size = cg_default_window_size(); // initial window size
 GLuint	program = 0;		// ID holder for GPU program
 
 GLuint  vertex_array = 0;			// ID holder for vertex array object
-GLuint	LENA = 0;					// texture object
-GLuint	BABOON = 0;					// texture object
+GLint	LENA = 0;					// texture object
+GLint	BABOON = 0;					// texture object
 
 //*************************************
 // global variables

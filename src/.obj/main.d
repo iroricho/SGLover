@@ -1,6 +1,6 @@
 .obj/main.o: main.cpp cgmath.h cgut.h gl/glfw/glfw3.h gl/glad/glad.h \
- cyl.h camera.h colosseum.h bullet.h ai.h irrKlang/irrKlang.h \
- irrKlang/ik_irrKlangTypes.h irrKlang/ik_vec3d.h \
+ stb_image.h cyl.h sphere.h camera.h colosseum.h bullet.h sky.h ai.h \
+ irrKlang/irrKlang.h irrKlang/ik_irrKlangTypes.h irrKlang/ik_vec3d.h \
  irrKlang/ik_IRefCounted.h irrKlang/ik_IVirtualRefCounted.h \
  irrKlang/ik_ESoundOutputDrivers.h irrKlang/ik_ESoundEngineOptions.h \
  irrKlang/ik_EStreamModes.h irrKlang/ik_SAudioStreamFormat.h \
@@ -19,13 +19,19 @@ gl/glfw/glfw3.h:
 
 gl/glad/glad.h:
 
+stb_image.h:
+
 cyl.h:
+
+sphere.h:
 
 camera.h:
 
 colosseum.h:
 
 bullet.h:
+
+sky.h:
 
 ai.h:
 
