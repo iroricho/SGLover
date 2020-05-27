@@ -74,6 +74,7 @@ inline void ai_t::update( float t, const vec3& tpos )
 
 	//********* 충돌 검사 **********//
 	collision(bullet.pos);
+	collision(tank.pos);
 
 	
 

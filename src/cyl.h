@@ -9,7 +9,9 @@
 // 경기장, 탱크, 탄, ai 모두 이 구조체를 사용합니다.
 // tank 객체 정의는 camera.h에 되어 있습니다.
 
-GLuint	vertex_array_0 = 0;	// cylinder vertex_array
+GLuint	vertex_array_AI = 0;	// cylinder vertex_array
+GLuint	vertex_array_colosseum = 0;	// cylinder vertex_array
+GLuint	vertex_array_tank = 0;	// cylinder vertex_array
 
 struct cyl
 {
@@ -28,8 +30,8 @@ struct cyl
 };
 
 
-//위쪽 매핑하는 원기둥//
-std::vector<vertex> create_cyltop_vertices(uint N)
+//AI 매핑하는 원기둥//
+std::vector<vertex> create_cyltop_vertices_AI(uint N)
 {
 	std::vector<vertex> v;
 
@@ -39,19 +41,19 @@ std::vector<vertex> create_cyltop_vertices(uint N)
 	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.875f) });	//origin of upside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.25f + 0.25f*(i * theta)/PI, 0.75f) });
 	}
 
 	//downside vertices
 	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.5f,0.5f) });	//origin of downside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)), vec2(i * theta,0) });
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.25f + 0.25f*(i * theta) / PI, 0.5f) });
 	}
 	return v;
 }
 
-void update_vertex_buffer_cyltop(const std::vector<vertex>& vertices, uint N)
+void update_vertex_buffer_cyltop_AI(const std::vector<vertex>& vertices, uint N)
 {
 	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
 	static GLuint index_buffer = 0;		// ID holder for index buffer
@@ -121,17 +123,15 @@ void update_vertex_buffer_cyltop(const std::vector<vertex>& vertices, uint N)
 	glBufferData( GL_ELEMENT_ARRAY_BUFFER, sizeof(uint)*indices.size(), &indices[0], GL_STATIC_DRAW );
 
 	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
-	if(vertex_array_0) glDeleteVertexArrays(1,&vertex_array_0);
-	vertex_array_0 = cg_create_vertex_array( vertex_buffer, index_buffer );
-	if(!vertex_array_0){ printf("%s(): failed to create vertex aray\n",__func__); return; }
+	if(vertex_array_AI) glDeleteVertexArrays(1,&vertex_array_AI);
+	vertex_array_AI = cg_create_vertex_array( vertex_buffer, index_buffer );
+	if(!vertex_array_AI){ printf("%s(): failed to create vertex aray\n",__func__); return; }
 }
 
 
+//콜로세움용 원기둥//
 
-
-
-//옆면 매핑하는 원기둥//
-std::vector<vertex> create_cylside_vertices(uint N)
+std::vector<vertex> create_cyltop_vertices_colosseum(uint N)
 {
 	std::vector<vertex> v;
 
@@ -148,9 +148,186 @@ std::vector<vertex> create_cylside_vertices(uint N)
 	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.5f,0.5f) });	//origin of downside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)), vec2(i * theta,0) });
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
 	}
 	return v;
 }
+
+void update_vertex_buffer_cyltop_colosseum(const std::vector<vertex>& vertices, uint N)
+{
+	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
+	static GLuint index_buffer = 0;		// ID holder for index buffer
+
+	// clear and create new buffers
+	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
+	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
+
+	// check exceptions
+	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
+
+	// create buffers
+	std::vector<uint> indices;
+
+	// upside indices
+	for (uint i = 0; i < N; i++)
+	{
+		indices.push_back(0);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+
+		indices.push_back(0);
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+	}
+
+	// downside indices
+	for (uint i = N + 2; i < 2 * N + 2; i++)
+	{
+		indices.push_back(N + 2);
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+
+		indices.push_back(N + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+	}
+
+	// side indices
+	for (uint i = 1; i < N + 1; i++)
+	{
+		indices.push_back(i);
+		indices.push_back(i + 1);
+		indices.push_back(i + N + 2);
+
+		indices.push_back(i);
+		indices.push_back(i + N + 2);
+		indices.push_back(i + 1);
+
+		indices.push_back(i + N + 2);
+		indices.push_back(i + N + 3);
+		indices.push_back(i + 1);
+
+		indices.push_back(i + N + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + N + 3);
+	}
+
+	// generation of vertex buffer: use vertices as it is
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// geneation of index buffer
+	glGenBuffers(1, &index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
+	if (vertex_array_colosseum) glDeleteVertexArrays(1, &vertex_array_colosseum);
+	vertex_array_colosseum = cg_create_vertex_array(vertex_buffer, index_buffer);
+	if (!vertex_array_colosseum) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+}
+
+
+//탱크용 원기둥//
+std::vector<vertex> create_cyltop_vertices_tank(uint N)
+{
+	std::vector<vertex> v;
+
+	float theta = 2.0f * PI / N;
+
+	//upside vertices
+	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.625f) });	//origin of upside
+	for (uint i = 0; i <= N; i++)
+	{
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.625f + 0.125f * sin(i * theta)) });
+	}
+
+	//downside vertices
+	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.125f,0.625f) });	//origin of downside
+	for (uint i = 0; i <= N; i++)
+	{
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.125f + 0.125f * cos(i * theta),0.625f + 0.125f * sin(i * theta)) });
+	}
+	return v;
+}
+
+void update_vertex_buffer_cyltop_tank(const std::vector<vertex>& vertices, uint N)
+{
+	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
+	static GLuint index_buffer = 0;		// ID holder for index buffer
+
+	// clear and create new buffers
+	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
+	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
+
+	// check exceptions
+	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
+
+	// create buffers
+	std::vector<uint> indices;
+
+	// upside indices
+	for (uint i = 0; i < N; i++)
+	{
+		indices.push_back(0);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+
+		indices.push_back(0);
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+	}
+
+	// downside indices
+	for (uint i = N + 2; i < 2 * N + 2; i++)
+	{
+		indices.push_back(N + 2);
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+
+		indices.push_back(N + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+	}
+
+	// side indices
+	for (uint i = 1; i < N + 1; i++)
+	{
+		indices.push_back(i);
+		indices.push_back(i + 1);
+		indices.push_back(i + N + 2);
+
+		indices.push_back(i);
+		indices.push_back(i + N + 2);
+		indices.push_back(i + 1);
+
+		indices.push_back(i + N + 2);
+		indices.push_back(i + N + 3);
+		indices.push_back(i + 1);
+
+		indices.push_back(i + N + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + N + 3);
+	}
+
+	// generation of vertex buffer: use vertices as it is
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// geneation of index buffer
+	glGenBuffers(1, &index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
+	if (vertex_array_tank) glDeleteVertexArrays(1, &vertex_array_tank);
+	vertex_array_tank = cg_create_vertex_array(vertex_buffer, index_buffer);
+	if (!vertex_array_tank) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+}
+
+
+
 
 #endif

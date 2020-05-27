@@ -245,9 +245,14 @@ inline void camera::update_LEFT()
 	vec4 at4 = vec4(at, 1);
 	float dt = t - tl;
 
+
+
+
+
+
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
 	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(max_speed,dt * speed)) * (mat4::translate(-eye) * at4));
-
+	
 	at = vec3(atb.x, atb.y, atb.z);
 }
 

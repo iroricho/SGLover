@@ -32,7 +32,7 @@
 static const char*	window_name = "SGLover";
 static const char*	vert_shader_path = "../bin/shaders/circ.vert";
 static const char*	frag_shader_path = "../bin/shaders/circ.frag";
-static const char* lena_image_path = "../bin/images/lena2.jpg";
+static const char* lena_image_path = "../bin/images/lena3.jpg";
 static const char* baboon_image_path = "../bin/images/baboon.jpg";
 
 //*************************************
@@ -158,20 +158,22 @@ void render()
 
 
 	// bind vertex array object of cylinder
-	glBindVertexArray( vertex_array_0 ); //여기.
+	//glBindVertexArray( vertex_array_0 ); //여기.
 
 	GLint uloc;
 	
 	// update tank uniforms and draw calls
+	glBindVertexArray(vertex_array_tank); //여기.
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, tank.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*tank.NTESS*tank.NTESS*3, GL_UNSIGNED_INT, nullptr );
 
 	// update colosseum uniforms and draw calls
+	glBindVertexArray(vertex_array_colosseum); 
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, colosseum.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*colosseum.NTESS*colosseum.NTESS*3, GL_UNSIGNED_INT, nullptr );
 
 	//AI 그리기
-	glBindVertexArray( vertex_array_0 );
+	glBindVertexArray( vertex_array_AI );
 	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
 	glDrawElements( GL_TRIANGLES, 4*ai.NTESS*ai.NTESS*3, GL_UNSIGNED_INT, nullptr );
 
@@ -361,9 +363,9 @@ bool user_init()
 	colosseum.update_colosseum();
 
 	// define the position of four corner vertices
-	unit_tank_vertices = std::move( create_cyltop_vertices( tank.NTESS ));
-	unit_colsseum_vertices = std::move( create_cyltop_vertices( colosseum.NTESS ));
-	unit_ai_vertices = std::move( create_cyltop_vertices( ai.NTESS ));
+	unit_tank_vertices = std::move( create_cyltop_vertices_tank( tank.NTESS ));
+	unit_colsseum_vertices = std::move( create_cyltop_vertices_colosseum( colosseum.NTESS ));
+	unit_ai_vertices = std::move( create_cyltop_vertices_AI( ai.NTESS ));
 	unit_bullet_vertices = std::move(create_sphere_vertices(bullet.NTESS));
 	unit_sky_vertices = std::move( create_sky_vertices( sky.NTESS ));
 
@@ -373,9 +375,9 @@ bool user_init()
 	*/
 
 	// create vertex buffer; called again when index buffering mode is toggled
-	update_vertex_buffer_cyltop( unit_tank_vertices, tank.NTESS );
-	update_vertex_buffer_cyltop( unit_colsseum_vertices, colosseum.NTESS );
-	update_vertex_buffer_cyltop( unit_ai_vertices, ai.NTESS);		// AI 버퍼 생성
+	update_vertex_buffer_cyltop_colosseum( unit_colsseum_vertices, colosseum.NTESS );
+	update_vertex_buffer_cyltop_AI( unit_ai_vertices, ai.NTESS);		// AI 버퍼 생성
+	update_vertex_buffer_cyltop_tank( unit_tank_vertices, tank.NTESS );
 	update_vertex_buffer_sphere(unit_bullet_vertices, bullet.NTESS);		// bullet 버퍼 생성
 	update_vertex_buffer_sky( unit_sky_vertices, sky.NTESS);		// bullet 버퍼 생성
 	
