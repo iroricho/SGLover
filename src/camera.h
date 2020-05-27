@@ -8,8 +8,23 @@
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
+struct tank_t
+{
+	float	radius=0.5f;	// radius
+	float	height=0.5f;	// height
+	vec3	pos;			// position of tank
+	vec4	color;			// RGBA color in [0,1]
+	uint	NTESS=29;
+	mat4	model_matrix;	// modeling transformation
+
+	// public functions
+	void	update_tank( float t, const vec3& eye, const vec3& at );	
+};
+
+#define cosrand() cos((float)rand()) 
+
 // tank 객체 생성
-cyl tank = {0.3f, 0.3f, vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+tank_t tank = {0.3f + 0.05f * cosrand(), 0.3f + 0.05f * cosrand(), vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 
 //*************************************
 struct camera
@@ -47,8 +62,10 @@ struct camera
 	float td=0;
 	float tl=0;
 	float tr=0;
-	float speed=0.1f;			// velocity of move of camera 기체 별 상이
-	float max_speed=0.1f;			// max velocity of move of camera 기체 별 상이
+	
+	float	mass = tank.radius*tank.radius*tank.height;	// tank 질량
+	float	speed = 0.005f / mass;	// velocity of tank
+	float	max_speed = 1.3f * speed;	// max velocity of tank
 
 	// ************ WASD  ***************//
 	bool b_W = false;
@@ -243,15 +260,9 @@ inline void camera::update_D()
 inline void camera::update_LEFT()
 {
 	vec4 at4 = vec4(at, 1);
-	float dt = t - tl;
-
-
-
-
-
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(max_speed,dt * speed)) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, 0.15f * speed) * (mat4::translate(-eye) * at4));
 	
 	at = vec3(atb.x, atb.y, atb.z);
 }
@@ -259,16 +270,15 @@ inline void camera::update_LEFT()
 inline void camera::update_RIGHT()
 {
 	vec4 at4 = vec4(at, 1);
-	float dt = t - tr;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(max_speed,dt * speed)) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, 0.15f * speed) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
 }
 
 //********** tank 움직임 파트 *************
-inline void cyl::update_tank( float t, const vec3& eye, const vec3& at )
+inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 {
 	vec3 n = (eye - at).normalize();
 	// tank pos랑 정확히 일치시키면 자기몸이 안 보여요 좀 떼어놓은 겁니다.

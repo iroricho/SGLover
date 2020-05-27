@@ -24,9 +24,6 @@ struct cyl
 
 	// public functions
 	void	update_colosseum();	
-	void	update_tank( float t, const vec3& eye, const vec3& at );	
-	void	update_bullet( float t, const vec3& eye, const vec3& at );	
-	void	update_ai( float t, const vec3& eye, const vec3& at );	
 };
 
 

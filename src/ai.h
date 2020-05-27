@@ -35,7 +35,6 @@ struct ai_t
 };
 
 // 중복을 피해 ai를 만드는 함수, 난이도에 따라 anum을 조절하면 됨
-#define cosrand() cos((float)rand()) 
 inline std::vector<ai_t> create_ais(int anum)
 {
 	std::srand((unsigned int) time(0)); //for rand
@@ -124,7 +123,9 @@ inline void ai_t::update( float t, const vec3& tpos )
 	}
 	else
 	{
-		pos += AO.normalize() * speed;
+		if (flag > 2.0f * speed) pos += h * speed;
+		else if (flag > -2.0f * speed) pos += AO.normalize() * speed;
+		else pos += -h * speed;
 	}
 	/*
 	printf("%f %f %f %f\n", pos.x, pos.y, pos.z, length(vec2(pos.x,pos.z)));
