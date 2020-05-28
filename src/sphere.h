@@ -132,7 +132,8 @@ std::vector<vertex> create_sky_vertices(uint N)
 			float x = s_theta * c_phi;
 			float  y = s_theta * s_phi;
 			float  z = c_theta;
-			v.push_back({ vec3(y,z,x), vec3(y,z,x), vec2(0.26f + 0.23f*0.5f*(j%2) , 0.76f + 0.2f *0.5f*(k%2) ) });
+			//v.push_back({ vec3(y,z,x), vec3(y,z,x), vec2(0.26f + 0.23f*0.5f*(j%2) , 0.76f + 0.2f *0.5f*(k%2) ) });
+			v.push_back({ vec3(y,z,x), vec3(y,z,x), vec2((phi / (2 * PI)) , (1 - (theta / PI)) )});	//텍스쳐좌표 변경
 
 
 
