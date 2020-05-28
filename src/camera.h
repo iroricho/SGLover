@@ -24,7 +24,7 @@ struct tank_t
 #define cosrand() cos((float)rand()) 
 
 // tank 객체 생성
-tank_t tank = {0.3f + 0.05f * cosrand(), 0.3f + 0.05f * cosrand(), vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+tank_t tank = {0.3f, 0.3f, vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 
 //*************************************
 struct camera
@@ -260,9 +260,10 @@ inline void camera::update_D()
 inline void camera::update_LEFT()
 {
 	vec4 at4 = vec4(at, 1);
+	float dt = t - tl;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, 0.15f * speed) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(0.03f * dt, 0.03f)) * (mat4::translate(-eye) * at4));
 	
 	at = vec3(atb.x, atb.y, atb.z);
 }
@@ -270,9 +271,10 @@ inline void camera::update_LEFT()
 inline void camera::update_RIGHT()
 {
 	vec4 at4 = vec4(at, 1);
+	float dt = t - tr;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, 0.15f * speed) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(0.03f * dt, 0.03f)) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
 }
