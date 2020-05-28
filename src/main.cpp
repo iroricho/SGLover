@@ -63,7 +63,6 @@ GLint		skymap = 0;		//skymap texture object
 
 //*************************************
 // global variables
-int		frame = 0;						// index of rendering frames
 float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
@@ -356,7 +355,6 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		else if (key == GLFW_KEY_SPACE) {
 			engine->play2D(sound_src_1, false);
 			bullet.launch(t, tank.pos, (cam.at - cam.eye).normalize());
-			printf("space\n");
 		}
 
 		//그냥 텍스쳐매핑할떄 테스트용. 나중에 지워도 됨.
@@ -562,21 +560,24 @@ int main( int argc, char* argv[] )
 	glfwSetMouseButtonCallback( window, mouse );	// callback for mouse click inputs
 	glfwSetCursorPosCallback( window, motion );		// callback for mouse movements
 
-	float tb = 0;	// time buffer for frame
-	float ti = 0;	// time interval of frame
-	float cons = 1000.0f;
-	int f_in_ti = 0;// ti에 몇개의 frame이 있는지
+	t = float(glfwGetTime());	// time init
+	float spf = 0.008f;	// sec per frame
+	float tb = t;
+	
 	// enters rendering/event loop
 	while( !glfwWindowShouldClose(window) )
 	{
 		// update global simulation parameter
 		t = halt? t : float(glfwGetTime()) - time_buffer;
-		ti = t-tb;
-		tb = t;
-		f_in_ti = int (cons * ti);
 
 		glfwPollEvents();	// polling and processing of events
-		if (!halt) for (int i=0; i<f_in_ti; i++) update();		// per-frame update
+		
+		if ( t >= tb )	// 컴퓨터가 빨라서 time interval이 작은 경우에는 문제가 안 됨
+		{
+			update();
+			tb += spf;
+		}
+		
 		render();			// per-frame render
 	}
 	

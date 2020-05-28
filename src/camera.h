@@ -65,8 +65,10 @@ struct camera
 	float tr=0;
 	
 	// **** speed
-	float	speed = 0.0002f / tank.mass;	// velocity of tank
+	float	speed = 0.009f / sqrt(tank.mass);	// velocity of tank
 	float	max_speed = 1.3f * speed;	// max velocity of tank
+	float	camera_speed = 0.03f;
+	float	max_camera_speed = 1.3f * camera_speed;	// max velocity of camera
 
 	// ************ WASD  ***************//
 	bool b_W = false;
@@ -264,7 +266,7 @@ inline void camera::update_LEFT()
 	float dt = t - tl;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(0.01f * dt, 0.01f)) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(camera_speed * dt, max_camera_speed)) * (mat4::translate(-eye) * at4));
 	
 	at = vec3(atb.x, atb.y, atb.z);
 }
@@ -275,7 +277,7 @@ inline void camera::update_RIGHT()
 	float dt = t - tr;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(0.008f * dt, 0.008f)) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(camera_speed * dt, max_camera_speed)) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
 }

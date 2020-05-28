@@ -18,7 +18,7 @@ struct ai_t
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
 	float	mass = radius*radius*height;
-	float	speed = 0.00035f / mass;	// velocity of ai
+	float	speed = 0.005f / sqrt(mass);	// velocity of ai
 	
 	float t0=0;				// time buffer for halt
 	
@@ -164,8 +164,8 @@ inline void ai_t::update( float t, const vec3& tpos )
 
 inline void ai_t::collision(vec3 tpos, float tradius, float tmass)
 {
-	float n = 0.01f / sqrt(mass);		// 충돌 후 이동 시간이 자기 질량에 반비례하게
-	float collision_speed = 0.08f * sqrt(tmass);	// 충돌 후 속도는 상대 질량에 비례하게
+	float n = 0.01f ;		// 충돌 후 재충돌 가능 interval
+	float collision_speed = 0.6f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
