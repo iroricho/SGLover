@@ -12,6 +12,7 @@
 #include "bullet.h"		// bullet 헤더
 #include "sky.h"
 #include "ai.h"			// ai 헤더
+#include "maintheme.h"		//메인화면 헤더
 
 #include "./irrKlang/irrKlang.h"
 #pragma comment(lib, "irrKlang.lib")
@@ -34,6 +35,9 @@ static const char*	vert_shader_path = "../bin/shaders/circ.vert";
 static const char*	frag_shader_path = "../bin/shaders/circ.frag";
 static const char* lena_image_path = "../bin/images/lena3.jpg";
 static const char* baboon_image_path = "../bin/images/baboon.jpg";
+static const char* main_theme_path = "../bin/images/maintheme.jpg";
+static const char* button_start_path = "../bin/images/buttonstart.jpg";
+static const char* button_help_path = "../bin/images/buttonhelp.jpg";
 
 //*************************************
 // window objects
@@ -47,6 +51,11 @@ GLuint	program = 0;		// ID holder for GPU program
 GLuint  vertex_array = 0;			// ID holder for vertex array object
 GLint	LENA = 0;					// texture object
 GLint	BABOON = 0;					// texture object
+GLint		main_theme = 0;		//main_theme texture object
+GLint		button_start = 0;	//button texture object
+GLint		button_help = 0;	//button texture object
+
+
 
 //*************************************
 // global variables
@@ -54,7 +63,8 @@ int		frame = 0;						// index of rendering frames
 float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
-uint	mode = 1;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
+uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
+int		screan_mode = 1;		//타이틀, 게임화면, 앤딩화면 전환용
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -70,6 +80,8 @@ std::vector<vertex>	unit_colsseum_vertices;		// colosseum vertices
 std::vector<vertex>	unit_ai_vertices;			// ai vertices
 std::vector<vertex>	unit_bullet_vertices;		// bullet vertices
 std::vector<vertex>	unit_sky_vertices;		// skyvertices
+std::vector<vertex>	main_theme_vertices;	//메인화면vertices
+std::vector<vertex>	button_vertices;				//버튼vertices
 /*
 std::vector<vertex>	colosseum_bottom_vertices;	//경기장 하부 vertices
 std::vector<vertex>	colosseum_side_vertices;	//경기장 옆면 vertices
@@ -144,14 +156,7 @@ void render()
 	// notify GL that we use our own program
 	glUseProgram( program );
 
-	// bind textures
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, LENA);
-	glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
-
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, BABOON);
-	glUniform1i(glGetUniformLocation(program, "TEX1"), 1);
+	
 
 
 	// bind vertex array object of cylinder
@@ -159,69 +164,126 @@ void render()
 
 	GLint uloc;
 	
-	// update tank uniforms and draw calls
-	glBindVertexArray(vertex_array_tank); //여기.
-	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, tank.model_matrix );
-	glDrawElements( GL_TRIANGLES, 4*tank.NTESS*tank.NTESS*3, GL_UNSIGNED_INT, nullptr );
-
-	// update colosseum uniforms and draw calls
-	glBindVertexArray(vertex_array_colosseum); 
-	uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, colosseum.model_matrix );
-	glDrawElements( GL_TRIANGLES, 4*colosseum.NTESS*colosseum.NTESS*3, GL_UNSIGNED_INT, nullptr );
-
-	for (int i=0; i<anum; i++)
+	if (screan_mode == 0)
 	{
-		ai_t& ai = ais[i];
+		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
-		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
-		//********* 충돌 검사 **********//
-		ai.collision(bullet.pos, bullet.radius);
-		ai.collision(tank.pos, tank.radius);
-		for (int j=0; j<anum; j++)
+		// bind textures
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, LENA);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, BABOON);
+		glUniform1i(glGetUniformLocation(program, "TEX1"), 1);
+
+		// update tank uniforms and draw calls
+		glBindVertexArray(vertex_array_tank); //여기.
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix);
+		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+
+		// update colosseum uniforms and draw calls
+		glBindVertexArray(vertex_array_colosseum);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, colosseum.model_matrix);
+		glDrawElements(GL_TRIANGLES, 4 * colosseum.NTESS * colosseum.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+
+		for (int i = 0; i < anum; i++)
 		{
-			if (j!=i) ai.collision(ais[j].pos, ais[j].radius);
+			ai_t& ai = ais[i];
+
+			// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
+			//********* 충돌 검사 **********//
+			ai.collision(bullet.pos, bullet.radius);
+			ai.collision(tank.pos, tank.radius);
+			for (int j = 0; j < anum; j++)
+			{
+				if (j != i) ai.collision(ais[j].pos, ais[j].radius);
+			}
+
+			ai.update(t, tank.pos);
+
+
+			/*
+			for (int j = i+1; j < cnum; j++)
+			{
+				c.collision(circles[j]);
+			}
+			*/
+
+			//AI 그리기
+			glBindVertexArray(vertex_array_AI);
+			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix);
+			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 		}
 
-		ai.update(t, tank.pos);
-	
+
+		//Bullet 그리기
+		glBindVertexArray(vertex_array_1);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
+		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+
+		//Sky 그리기
+		glBindVertexArray(vertex_array_2);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, sky.model_matrix);
+		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
 		/*
-		for (int j = i+1; j < cnum; j++)
-		{
-			c.collision(circles[j]);
-		}
+		//경기장 하부 그리기
+		glBindVertexArray(vertex_array_3);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bottom.model_col);
+		glDrawElements(GL_TRIANGLES, 20*bottom.NTESS, GL_UNSIGNED_INT, nullptr);
+
+		//경기장 옆면 그리기
+		glBindVertexArray(side.vertex_array_4);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, side.model_col);
+		glDrawElements(GL_TRIANGLES, 10000, GL_UNSIGNED_INT, nullptr);
 		*/
 
-		//AI 그리기
-		glBindVertexArray( vertex_array_AI );
-		uloc = glGetUniformLocation( program, "model_matrix" );		if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, ai.model_matrix );
-		glDrawElements( GL_TRIANGLES, 4*ai.NTESS*ai.NTESS*3, GL_UNSIGNED_INT, nullptr );
+		// swap front and back buffers, and display to screen
+
+
+
+
 	}
 
+	else if (screan_mode == 1)
+	{
+		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
-	//Bullet 그리기
-	glBindVertexArray(vertex_array_1);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
-	glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
-	//Sky 그리기
-	glBindVertexArray(vertex_array_2);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, sky.model_matrix);
-	glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+		//메인 바탕화면 그리기
+		glBindVertexArray(vertex_array_maintheme);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+		
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, main_theme);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 2);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+		/*
+		처음에는 버튼식으로 구현해서 클릭하면 넘기는 걸로 하려 했는데 구현이 어려울거 같아서 일단은 키보드로 구현했습니다
+		//시작 버튼 그리기
+		glBindVertexArray(vertex_array_button);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bt_start.model_matrix);
+		glActiveTexture(GL_TEXTURE3);
+		glBindTexture(GL_TEXTURE_2D, button_start);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+		//설명서 버튼 그리기
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bt_help.model_matrix);
+		glActiveTexture(GL_TEXTURE4);
+		glBindTexture(GL_TEXTURE_2D, button_help);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 4);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		*/
+
+
+
+	}
+
 	
-	/*
-	//경기장 하부 그리기
-	glBindVertexArray(vertex_array_3);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bottom.model_col);
-	glDrawElements(GL_TRIANGLES, 20*bottom.NTESS, GL_UNSIGNED_INT, nullptr);
-
-	//경기장 옆면 그리기
-	glBindVertexArray(side.vertex_array_4);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, side.model_col);
-	glDrawElements(GL_TRIANGLES, 10000, GL_UNSIGNED_INT, nullptr);
-	*/
-
-	// swap front and back buffers, and display to screen
 	glfwSwapBuffers( window );
 }
 
@@ -280,6 +342,12 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			mode = (mode + 1) % 3;
 			printf("using mode %d: %s (press 'd' to toggle)\n", mode,
 				mode == 0 ? "texcoord" : mode == 1 ? "lena" : "baboon");
+		}
+
+		else if (key == GLFW_KEY_G)
+		{
+			screan_mode = (screan_mode + 1) % 2;
+			
 		}
 
 
@@ -390,6 +458,9 @@ bool user_init()
 	unit_ai_vertices = std::move( create_cyltop_vertices_AI( ais[0].NTESS ));
 	unit_bullet_vertices = std::move(create_sphere_vertices(bullet.NTESS));
 	unit_sky_vertices = std::move( create_sky_vertices( sky.NTESS ));
+	main_theme_vertices = std::move(create_vertices_maintheme());
+	button_vertices = std::move(create_vertices_button());
+	
 
 	/*
 	colosseum_bottom_vertices = std::move(bottom.create_colosseum_vertices());		//경기장하부vertice생성
@@ -402,6 +473,8 @@ bool user_init()
 	update_vertex_buffer_cyltop_tank( unit_tank_vertices, tank.NTESS );
 	update_vertex_buffer_sphere(unit_bullet_vertices, bullet.NTESS);		// bullet 버퍼 생성
 	update_vertex_buffer_sky( unit_sky_vertices, sky.NTESS);		// bullet 버퍼 생성
+	update_vertex_buffer_maintheme(main_theme_vertices);		//메인화면 버퍼 생성
+	update_vertex_buffer_button(button_vertices);					//버튼 버퍼 생성
 	
 	/*
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
@@ -411,6 +484,11 @@ bool user_init()
 	// load the Lena image to a texture
 	LENA = create_texture(lena_image_path, true);		if (LENA == -1) return false;
 	BABOON = create_texture(baboon_image_path, true);	if (BABOON == -1) return false;
+	main_theme = create_texture(main_theme_path, true);	if (main_theme == -1) return false;
+	button_start = create_texture(button_start_path, true);	if (button_start == -1) return false;
+	button_help = create_texture(button_help_path, true);	if (button_help == -1) return false;
+
+
 
 	return true;
 }

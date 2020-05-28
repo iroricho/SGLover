@@ -56,8 +56,13 @@
     <ClInclude Include="sky.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="maintheme.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile" />
+    <None Include="..\bin\shaders\circ.frag" />
+    <None Include="..\bin\shaders\circ.vert" />
   </ItemGroup>
 </Project>
