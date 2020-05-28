@@ -12,12 +12,22 @@ out vec2 tc;	// the third output: not used yet
 uniform mat4 model_matrix;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
+uniform int		screan_mode;		//화면 모드
 
 void main()
 {
-	vec4 wpos = model_matrix * vec4(position,1);
-	vec4 epos = view_matrix * wpos;
-	gl_Position = projection_matrix * epos;
+
+	if(screan_mode == 1)	
+	{
+		gl_Position = model_matrix*vec4(position,1);
+	}
+	else if(screan_mode == 0)
+	{
+		vec4 wpos = model_matrix * vec4(position,1);
+		vec4 epos = view_matrix * wpos;
+		gl_Position = projection_matrix * epos;
+	}
+	
 
 	// pass eye-coordinate normal to fragment shader
 	norm = normalize(mat3(view_matrix*model_matrix)*normal);

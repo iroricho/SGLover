@@ -14,13 +14,18 @@ out vec4 fragColor;
 
 uniform sampler2D	TEX0;
 uniform sampler2D	TEX1;
+uniform sampler2D TEX3;	//maintheme texture
 uniform int			mode;
+uniform int			screan_mode;	//screan_mode
 
 // shader's global variables, called the uniform variables
 
 void main()
 {
-	if (mode == 1)			fragColor = texture(TEX0, tc);
-	else if (mode == 2)	fragColor = texture(TEX1, tc);
-	else				fragColor = vec4(tc, 0, 0);
+	
+		if (mode == 1)			fragColor = texture(TEX0, tc);
+		else if (mode == 2)	fragColor = texture(TEX1, tc);
+		else				fragColor = vec4(tc, 0, 0);
+
+	
 }
