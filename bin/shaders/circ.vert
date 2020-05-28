@@ -17,11 +17,11 @@ uniform int		screan_mode;		//화면 모드
 void main()
 {
 
-	if(screan_mode == 1)	
+	if(screan_mode == 0 || screan_mode == 2)		//시작화면0 설명서2
 	{
 		gl_Position = model_matrix*vec4(position,1);
 	}
-	else if(screan_mode == 0)
+	else if(screan_mode == 1)	//메인게임
 	{
 		vec4 wpos = model_matrix * vec4(position,1);
 		vec4 epos = view_matrix * wpos;
