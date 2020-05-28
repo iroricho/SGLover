@@ -18,7 +18,7 @@ struct ai_t
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
 	float	mass = radius*radius*height;
-	float	speed = 0.0008f / mass;	// velocity of ai
+	float	speed = 0.00035f / mass;	// velocity of ai
 	
 	float t0=0;				// time buffer for halt
 	
