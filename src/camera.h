@@ -64,7 +64,7 @@ struct camera
 	float tr=0;
 	
 	float	mass = tank.radius*tank.radius*tank.height;	// tank Áú·®
-	float	speed = 0.005f / mass;	// velocity of tank
+	float	speed = 0.001f / mass;	// velocity of tank
 	float	max_speed = 1.3f * speed;	// max velocity of tank
 
 	// ************ WASD  ***************//

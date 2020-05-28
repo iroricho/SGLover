@@ -119,10 +119,6 @@ void update()
 	//change texture mode
 	glUniform1i(glGetUniformLocation(program, "mode"), mode);
 	
-	
-	// update global simulation parameter
-	t = halt? t : float(glfwGetTime()) - time_buffer;
-	
 	// **** update camera
 	update_camera();
 	
@@ -197,18 +193,16 @@ void render()
 			ai.collision(tank.pos, tank.radius);
 			for (int j = 0; j < anum; j++)
 			{
-				if (j != i) ai.collision(ais[j].pos, ais[j].radius);
+				if (j != i)
+				{
+					vec3 aipos0 = ai.pos;
+					float airadius0 = ai.radius;
+					ai.collision(ais[j].pos, ais[j].radius);
+					ais[j].collision(aipos0, airadius0);
+				}
 			}
 
 			ai.update(t, tank.pos);
-
-
-			/*
-			for (int j = i+1; j < cnum; j++)
-			{
-				c.collision(circles[j]);
-			}
-			*/
 
 			//AI 그리기
 			glBindVertexArray(vertex_array_AI);
@@ -519,11 +513,21 @@ int main( int argc, char* argv[] )
 	glfwSetMouseButtonCallback( window, mouse );	// callback for mouse click inputs
 	glfwSetCursorPosCallback( window, motion );		// callback for mouse movements
 
+	float tb = 0;	// time buffer for frame
+	float ti = 0;	// time interval of frame
+	float cons = 1000.0f;
+	int f_in_ti = 0;// ti에 몇개의 frame이 있는지
 	// enters rendering/event loop
-	for( frame=0; !glfwWindowShouldClose(window); frame++ )
+	while( !glfwWindowShouldClose(window) )
 	{
+		// update global simulation parameter
+		t = halt? t : float(glfwGetTime()) - time_buffer;
+		ti = t-tb;
+		tb = t;
+		f_in_ti = int (cons * ti);
+
 		glfwPollEvents();	// polling and processing of events
-		update();			// per-frame update
+		for (int i=0; i<f_in_ti; i++) update();			// per-frame update
 		render();			// per-frame render
 	}
 	

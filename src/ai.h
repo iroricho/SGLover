@@ -172,7 +172,7 @@ inline void ai_t::collision(vec3 tpos, float tradius)
 		if (collision_true==1)
 		{
 			play_sound();
-			printf("collision! %d\n",collision_true);
+			//printf("collision! %d\n",collision_true);
 			collision_t0 = t;
 			collision_direction0 = ( pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
 		}
@@ -183,7 +183,7 @@ inline void ai_t::collision(vec3 tpos, float tradius)
 		pos.x = pos.x + collision_direction0.x*collision_speed;
 		pos.z = pos.z + collision_direction0.z*collision_speed;
 		collision_true = 0;  //collision_true 0으로 만들어서 재충돌 안일어나게.
-		printf("settrue 0 \n");
+		//printf("settrue 0 \n");
 	}
 	else
 	{
