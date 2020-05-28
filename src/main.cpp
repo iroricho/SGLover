@@ -38,6 +38,8 @@ static const char* baboon_image_path = "../bin/images/baboon.jpg";
 static const char* main_theme_path = "../bin/images/maintheme.jpg";
 static const char* button_start_path = "../bin/images/buttonstart.jpg";
 static const char* button_help_path = "../bin/images/buttonhelp.jpg";
+static const char* help_page_path = "../bin/images/helppage.jpg";
+static const char* skymap_path = "../bin/images/skymap.jpg";
 
 //*************************************
 // window objects
@@ -54,6 +56,8 @@ GLint	BABOON = 0;					// texture object
 GLint		main_theme = 0;		//main_theme texture object
 GLint		button_start = 0;	//button texture object
 GLint		button_help = 0;	//button texture object
+GLint		help_page = 0;		//help page texture object
+GLint		skymap = 0;		//skymap texture object
 
 
 
@@ -64,7 +68,7 @@ float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
 uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
-int		screan_mode = 1;		//타이틀, 게임화면, 앤딩화면 전환용
+int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -164,17 +168,15 @@ void render()
 
 	GLint uloc;
 	
-	if (screan_mode == 0)
+	if (screan_mode == 1)
 	{
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
 		// bind textures
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, LENA);
+		
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
 
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, BABOON);
+		
 		glUniform1i(glGetUniformLocation(program, "TEX1"), 1);
 
 		// update tank uniforms and draw calls
@@ -224,6 +226,7 @@ void render()
 
 		//Sky 그리기
 		glBindVertexArray(vertex_array_2);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 4);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, sky.model_matrix);
 		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
@@ -246,7 +249,7 @@ void render()
 
 	}
 
-	else if (screan_mode == 1)
+	else if (screan_mode == 0)		//초기화면
 	{
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
@@ -256,8 +259,7 @@ void render()
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
 		
 
-		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, main_theme);
+		
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
@@ -278,6 +280,26 @@ void render()
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 4);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		*/
+
+
+
+	}
+
+	else if (screan_mode == 2)		//설명서
+	{
+	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+
+
+	//설명서 그리기
+	glBindVertexArray(vertex_array_maintheme);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+
+
+	
+	glUniform1i(glGetUniformLocation(program, "TEX0"), 3);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+
 
 
 
@@ -346,9 +368,16 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_G)
 		{
-			screan_mode = (screan_mode + 1) % 2;
+			if (screan_mode == 0 || screan_mode == 2)	screan_mode = 1;
+		}
+		else if (key == GLFW_KEY_F2)
+		{
+			if (screan_mode == 0 || screan_mode == 1)	screan_mode = 2;
+			else if (screan_mode == 2) 	screan_mode = 0;
 			
 		}
+	
+
 
 
 	}
@@ -476,6 +505,7 @@ bool user_init()
 	update_vertex_buffer_maintheme(main_theme_vertices);		//메인화면 버퍼 생성
 	update_vertex_buffer_button(button_vertices);					//버튼 버퍼 생성
 	
+	
 	/*
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
 	//side.update_vertex_buffer_colosseum_side(colosseum_side_vertices);	//경기장옆면 버퍼 생성
@@ -487,8 +517,20 @@ bool user_init()
 	main_theme = create_texture(main_theme_path, true);	if (main_theme == -1) return false;
 	button_start = create_texture(button_start_path, true);	if (button_start == -1) return false;
 	button_help = create_texture(button_help_path, true);	if (button_help == -1) return false;
+	help_page = create_texture(help_page_path, true);	if (help_page == -1) return false;
+	skymap = create_texture(skymap_path, true);	if (skymap == -1) return false;
 
-
+	//bind texture object
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, LENA);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, BABOON);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, main_theme);
+	glActiveTexture(GL_TEXTURE3);
+	glBindTexture(GL_TEXTURE_2D, help_page);
+	glActiveTexture(GL_TEXTURE4);
+	glBindTexture(GL_TEXTURE_2D, skymap);
 
 	return true;
 }
