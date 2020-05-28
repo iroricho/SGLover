@@ -136,6 +136,30 @@ void update()
 	
 	// **** update tank
 	tank.update_tank(t, cam.eye, cam.at);
+
+	// **** update ai
+	for (int i = 0; i < anum; i++)
+	{
+		ai_t& ai = ais[i];
+
+		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
+		//********* 충돌 검사 **********//
+		ai.collision(bullet.pos, bullet.radius, bullet.mass);
+		ai.collision(tank.pos, tank.radius, tank.mass);
+		for (int j = 0; j < anum; j++)
+		{
+			if (j != i)
+			{
+				vec3 aipos0 = ai.pos;
+				float airadius0 = ai.radius;
+				float aimass0 = ai.mass;
+				ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
+				ais[j].collision(aipos0, airadius0, aimass0);
+			}
+		}
+
+		ai.update(t, tank.pos);
+	}
 	
 	// Bullet move update
 	bullet.update(t, tank.pos);
@@ -186,23 +210,6 @@ void render()
 		for (int i = 0; i < anum; i++)
 		{
 			ai_t& ai = ais[i];
-
-			// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
-			//********* 충돌 검사 **********//
-			ai.collision(bullet.pos, bullet.radius);
-			ai.collision(tank.pos, tank.radius);
-			for (int j = 0; j < anum; j++)
-			{
-				if (j != i)
-				{
-					vec3 aipos0 = ai.pos;
-					float airadius0 = ai.radius;
-					ai.collision(ais[j].pos, ais[j].radius);
-					ais[j].collision(aipos0, airadius0);
-				}
-			}
-
-			ai.update(t, tank.pos);
 
 			//AI 그리기
 			glBindVertexArray(vertex_array_AI);
@@ -527,7 +534,7 @@ int main( int argc, char* argv[] )
 		f_in_ti = int (cons * ti);
 
 		glfwPollEvents();	// polling and processing of events
-		for (int i=0; i<f_in_ti; i++) update();			// per-frame update
+		if (!halt) for (int i=0; i<f_in_ti; i++) update();		// per-frame update
 		render();			// per-frame render
 	}
 	

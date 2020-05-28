@@ -11,6 +11,7 @@ struct Bullet
 	vec3	pos = vec3(0,-1,0);			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
+	float	mass=radius*radius*radius;
 
 	float t0 = 0;				// 총 쏜 시점에서의 시간
 	vec3 pos0 = 0;			//총 쏜 시점에서의 탱크 위치
@@ -24,7 +25,7 @@ struct Bullet
 	void launch(float t0, vec3 pos0, vec3 n0);
 };
 
-Bullet bullet = { 0.3f,  vec3(7.0f,-1,7.0f), vec4(1.0f,0.0f,0.0f,1.0f), 30};
+Bullet bullet = { 0.5f,  vec3(7.0f,-1,7.0f), vec4(1.0f,0.0f,0.0f,1.0f), 30};
 
 //********** Bullet 움직임 파트 *************
 inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)

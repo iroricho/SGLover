@@ -15,6 +15,7 @@ struct tank_t
 	vec3	pos;			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=29;
+	float	mass = radius*radius*height;	// tank 질량
 	mat4	model_matrix;	// modeling transformation
 
 	// public functions
@@ -63,8 +64,8 @@ struct camera
 	float tl=0;
 	float tr=0;
 	
-	float	mass = tank.radius*tank.radius*tank.height;	// tank 질량
-	float	speed = 0.001f / mass;	// velocity of tank
+	// **** speed
+	float	speed = 0.0002f / tank.mass;	// velocity of tank
 	float	max_speed = 1.3f * speed;	// max velocity of tank
 
 	// ************ WASD  ***************//
@@ -263,7 +264,7 @@ inline void camera::update_LEFT()
 	float dt = t - tl;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(0.03f * dt, 0.03f)) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(up, min(0.01f * dt, 0.01f)) * (mat4::translate(-eye) * at4));
 	
 	at = vec3(atb.x, atb.y, atb.z);
 }
@@ -274,7 +275,7 @@ inline void camera::update_RIGHT()
 	float dt = t - tr;
 
 	//eye를 중심으로 이동(translate), up기준 회전(rotate), 다시 eye 원래 위치로 이동
-	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(0.03f * dt, 0.03f)) * (mat4::translate(-eye) * at4));
+	vec4 atb = (mat4::translate(eye) * mat4::rotate(-up, min(0.008f * dt, 0.008f)) * (mat4::translate(-eye) * at4));
 
 	at = vec3(atb.x, atb.y, atb.z);
 }

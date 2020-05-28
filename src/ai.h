@@ -18,7 +18,7 @@ struct ai_t
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
 	float	mass = radius*radius*height;
-	float	speed = 0.01f / mass;	// velocity of ai
+	float	speed = 0.0008f / mass;	// velocity of ai
 	
 	float t0=0;				// time buffer for halt
 	
@@ -31,7 +31,7 @@ struct ai_t
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
-	void collision(vec3 tpos, float tradius);
+	void collision(vec3 tpos, float tradius, float tmass);
 };
 
 // 중복을 피해 ai를 만드는 함수, 난이도에 따라 anum을 조절하면 됨
@@ -54,7 +54,7 @@ inline std::vector<ai_t> create_ais(int anum)
 	ai_t a;
 
 	//first ai
-	a = { 0.3f + abs(cosrand()), 0.3f + abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+	a = { 0.3f + 0.25f * abs(cosrand()), 0.3f + 0.5f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 	ais.push_back(a);
 
 	int canum = 1; //current ai number
@@ -64,7 +64,7 @@ inline std::vector<ai_t> create_ais(int anum)
 	//make ai
 	while (canum < anum)
 	{
-		a = { 0.3f + abs(cosrand()), 0.3f + abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+		a = { 0.3f + 0.25f * abs(cosrand()), 0.3f + 0.5f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 
 		tempx = a.pos.x;
 		tempz = a.pos.z;
@@ -162,10 +162,10 @@ inline void ai_t::update( float t, const vec3& tpos )
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
 
-inline void ai_t::collision(vec3 tpos, float tradius)
+inline void ai_t::collision(vec3 tpos, float tradius, float tmass)
 {
-	float n = 0.01f;		//충돌시 n초동안 이동하게 (=튕기게)
-	float collision_speed = 0.5f / mass;	// 질량에 반비례하게 설정
+	float n = 0.01f / sqrt(mass);		// 충돌 후 이동 시간이 자기 질량에 반비례하게
+	float collision_speed = 0.08f * sqrt(tmass);	// 충돌 후 속도는 상대 질량에 비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
