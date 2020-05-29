@@ -13,6 +13,7 @@
 #include "sky.h"
 #include "ai.h"			// ai 헤더
 #include "maintheme.h"		//메인화면 헤더
+#include "numbers.h"		//숫자 카운터 헤더
 
 #include "./irrKlang/irrKlang.h"
 #pragma comment(lib, "irrKlang.lib")
@@ -40,6 +41,8 @@ static const char* button_start_path = "../bin/images/buttonstart.jpg";
 static const char* button_help_path = "../bin/images/buttonhelp.jpg";
 static const char* help_page_path = "../bin/images/helppage.jpg";
 static const char* skymap_path = "../bin/images/skymap.jpg";
+static const char* numbers_path = "../bin/images/numbers.jpg";
+
 
 //*************************************
 // window objects
@@ -58,6 +61,7 @@ GLint		button_start = 0;	//button texture object
 GLint		button_help = 0;	//button texture object
 GLint		help_page = 0;		//help page texture object
 GLint		skymap = 0;		//skymap texture object
+GLint		numbers = 0;
 
 
 
@@ -139,6 +143,7 @@ void update()
 	
 	// **** update tank
 	tank.update_tank(t, cam.eye, cam.at);
+	num_cnt.update_counter(t, cam.eye, cam.at);
 
 	// **** update ai
 	for (int i = 0; i < anum; i++)
@@ -186,9 +191,13 @@ void render()
 	//glBindVertexArray( vertex_array_0 ); //여기.
 
 	GLint uloc;
+
+
 	
+
 	if (screan_mode == 1)
 	{
+		
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
 		// bind textures
@@ -230,6 +239,15 @@ void render()
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, sky.model_matrix);
 		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
+		//숫자 카운터 그리기
+		GLuint cnt = (int)t;
+		
+		glBindVertexArray(vertex_array_numbers_1+cnt);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 5);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, num_cnt.model_matrix);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+
 		/*
 		//경기장 하부 그리기
 		glBindVertexArray(vertex_array_3);
@@ -251,6 +269,7 @@ void render()
 
 	else if (screan_mode == 0)		//초기화면
 	{
+		
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
@@ -503,7 +522,7 @@ bool user_init()
 	update_vertex_buffer_sky( unit_sky_vertices, sky.NTESS);		// bullet 버퍼 생성
 	update_vertex_buffer_maintheme(main_theme_vertices);		//메인화면 버퍼 생성
 	update_vertex_buffer_button(button_vertices);					//버튼 버퍼 생성
-	
+	update_number_vertexbuffers();		//숫자 버퍼 생성
 	
 	/*
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
@@ -518,6 +537,7 @@ bool user_init()
 	button_help = create_texture(button_help_path, true);	if (button_help == -1) return false;
 	help_page = create_texture(help_page_path, true);	if (help_page == -1) return false;
 	skymap = create_texture(skymap_path, true);	if (skymap == -1) return false;
+	numbers = create_texture(numbers_path, true);	if (numbers == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -530,6 +550,11 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, help_page);
 	glActiveTexture(GL_TEXTURE4);
 	glBindTexture(GL_TEXTURE_2D, skymap);
+	glActiveTexture(GL_TEXTURE5);
+	glBindTexture(GL_TEXTURE_2D, numbers);
+
+
+
 
 	return true;
 }
