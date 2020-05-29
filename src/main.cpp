@@ -46,6 +46,9 @@ static const char* numbers_path = "../bin/images/numbers.jpg";
 static const char* head_path = "../bin/images/head.jpg";
 static const char* bullets_path = "../bin/images/bullet.jpg";
 static const char* hh_head_path = "../bin/images/hh_head.jpg";
+static const char* pause_page_path = "../bin/images/pausepage.jpg";
+static const char* clear_page_path = "../bin/images/clearpage.jpg";
+static const char* fail_page_path = "../bin/images/failpage.jpg";
 
 //*************************************
 // window objects
@@ -68,6 +71,9 @@ GLint		numbers = 0;
 GLint		head = 0;
 GLint		bullets = 0;
 GLint		hh_head = 0;
+GLint		pause_page = 0;
+GLint		clear_page = 0;
+GLint		fail_page = 0;
 
 
 //*************************************
@@ -341,7 +347,58 @@ void render()
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 
+	}
 
+	else if (screan_mode == 3)		//일시정지
+	{
+	halt = 1;
+	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+
+
+	//일시정지 화면 그리기
+	glBindVertexArray(vertex_array_maintheme);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+
+
+
+	glUniform1i(glGetUniformLocation(program, "TEX0"), 9);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+
+	}
+
+	else if (screan_mode == 4)		//클리어
+	{
+	halt = 1;
+	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+
+
+	//클리어 화면 그리기
+	glBindVertexArray(vertex_array_maintheme);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+
+
+
+	glUniform1i(glGetUniformLocation(program, "TEX0"), 10);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+
+	}
+
+	else if (screan_mode == 5)		//실패
+	{
+	halt = 1;
+	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+
+
+	//일시정지 화면 그리기
+	glBindVertexArray(vertex_array_maintheme);
+	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+
+
+
+	glUniform1i(glGetUniformLocation(program, "TEX0"), 11);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
 
 	}
@@ -434,13 +491,24 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_G)
 		{
-			if (screan_mode == 0 || screan_mode == 2) { halt = 0;  screan_mode = 1; }
+			if (screan_mode == 0 || screan_mode == 2 || screan_mode == 3) { halt = 0;  screan_mode = 1; }
 		}
 		else if (key == GLFW_KEY_F2)
 		{
-			if (screan_mode == 0 || screan_mode == 1)	screan_mode = 2;
-			else if (screan_mode == 2) 	screan_mode = 0;
+			if (screan_mode == 0 )	screan_mode = 2;
 			
+			
+		}
+		else if (key == GLFW_KEY_I)
+		{
+			if (screan_mode != 1 )		screan_mode = 0;
+
+		}
+		else if (key == GLFW_KEY_P)
+		{
+			if (screan_mode == 1)		screan_mode = 3;
+			else if (screan_mode == 3)	screan_mode = 1;
+
 		}
 	
 
@@ -619,6 +687,9 @@ bool user_init()
 	head = create_texture(head_path, true);	if (head == -1) return false;
 	bullets = create_texture(bullets_path, true);	if (bullets== -1) return false;
 	hh_head = create_texture(hh_head_path, true);	if (hh_head == -1) return false;
+	pause_page = create_texture(pause_page_path, true);	if (pause_page == -1) return false;
+	clear_page = create_texture(clear_page_path, true);	if (clear_page == -1) return false;
+	fail_page = create_texture(fail_page_path, true);	if (fail_page == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -639,6 +710,12 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, bullets);
 	glActiveTexture(GL_TEXTURE8);
 	glBindTexture(GL_TEXTURE_2D, hh_head);
+	glActiveTexture(GL_TEXTURE9);
+	glBindTexture(GL_TEXTURE_2D, pause_page);
+	glActiveTexture(GL_TEXTURE10);
+	glBindTexture(GL_TEXTURE_2D, clear_page);
+	glActiveTexture(GL_TEXTURE11);
+	glBindTexture(GL_TEXTURE_2D, fail_page);
 
 
 

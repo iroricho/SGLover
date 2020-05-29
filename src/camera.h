@@ -424,7 +424,16 @@ inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 		0, 0, 0, 1
 	};
 
-	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
+	mat4 scale_matrix_2 =
+	{
+		0.3f, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 0.3f, 0,
+		0, 0, 0, 1
+	};
+
+
+	model_matrix = translate_matrix * rotation_matrix *scale_matrix_2* scale_matrix;
 }
 
 inline void	tank_t::update_tank_head(float t)
@@ -445,8 +454,16 @@ inline void	tank_t::update_tank_head(float t)
 		-sin(t), 0, cos(t), 0,
 		0, 0, 0, 1
 	};
+
+	mat4 scale_matrix =
+	{
+		0.8f, 0, 0, 0,
+		0, 0.8f, 0, 0,
+		0, 0, 0.8f, 0,
+		0, 0, 0, 1
+	};
 	
-	model_matrix_head = translate_matrix*model_matrix * rotation_matrix;
+	model_matrix_head = translate_matrix*model_matrix * scale_matrix * rotation_matrix;
 
 
 }
