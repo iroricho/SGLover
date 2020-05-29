@@ -66,8 +66,8 @@ struct camera
 	// **** speed
 	float	speed = 0.8f / sqrt(tank.mass);	// velocity of tank
 	float	max_speed = 1.3f * speed;	// max velocity of tank
-	float	camera_speed = 0.9f;
-	float	max_camera_speed = 1.3f * camera_speed;	// max velocity of camera
+	float	camera_speed = 1.3f;
+	//float	max_camera_speed = 1.3f * camera_speed;	// max velocity of camera
 
 	// ************ WASD  ***************//
 	bool b_W = false;

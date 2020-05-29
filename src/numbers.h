@@ -2,7 +2,7 @@
 
 #include "cgmath.h"
 #include "cgut.h"
-#include <glad\glad.h>
+#include "gl/glad/glad.h"
 
 
 
