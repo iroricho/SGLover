@@ -269,7 +269,7 @@ void render()
 
 	else if (screan_mode == 0)		//초기화면
 	{
-		
+		halt = 1;
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
@@ -306,6 +306,7 @@ void render()
 
 	else if (screan_mode == 2)		//설명서
 	{
+	halt = 1;
 	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
@@ -386,7 +387,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_G)
 		{
-			if (screan_mode == 0 || screan_mode == 2)	screan_mode = 1;
+			if (screan_mode == 0 || screan_mode == 2) { halt = 0;  screan_mode = 1; }
 		}
 		else if (key == GLFW_KEY_F2)
 		{
@@ -597,13 +598,19 @@ int main( int argc, char* argv[] )
 
 		glfwPollEvents();	// polling and processing of events
 		
-		if ( t >= tb )	// 컴퓨터가 빨라서 time interval이 작은 경우에는 문제가 안 됨
+		if (screan_mode != 1) {  update(); }	//시작부터 halt가 1이면 정상실행이 안되어서 수정하였습니다.
+		else
 		{
-			update();
-			tb += spf;
+			if (t >= tb)	// 컴퓨터가 빨라서 time interval이 작은 경우에는 문제가 안 됨
+			{
+				update();
+				tb += spf;
+			}
 		}
+			render();			// per-frame render
+
 		
-		render();			// per-frame render
+		
 	}
 	
 	// normal termination
