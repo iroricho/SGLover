@@ -139,6 +139,7 @@ std::vector<vertex> create_cyltop_vertices_colosseum(uint N)
 	for (uint i = 0; i <= N; i++)
 	{
 		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
+		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2( cos(i * theta), sin(i * theta)) });
 	}
 
 	//downside vertices
