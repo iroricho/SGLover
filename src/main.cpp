@@ -44,6 +44,8 @@ static const char* help_page_path = "../bin/images/helppage.jpg";
 static const char* skymap_path = "../bin/images/skymap.jpg";
 static const char* numbers_path = "../bin/images/numbers.jpg";
 static const char* head_path = "../bin/images/head.jpg";
+static const char* bullets_path = "../bin/images/bullet.jpg";
+static const char* hh_head_path = "../bin/images/hh_head.jpg";
 
 //*************************************
 // window objects
@@ -64,7 +66,8 @@ GLint		help_page = 0;		//help page texture object
 GLint		skymap = 0;		//skymap texture object
 GLint		numbers = 0;
 GLint		head = 0;
-
+GLint		bullets = 0;
+GLint		hh_head = 0;
 
 
 //*************************************
@@ -122,56 +125,64 @@ void update()
 {
 	//change texture mode
 	glUniform1i(glGetUniformLocation(program, "mode"), mode);
-	
-	// **** update camera
-	update_camera();
-	
-	// update projection matrix
-	cam.aspect = window_size.x/float(window_size.y);
-	cam.projection_matrix = mat4::perspective( cam.fovy, cam.aspect, cam.dnear, cam.dfar );
 
-	// camera의 eye, at, up 은 cameara 헤더에 정의된 함수들이 바꿔줍니다.
-	// 때문에 update 때만 view_matrix를 구해주면 됩니다.
-	cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
-
-	GLint uloc;
-	uloc = glGetUniformLocation( program, "view_matrix" );			if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.view_matrix );
-	uloc = glGetUniformLocation( program, "projection_matrix" );	if(uloc>-1) glUniformMatrix4fv( uloc, 1, GL_TRUE, cam.projection_matrix );
-	
-	// **** update tank
-	tank.update_tank(t, cam.eye, cam.at);
-	tank.update_tank_head(t);
-	num_cnt.update_counter(t, cam.eye, cam.at);
-
-	// **** update ai
-	for (int i = 0; i < anum; i++)
+	if (screan_mode == 1)
 	{
-		ai_t& ai = ais[i];
+		// **** update camera
+		update_camera();
 
-		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
-		//********* 충돌 검사 **********//
-		ai.collision(bullet.pos, bullet.radius, bullet.mass);
-		ai.collision(tank.pos, tank.radius, tank.mass);
-		for (int j = 0; j < anum; j++)
+		// update projection matrix
+		cam.aspect = window_size.x / float(window_size.y);
+		cam.projection_matrix = mat4::perspective(cam.fovy, cam.aspect, cam.dnear, cam.dfar);
+
+		// camera의 eye, at, up 은 cameara 헤더에 정의된 함수들이 바꿔줍니다.
+		// 때문에 update 때만 view_matrix를 구해주면 됩니다.
+		cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
+
+		GLint uloc;
+		uloc = glGetUniformLocation(program, "view_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.view_matrix);
+		uloc = glGetUniformLocation(program, "projection_matrix");	if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.projection_matrix);
+
+		// **** update tank
+		tank.update_tank(t, cam.eye, cam.at);
+		tank.update_tank_head(t);
+		num_cnt.update_counter(t, cam.eye, cam.at);
+
+		// **** update ai
+		for (int i = 0; i < anum; i++)
 		{
-			if (j != i)
+			ai_t& ai = ais[i];
+
+			// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
+			//********* 충돌 검사 **********//
+			ai.collision(bullet.pos, bullet.radius, bullet.mass);
+			ai.collision(tank.pos, tank.radius, tank.mass);
+			for (int j = 0; j < anum; j++)
 			{
-				vec3 aipos0 = ai.pos;
-				float airadius0 = ai.radius;
-				float aimass0 = ai.mass;
-				ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
-				ais[j].collision(aipos0, airadius0, aimass0);
+				if (j != i)
+				{
+					vec3 aipos0 = ai.pos;
+					float airadius0 = ai.radius;
+					float aimass0 = ai.mass;
+					ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
+					ais[j].collision(aipos0, airadius0, aimass0);
+				}
 			}
+
+			ai.update(t, tank.pos);
+			ai.update_head(t);
 		}
 
-		ai.update(t, tank.pos);
+		// Bullet move update
+		bullet.update(t, tank.pos);
+
+		//Sky move update
+		sky.update(t, tank.pos);
+
+
 	}
 	
-	// Bullet move update
-	bullet.update(t, tank.pos);
-
-	//Sky move update
-	sky.update(t, tank.pos);
+	
 }
 
 void render()
@@ -226,13 +237,20 @@ void render()
 
 			//AI 그리기
 			glBindVertexArray(vertex_array_AI);
+			glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix);
-			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//몸통
+			glBindVertexArray(vertex_array_2);
+			glUniform1i(glGetUniformLocation(program, "TEX0"), 8);
+			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix_head);
+			glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
+
 		}
 
 
 		//Bullet 그리기
-		glBindVertexArray(vertex_array_1);
+		glBindVertexArray(vertex_array_2);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 7);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
 		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
@@ -599,7 +617,8 @@ bool user_init()
 	skymap = create_texture(skymap_path, true);	if (skymap == -1) return false;
 	numbers = create_texture(numbers_path, true);	if (numbers == -1) return false;
 	head = create_texture(head_path, true);	if (head == -1) return false;
-
+	bullets = create_texture(bullets_path, true);	if (bullets== -1) return false;
+	hh_head = create_texture(hh_head_path, true);	if (hh_head == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -616,6 +635,10 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, numbers);
 	glActiveTexture(GL_TEXTURE6);
 	glBindTexture(GL_TEXTURE_2D, head);
+	glActiveTexture(GL_TEXTURE7);
+	glBindTexture(GL_TEXTURE_2D, bullets);
+	glActiveTexture(GL_TEXTURE8);
+	glBindTexture(GL_TEXTURE_2D, hh_head);
 
 
 
@@ -660,8 +683,9 @@ int main( int argc, char* argv[] )
 		t = halt? t : float(glfwGetTime()) - time_buffer;
 
 		glfwPollEvents();	// polling and processing of events
+
 		
-		if (screan_mode != 1) {  update(); }	//시작부터 halt가 1이면 정상실행이 안되어서 수정하였습니다.
+		if (screan_mode != 1) { t = float(glfwGetTime());   update(); }	//시작부터 halt가 1이면 정상실행이 안되어서 수정하였습니다.
 		else
 		{
 			if (t >= tb)	// 컴퓨터가 빨라서 time interval이 작은 경우에는 문제가 안 됨

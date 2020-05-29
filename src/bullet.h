@@ -56,9 +56,9 @@ inline void Bullet::update(float t, const vec3& tpos)
 
 	mat4 rotation_matrix =
 	{
-		1, 0, 0, 0,
+		cos(2*t), 0, sin(2*t), 0,
 		0, 1, 0, 0,
-		0, 0, 1, 0,
+		-sin(2*t), 0, cos(2*t), 0,
 		0, 0, 0, 1
 	};
 

@@ -28,10 +28,12 @@ struct ai_t
 	vec3 collision_direction0 = vec3(0);  //충돌 시점에서의 충돌방향.
 
 	mat4	model_matrix;	// modeling transformation
+	mat4 model_matrix_head;
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
 	void collision(vec3 tpos, float tradius, float tmass);
+	void	update_head(float t);
 };
 
 // 중복을 피해 ai를 만드는 함수, 난이도에 따라 anum을 조절하면 됨
@@ -189,6 +191,29 @@ inline void ai_t::collision(vec3 tpos, float tradius, float tmass)
 	{
 		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
 	}
+}
+
+inline void ai_t::update_head(float t)
+{
+	mat4 translate_matrix =
+	{
+		1, 0, 0, 0,
+		0, 1, 0, height*1.3f,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	mat4 rotation_matrix =
+	{
+		cos(3*t), 0, sin(3*t), 0,
+		0, 1, 0, 0,
+		-sin(3*t), 0, cos(3*t), 0,
+		0, 0, 0, 1
+	};
+
+	model_matrix_head = translate_matrix * model_matrix * rotation_matrix;
+
+
 }
 
 #endif // __AI_H__
