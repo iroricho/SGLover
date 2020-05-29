@@ -104,7 +104,8 @@ struct vertex // will be used for all the course examples
 {
     vec3 pos;	// position
 	vec3 norm;	// normal vector; we will use this for vertex color for this example
-    vec2 tex;	// texture coordinate; ignore this for the moment
+    vec3 tex;	// texture coordinate; ignore this for the moment
+	vec3 save_tex;
 };
 
 struct image

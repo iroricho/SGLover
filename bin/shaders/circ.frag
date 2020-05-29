@@ -6,26 +6,20 @@
 #endif
 
 // inputs from vertex shader
-in vec3 norm;
-in vec2 tc;	// used for texture coordinate visualization
+in vec3 tc;	// used for texture coordinate visualization
 
 // output of the fragment shader
 out vec4 fragColor;
 
-uniform sampler2D	TEX0;
-uniform sampler2D	TEX1;
-uniform sampler2D TEX3;	//maintheme texture
-uniform int			mode;
-uniform int			screan_mode;	//screan_mode
-
 // shader's global variables, called the uniform variables
+uniform bool b_solid_color;
+uniform vec4 solid_color;
+uniform int TEXTURE_MODE;
 
 void main()
 {
-	
-		if (mode == 1)			fragColor = texture(TEX0, tc);
-		else if (mode == 2)	fragColor = texture(TEX1, tc);
-		else				fragColor = vec4(tc, 0, 0);
+	if (TEXTURE_MODE == 0) fragColor = vec4(tc, 1);
 
-	
+		
+
 }
