@@ -57,17 +57,14 @@ struct camera
 	void update_pn( vec2 m );
 
 	// time buffer
-	float tw=0;
-	float ta=0;
-	float ts=0;
-	float td=0;
-	float tl=0;
-	float tr=0;
+	float t0=0;
+	vec3 eye0;
+	vec3 at0;
 	
 	// **** speed
-	float	speed = 0.009f / sqrt(tank.mass);	// velocity of tank
+	float	speed = 0.8f / sqrt(tank.mass);	// velocity of tank
 	float	max_speed = 1.3f * speed;	// max velocity of tank
-	float	camera_speed = 0.03f;
+	float	camera_speed = 0.9f;
 	float	max_camera_speed = 1.3f * camera_speed;	// max velocity of camera
 
 	// ************ WASD  ***************//
@@ -86,27 +83,77 @@ struct camera
 	bool is_RIGHT() const { return b_RIGHT; }
 
 	//굳이 함수 call을 해서 overhead를 늘릴 필요는 사실 없음
-	void begin_W() { tw=t; b_W= true; }
-	void begin_A() { ta=t; b_A = true; }
-	void begin_S() { ts=t; b_S= true; }
-	void begin_D() { td=t; b_D = true; }
-	void begin_LEFT() { tl=t; b_LEFT = true; }
-	void begin_RIGHT() { tr=t; b_RIGHT= true; }
+	void begin_Camera(char key, int flags) {
+		t0=t; 
+		eye0 = eye;
+		at0 = at;
 
-	void end_W() { b_W= false; }
-	void end_A() { b_A = false; }
-	void end_S() { b_S= false; }
-	void end_D() { b_D = false; }
-	void end_LEFT() { b_LEFT = false; }
-	void end_RIGHT() { b_RIGHT= false; }
+		if (key == 'W') b_W = true;
+		else if (key == 'A') b_A = true;
+		else if (key == 'S') b_S = true;
+		else if (key == 'D') b_D = true;
+		else if (key == 'L' ) b_LEFT = true;
+		else if (key == 'R') b_RIGHT = true;
+
+		//end_Camera 당시에 켜져 있던 key들 다시 키기.
+		//다른 키 눌렸을 때 갱신용임.
+		if (flags & 0x1) {
+			b_W = true;
+		}
+		if (flags & 0x10) {
+			b_A = true;
+		}
+		if (flags & 0x100) {
+			b_S = true;
+		}
+		if (flags & 0x1000) {
+			b_D = true;
+		}
+		if (flags & 0x10000) {
+			b_LEFT = true;
+		}
+		if (flags & 0x100000) {
+			b_RIGHT = true;
+		}
+
+	}
+
+
+	int end_Camera() {
+		int flags=0;
+
+		if (b_W) {
+			b_W = false;
+			flags += 0x1;
+		}
+		if (b_A) {
+			b_A = false;
+			flags += 0x10;
+		}
+		if (b_S) {
+			b_S = false;
+			flags += 0x100;
+		}
+		if (b_D) {
+			b_D = false;
+			flags += 0x1000;
+		}
+		if (b_LEFT) {
+			b_LEFT = false;
+			flags += 0x10000;
+		}
+		if (b_RIGHT) {
+			b_RIGHT = false;
+			flags += 0x100000;
+		}
+
+		return flags;
+	}
+
 
 	//camera의 eye, at, up 값을 받아서 바꾸고 view matrix를 반환하는 함수임
-	void update_W();
-	void update_A();
-	void update_S();
-	void update_D();
-	void update_LEFT();
-	void update_RIGHT();
+	void update_Camera();
+
 
 };
 
@@ -216,16 +263,68 @@ inline void camera::update_pn( vec2 m )
 
 // WASD는 n벡터의 시작점을 바꾸는 것과 같음
 // 즉 eye와 at을 같이 바꿔주면 됨
-inline void camera::update_W()
+inline void camera::update_Camera()
 {
-	vec3 u = (at- eye).normalize();
-	//vec3 v = (u.cross(up)).normalize();
-	float dt = t - tw;
+	vec3 n = (cam.at - cam.eye).normalize();
+	vec3 u = cam.up;
+	vec3 v = (n.cross(u)).normalize();
 
-	eye += u * min(max_speed,dt * speed);
-	at += u * min(max_speed,dt * speed);
+	float dt = t - t0;
+
+	vec3 eye_cumulative;
+	vec3 at_cumulative;
+	if (b_W || b_A || b_S || b_D || b_LEFT || b_RIGHT) {
+		eye_cumulative = eye0;
+		at_cumulative = at0;
+	}
+
+	if (b_W) {
+		eye_cumulative= eye_cumulative + n * dt * speed;
+		at_cumulative = at_cumulative + n * dt * speed;
+		
+	}
+	if (b_A) {
+		eye_cumulative = eye_cumulative - v * dt * speed;
+		at_cumulative = at_cumulative - v * dt * speed;
+
+	}
+	if (b_S) {
+		eye_cumulative = eye_cumulative - n * dt * speed;
+		at_cumulative = at_cumulative - n * dt * speed;
+		
+	}
+	if (b_D) {
+		eye_cumulative = eye_cumulative + v * dt * speed;
+		at_cumulative = at_cumulative + v * dt * speed;
+	}
+	//at = at_cumulative;
+
+	if (b_LEFT) {
+
+		vec4 at4 = vec4(at_cumulative, 1);
+		vec4 atb = (mat4::translate(eye_cumulative) * mat4::rotate(up, camera_speed * dt) * (mat4::translate(-1*eye_cumulative))) * at4;
+
+		at_cumulative = vec3(atb.x, atb.y, atb.z);
+
+		
+	}
+	if (b_RIGHT) {
+		
+		vec4 at4 = vec4(at_cumulative, 1);
+		vec4 atb = (mat4::translate(eye_cumulative) * mat4::rotate(up, -1* camera_speed * dt) * (mat4::translate(-1 * eye_cumulative))) * at4;
+
+		at_cumulative = vec3(atb.x, atb.y, atb.z);
+	}
+
+
+
+	if (b_W || b_A || b_S || b_D || b_LEFT || b_RIGHT) {
+		eye = eye_cumulative;
+		at = at_cumulative;
+	}
+
 }
-
+/*
 inline void camera::update_A()
 {
 	vec3 u = (at- eye).normalize();
@@ -281,6 +380,7 @@ inline void camera::update_RIGHT()
 
 	at = vec3(atb.x, atb.y, atb.z);
 }
+*/
 
 //********** tank 움직임 파트 *************
 inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )

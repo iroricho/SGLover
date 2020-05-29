@@ -113,12 +113,7 @@ inline vec2 cursor_to_ndc( dvec2 cursor, ivec2 window_size )
 }
 
 void update_camera() {
-	if (cam.is_W()) { cam.update_W(); }
-	if (cam.is_A()) { cam.update_A(); }
-	if (cam.is_S()) { cam.update_S(); }
-	if (cam.is_D()) { cam.update_D(); }
-	if (cam.is_RIGHT()) { cam.update_RIGHT(); }
-	if (cam.is_LEFT()) { cam.update_LEFT(); }
+	cam.update_Camera();
 }
 
 void update()
@@ -366,12 +361,38 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		// 하지만 8방향일 뿐 자연스럽지는 못 함
 		// 이동과 카메라 회전을 동시에 하면 문제가 생김
 		
-		else if (key == GLFW_KEY_W) cam.begin_W();
-		else if (key == GLFW_KEY_A) cam.begin_A();
-		else if (key == GLFW_KEY_S) cam.begin_S();
-		else if (key == GLFW_KEY_D) cam.begin_D();
-		else if (key == GLFW_KEY_LEFT) cam.begin_LEFT();
-		else if (key == GLFW_KEY_RIGHT) cam.begin_RIGHT();
+		else if (key == GLFW_KEY_W) {
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera('W', flags);
+		}
+		else if (key == GLFW_KEY_A) {
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera('A', flags);
+		}
+		else if (key == GLFW_KEY_S) {
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera('S', flags);
+		}
+		else if (key == GLFW_KEY_D) {
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera('D', flags);
+		}
+		else if (key == GLFW_KEY_LEFT) {
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera('L', flags);
+		}
+		else if (key == GLFW_KEY_RIGHT) {
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera('R', flags);
+		}
+
+
 		else if (key == GLFW_KEY_SPACE) {
 			engine->play2D(sound_src_1, false);
 			bullet.launch(t, tank.pos, (cam.at - cam.eye).normalize());
@@ -402,12 +423,42 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	}
 	else if(action==GLFW_RELEASE)
 	{
-		if(key==GLFW_KEY_W) cam.end_W();
-		else if(key==GLFW_KEY_A) cam.end_A();
-		else if(key==GLFW_KEY_S) cam.end_S();
-		else if(key==GLFW_KEY_D) cam.end_D();
-		else if(key==GLFW_KEY_LEFT) cam.end_LEFT();
-		else if(key==GLFW_KEY_RIGHT) cam.end_RIGHT();
+		if (key == GLFW_KEY_W) {
+			cam.b_W = false;
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera(NULL, flags);
+		}
+		else if (key == GLFW_KEY_A) {
+			cam.b_A = false;
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera(NULL, flags);
+		}
+		else if (key == GLFW_KEY_S) {
+			cam.b_S = false;
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera(NULL, flags);
+		}
+		else if (key == GLFW_KEY_D) {
+			cam.b_D = false;
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera(NULL, flags);
+		}
+		else if (key == GLFW_KEY_LEFT) {
+			cam.b_LEFT = false;
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera(NULL, flags);
+		}
+		else if (key == GLFW_KEY_RIGHT) {
+			cam.b_RIGHT = false;
+			int flags;
+			flags = cam.end_Camera();
+			cam.begin_Camera(NULL, flags);
+		}
 	}
 }
 
