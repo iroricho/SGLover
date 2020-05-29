@@ -195,8 +195,10 @@ void render()
 
 
 	
+
 	if (screan_mode == 1)
 	{
+		
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
 		// bind textures
@@ -386,7 +388,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_G)
 		{
-			if (screan_mode == 0 || screan_mode == 2) { halt = !halt;  screan_mode = 1; }	//halt 조절
+			if (screan_mode == 0 || screan_mode == 2)	screan_mode = 1;
 		}
 		else if (key == GLFW_KEY_F2)
 		{
@@ -599,15 +601,7 @@ int main( int argc, char* argv[] )
 		f_in_ti = int (cons * ti);
 
 		glfwPollEvents();	// polling and processing of events
-		if (screan_mode != 1) {		//시작부터 halt가 0이면 update가 실행되지않아 정상 실행이 안되어서 이렇게 수정했습니다.
-			halt = 1;
-			update();
-		}
-		else
-		{
-			if (!halt) for (int i = 0; i < f_in_ti; i++) update();		// per-frame update
-		}
-		
+		if (!halt) for (int i=0; i<f_in_ti; i++) update();		// per-frame update
 		render();			// per-frame render
 	}
 	
