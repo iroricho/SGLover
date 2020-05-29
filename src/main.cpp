@@ -49,6 +49,7 @@ static const char* hh_head_path = "../bin/images/hh_head.jpg";
 static const char* pause_page_path = "../bin/images/pausepage.jpg";
 static const char* clear_page_path = "../bin/images/clearpage.jpg";
 static const char* fail_page_path = "../bin/images/failpage.jpg";
+static const char* ground_path = "../bin/images/ground.jpg";
 
 //*************************************
 // window objects
@@ -74,6 +75,7 @@ GLint		hh_head = 0;
 GLint		pause_page = 0;
 GLint		clear_page = 0;
 GLint		fail_page = 0;
+GLint		ground = 0;
 
 
 //*************************************
@@ -157,6 +159,7 @@ void update()
 		num_cnt.update_counter(t, cam.eye, cam.at);
 
 		// **** update ai
+		int cnt = 0;
 		for (int i = 0; i < anum; i++)
 		{
 			ai_t& ai = ais[i];
@@ -165,6 +168,7 @@ void update()
 			//********* 충돌 검사 **********//
 			ai.collision(bullet.pos, bullet.radius, bullet.mass);
 			ai.collision(tank.pos, tank.radius, tank.mass);
+			
 			for (int j = 0; j < anum; j++)
 			{
 				if (j != i)
@@ -175,12 +179,19 @@ void update()
 					ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
 					ais[j].collision(aipos0, airadius0, aimass0);
 				}
+
+				//사망 카운트
+				
+				
 			}
 
 			ai.update(t, tank.pos);
 			ai.update_head(t);
 
-			ai_death = ai.death;
+			if (ai.death == 1)	cnt++;
+			ai_death = cnt;
+
+		
 		}
 
 		// Bullet move update
@@ -239,9 +250,12 @@ void render()
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix_head);
 		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
 
-		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
+
+
+		
 		// update colosseum uniforms and draw calls
 		glBindVertexArray(vertex_array_colosseum);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, colosseum.model_matrix);
 		glDrawElements(GL_TRIANGLES, 4 * colosseum.NTESS * colosseum.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
@@ -701,6 +715,7 @@ bool user_init()
 	pause_page = create_texture(pause_page_path, true);	if (pause_page == -1) return false;
 	clear_page = create_texture(clear_page_path, true);	if (clear_page == -1) return false;
 	fail_page = create_texture(fail_page_path, true);	if (fail_page == -1) return false;
+	ground = create_texture(ground_path, true);	if (ground == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -727,6 +742,8 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, clear_page);
 	glActiveTexture(GL_TEXTURE11);
 	glBindTexture(GL_TEXTURE_2D, fail_page);
+	glActiveTexture(GL_TEXTURE12);
+	glBindTexture(GL_TEXTURE_2D, ground);
 
 
 
