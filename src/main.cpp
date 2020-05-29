@@ -50,6 +50,7 @@ static const char* pause_page_path = "../bin/images/pausepage.jpg";
 static const char* clear_page_path = "../bin/images/clearpage.jpg";
 static const char* fail_page_path = "../bin/images/failpage.jpg";
 static const char* ground_path = "../bin/images/ground.jpg";
+static const char* student_path = "../bin/images/student.jpg";
 
 //*************************************
 // window objects
@@ -76,6 +77,7 @@ GLint		pause_page = 0;
 GLint		clear_page = 0;
 GLint		fail_page = 0;
 GLint		ground = 0;
+GLint		student = 0;
 
 
 //*************************************
@@ -255,7 +257,7 @@ void render()
 		
 		// update colosseum uniforms and draw calls
 		glBindVertexArray(vertex_array_colosseum);
-		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 12);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, colosseum.model_matrix);
 		glDrawElements(GL_TRIANGLES, 4 * colosseum.NTESS * colosseum.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
@@ -265,7 +267,7 @@ void render()
 
 			//AI ±×¸®±â
 			glBindVertexArray(vertex_array_AI);
-			glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
+			glUniform1i(glGetUniformLocation(program, "TEX0"), 13);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix);
 			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//¸öÅë
 			glBindVertexArray(vertex_array_2);
@@ -716,6 +718,7 @@ bool user_init()
 	clear_page = create_texture(clear_page_path, true);	if (clear_page == -1) return false;
 	fail_page = create_texture(fail_page_path, true);	if (fail_page == -1) return false;
 	ground = create_texture(ground_path, true);	if (ground == -1) return false;
+	student = create_texture(student_path, true);	if (student== -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -744,6 +747,9 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, fail_page);
 	glActiveTexture(GL_TEXTURE12);
 	glBindTexture(GL_TEXTURE_2D, ground);
+	glActiveTexture(GL_TEXTURE13);
+	glBindTexture(GL_TEXTURE_2D, student);
+
 
 
 

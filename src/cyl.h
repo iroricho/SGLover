@@ -38,14 +38,16 @@ std::vector<vertex> create_cyltop_vertices_AI(uint N)
 	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.875f) });	//origin of upside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.25f + 0.25f*(i * theta)/PI, 0.75f) });
+		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.25f + 0.25f*(i * theta)/PI, 0.5f) });
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(theta/PI*i, 1.0f) });
 	}
 
 	//downside vertices
 	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.5f,0.5f) });	//origin of downside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.25f + 0.25f*(i * theta) / PI, 0.5f) });
+		//v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.25f + 0.25f*(i * theta) / PI, 0.5f) });
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(theta / PI * i , 0.0f) });
 	}
 	return v;
 }
@@ -135,18 +137,19 @@ std::vector<vertex> create_cyltop_vertices_colosseum(uint N)
 	float theta = 2.0f * PI / N;
 
 	//upside vertices
-	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.875f) });	//origin of upside
+	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.5f,0.5f) });	//origin of upside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
-		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2( cos(i * theta), sin(i * theta)) });
+		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2( (cos(i * theta)+1.0f)/2.0f, (sin(i * theta)+1.0f) / 2.0f) });
 	}
 
 	//downside vertices
-	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.5f,0.5f) });	//origin of downside
+	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0,0) });	//origin of downside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
+		//v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.125f + 0.125f * cos(i * theta),0.875f + 0.125f * sin(i * theta)) });
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2((cos(i * theta) + 1.0f) / 2.0f, (sin(i * theta) + 1.0f) / 2.0f)  });
 	}
 	return v;
 }
