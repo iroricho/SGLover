@@ -15,6 +15,7 @@
 #include "maintheme.h"		//메인화면 헤더
 #include "numbers.h"		//숫자 카운터 헤더
 
+
 #include "./irrKlang/irrKlang.h"
 #pragma comment(lib, "irrKlang.lib")
 
@@ -42,7 +43,7 @@ static const char* button_help_path = "../bin/images/buttonhelp.jpg";
 static const char* help_page_path = "../bin/images/helppage.jpg";
 static const char* skymap_path = "../bin/images/skymap.jpg";
 static const char* numbers_path = "../bin/images/numbers.jpg";
-
+static const char* head_path = "../bin/images/head.jpg";
 
 //*************************************
 // window objects
@@ -62,6 +63,7 @@ GLint		button_help = 0;	//button texture object
 GLint		help_page = 0;		//help page texture object
 GLint		skymap = 0;		//skymap texture object
 GLint		numbers = 0;
+GLint		head = 0;
 
 
 
@@ -138,6 +140,7 @@ void update()
 	
 	// **** update tank
 	tank.update_tank(t, cam.eye, cam.at);
+	tank.update_tank_head(t);
 	num_cnt.update_counter(t, cam.eye, cam.at);
 
 	// **** update ai
@@ -205,8 +208,13 @@ void render()
 		// update tank uniforms and draw calls
 		glBindVertexArray(vertex_array_tank); //여기.
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix);
-		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//몸통
+		glBindVertexArray(vertex_array_2);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 6);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix_head);
+		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
 
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
 		// update colosseum uniforms and draw calls
 		glBindVertexArray(vertex_array_colosseum);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, colosseum.model_matrix);
@@ -590,6 +598,8 @@ bool user_init()
 	help_page = create_texture(help_page_path, true);	if (help_page == -1) return false;
 	skymap = create_texture(skymap_path, true);	if (skymap == -1) return false;
 	numbers = create_texture(numbers_path, true);	if (numbers == -1) return false;
+	head = create_texture(head_path, true);	if (head == -1) return false;
+
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -604,6 +614,8 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, skymap);
 	glActiveTexture(GL_TEXTURE5);
 	glBindTexture(GL_TEXTURE_2D, numbers);
+	glActiveTexture(GL_TEXTURE6);
+	glBindTexture(GL_TEXTURE_2D, head);
 
 
 

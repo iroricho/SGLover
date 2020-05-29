@@ -17,9 +17,11 @@ struct tank_t
 	uint	NTESS=29;
 	float	mass = radius*radius*height;	// tank 질량
 	mat4	model_matrix;	// modeling transformation
+	mat4 model_matrix_head;	//머리 matrix
 
 	// public functions
-	void	update_tank( float t, const vec3& eye, const vec3& at );	
+	void	update_tank( float t, const vec3& eye, const vec3& at );
+	void	update_tank_head(float t);
 };
 
 #define cosrand() cos((float)rand()) 
@@ -423,6 +425,30 @@ inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 	};
 
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
+}
+
+inline void	tank_t::update_tank_head(float t)
+{
+
+	mat4 translate_matrix =
+	{
+		1, 0, 0, 0,
+		0, 1, 0, 0.4f,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	mat4 rotation_matrix =
+	{
+		cos(t), 0, sin(t), 0,
+		0, 1, 0, 0,
+		-sin(t), 0, cos(t), 0,
+		0, 0, 0, 1
+	};
+	
+	model_matrix_head = translate_matrix*model_matrix * rotation_matrix;
+
+
 }
 
 #endif // __CAMERA_H__
