@@ -83,6 +83,8 @@ float	time_buffer = 0;				// time buffer for resume
 bool	halt = 0;
 uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
 int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
+int		ai_death = 0;			//ai 사망자수
+int		game_counter = 0;	//제한시간
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -177,6 +179,8 @@ void update()
 
 			ai.update(t, tank.pos);
 			ai.update_head(t);
+
+			ai_death = ai.death;
 		}
 
 		// Bullet move update
@@ -186,7 +190,11 @@ void update()
 		sky.update(t, tank.pos);
 
 
+		if (ai_death == anum)	screan_mode = 4;	//승리조건
+		if (game_counter == 61)	screan_mode = 5;	//패배조건
 	}
+
+	
 	
 	
 }
@@ -267,9 +275,10 @@ void render()
 		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
 		//숫자 카운터 그리기
-		GLuint cnt = (int)t;
+	
+		game_counter = (int)t;
 		
-		glBindVertexArray(vertex_array_numbers_1+cnt);
+		glBindVertexArray(vertex_array_numbers_60+1-game_counter);
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 5);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, num_cnt.model_matrix);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -297,6 +306,8 @@ void render()
 	else if (screan_mode == 0)		//초기화면
 	{
 		halt = 1;
+		ai_death = 0;		//데스 초기화
+		game_counter = 0;		//시간 카운터 초기화
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
