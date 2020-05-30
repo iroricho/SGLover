@@ -19,6 +19,7 @@ struct ai_t
 	float	mass = radius*radius*height;
 	float	speed = 0.005f / sqrt(mass);	// velocity of ai
 	bool	death = 0;
+	vec3	posb;			// pos buffer for rotate
 	
 	float t0=0;				// time buffer for halt
 	
@@ -102,7 +103,7 @@ inline std::vector<ai_t> create_ais(int anum)
 }
 
 // ais vector 생성
-int anum = 3;	//ai 갯수
+int anum = 5;	//ai 갯수
 int num_death_ai = 0;
 auto ais = std::move(create_ais(anum));
 
@@ -153,6 +154,16 @@ inline void ai_t::update( float t, const vec3& tpos )
 		pos.y -= 0.05f;
 	}
 
+	// ai 움직임에 따라 몸체도 회전시키기 위함. direction,ref 둘다 단위벡터임. y축 기준 회전
+	vec3 direction = (pos - posb).normalize();
+	vec3 ref = vec3(0,0,1.0f);
+
+	float theta = 0;
+	if (direction.x >= 0) theta = acos(ref.dot(direction));
+	else theta = -acos(ref.dot(direction));
+	theta -= PI/2.0f;
+	float c = cos(theta), s = sin(theta);
+
 	mat4 scale_matrix =
 	{
 		radius, 0, 0, 0,
@@ -163,9 +174,9 @@ inline void ai_t::update( float t, const vec3& tpos )
 
 	mat4 rotation_matrix =
 	{
-		1, 0, 0, 0,
+		c, 0, s, 0,
 		0, 1, 0, 0,
-		0, 0, 1, 0,
+		-s, 0, c, 0,
 		0, 0, 0, 1
 	};
 
@@ -178,6 +189,8 @@ inline void ai_t::update( float t, const vec3& tpos )
 	};
 	
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
+
+	posb = pos;
 }
 
 inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
@@ -220,8 +233,8 @@ inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
 {
 	bool hit = false;
 	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
-	float collision_time = 0.3f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.2f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+	float collision_time = 0.2f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
+	float collision_speed = 0.001f * sqrt(tmass) / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{

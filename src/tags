@@ -2784,7 +2784,6 @@ abs	cgmath.h	/^inline vec2 abs( const vec2& v ){ return vec2(fabs(v.x),fabs(v.y)
 abs	cgmath.h	/^inline vec3 abs( const vec3& v ){ return vec3(fabs(v.x),fabs(v.y),fabs(v.z)); }$/;"	f
 abs	cgmath.h	/^inline vec4 abs( const vec4& v ){ return vec4(fabs(v.x),fabs(v.y),fabs(v.z),fabs(v.w)); }$/;"	f
 access	cgut.h	35;"	d
-ai_death	main.cpp	/^int		ai_death = 0;			\/\/ai ªÁ∏¡¿⁄ºˆ$/;"	v
 ai_t	ai.h	/^struct ai_t$/;"	s
 ais	ai.h	/^auto ais = std::move(create_ais(anum));$/;"	v
 all_a	stb_image.h	/^   unsigned int mr,mg,mb,ma, all_a;$/;"	m	struct:__anon19
@@ -2828,7 +2827,7 @@ bt_help	maintheme.h	/^} bt_help;$/;"	v	typeref:struct:button_help
 bt_start	maintheme.h	/^} bt_start;$/;"	v	typeref:struct:button_start
 buffer_start	stb_image.h	/^   stbi_uc buffer_start[128];$/;"	m	struct:__anon6
 buflen	stb_image.h	/^   int buflen;$/;"	m	struct:__anon6
-bullet	bullet.h	/^Bullet bullet = { 0.5f,  vec3(7.0f,-1,7.0f), vec4(1.0f,0.0f,0.0f,1.0f), 30};$/;"	v
+bullet_list	bullet.h	/^std::vector<Bullet> bullet_list;$/;"	v
 bullets	main.cpp	/^GLint		bullets = 0;$/;"	v
 bullets_path	main.cpp	/^static const char* bullets_path = "..\/bin\/images\/bullet.jpg";$/;"	v	file:
 button	camera.h	/^	int		button;$/;"	m	struct:camera
@@ -2843,6 +2842,7 @@ buttons	gl/glfw/glfw3.h	/^    unsigned char buttons[15];$/;"	m	struct:GLFWgamepa
 c	pre-colosseum.h	/^	float c	= -cos(ang), s = sin(ang);$/;"	m	struct:colosseum_bottom
 c	pre-colosseum.h	/^	float c = -cos(ang), s = sin(ang);$/;"	m	struct:colosseum_side
 cam	camera.h	/^camera	cam;$/;"	v
+camer_toggle	main.cpp	/^int		camer_toggle = 0;$/;"	v
 camera	camera.h	/^struct camera$/;"	s
 camera_speed	camera.h	/^	float	camera_speed = 1.3f;$/;"	m	struct:camera
 center	sphere.h	/^	vec2	center = vec2(0);		\/\/ 2D position for translation$/;"	m	struct:sphere_t
@@ -2881,7 +2881,8 @@ codes	stb_image.h	/^   stbi__gif_lzw codes[8192];$/;"	m	struct:__anon22
 coeff	stb_image.h	/^      short   *coeff;   \/\/ progressive only$/;"	m	struct:__anon11::__anon12
 coeff_h	stb_image.h	/^      int      coeff_w, coeff_h; \/\/ number of 8x8 coefficient blocks$/;"	m	struct:__anon11::__anon12
 coeff_w	stb_image.h	/^      int      coeff_w, coeff_h; \/\/ number of 8x8 coefficient blocks$/;"	m	struct:__anon11::__anon12
-collision	ai.h	/^inline void ai_t::collision(vec3 tpos, float tradius, float tmass)$/;"	f	class:ai_t
+collision	ai.h	/^inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)$/;"	f	class:ai_t
+collision_bullet	ai.h	/^inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)$/;"	f	class:ai_t
 collision_direction0	ai.h	/^	vec3 collision_direction0 = vec3(0);  \/\/√Êµπ Ω√¡°ø°º≠¿« √ÊµππÊ«‚.$/;"	m	struct:ai_t
 collision_t0	ai.h	/^	float collision_t0=0;$/;"	m	struct:ai_t
 collision_true	ai.h	/^	bool collision_true = 1; \/\/ √—æÀ¿Ã ∂’∞Ì ¡ˆ≥™∞°¥¬µøæ» ∞Ëº” √Êµπ ¿œæÓ≥™¥¬∞Õ πÊ¡ˆøÎ. true ¿œ∂ß∏∏ √Êµπ«‘.   √Êµπ«œ¥¬ º¯∞£ 0¿∏∑Œ πŸ≤Ó∞Ì ¿œ¡§ Ω√∞£ »ƒ ¥ŸΩ√ 1∑Œ πŸ≤Ò.$/;"	m	struct:ai_t
@@ -2895,11 +2896,12 @@ color_table	stb_image.h	/^   stbi_uc *color_table;$/;"	m	struct:__anon22
 colosseum	colosseum.h	/^cyl colosseum = {20.0f, 20.0f, vec3(0,-10.5f,0), vec4(0.5f,0.5f,0.5f,1.0f), 100};$/;"	v
 colosseum_bottom	pre-colosseum.h	/^struct colosseum_bottom \/\/∞Ê±‚¿Â πÿ∏È$/;"	s
 colosseum_side	pre-colosseum.h	/^struct colosseum_side		\/\/∞Ê±‚¿Â ø∑∏È$/;"	s
-cosrand	camera.h	27;"	d
+cosrand	camera.h	29;"	d
 create_ais	ai.h	/^inline std::vector<ai_t> create_ais(int anum)$/;"	f
 create_colosseum_side_vertices	pre-colosseum.h	/^std::vector<vertex> colosseum_side::create_colosseum_side_vertices()$/;"	f	class:colosseum_side
 create_colosseum_vertices	pre-colosseum.h	/^std::vector<vertex> colosseum_bottom::create_colosseum_vertices()$/;"	f	class:colosseum_bottom
 create_cyltop_vertices_AI	cyl.h	/^std::vector<vertex> create_cyltop_vertices_AI(uint N)$/;"	f
+create_cyltop_vertices_AI_arm	cyl.h	/^std::vector<vertex> create_cyltop_vertices_AI_arm(uint N)$/;"	f
 create_cyltop_vertices_colosseum	cyl.h	/^std::vector<vertex> create_cyltop_vertices_colosseum(uint N)$/;"	f
 create_cyltop_vertices_tank	cyl.h	/^std::vector<vertex> create_cyltop_vertices_tank(uint N)$/;"	f
 create_sky_vertices	sphere.h	/^std::vector<vertex> create_sky_vertices(uint N)$/;"	f
@@ -2973,6 +2975,7 @@ det	cgmath.h	/^	inline float det() const { return _11*(_22*_33-_23*_32) + _12*(_
 det	cgmath.h	/^inline float mat4::det() const$/;"	f	class:mat4
 dfar	camera.h	/^	float	dfar = 1000.0f;$/;"	m	struct:camera
 dir	cgut.h	/^	char path[_MAX_PATH], drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];$/;"	m	struct:module_path_t
+dissapear	bullet.h	/^inline void Bullet::dissapear()$/;"	f	class:Bullet
 distance	cgmath.h	/^inline float distance( const vec2& a, const vec2& b ){ return (a-b).length(); }$/;"	f
 distance	cgmath.h	/^inline float distance( const vec3& a, const vec3& b ){ return (a-b).length(); }$/;"	f
 distance	cgmath.h	/^inline float distance( const vec4& a, const vec4& b ){ return (a-b).length(); }$/;"	f
@@ -2986,6 +2989,8 @@ dot	cgmath.h	/^inline float dot( const vec4& v1, const vec4& v2){ return v1.dot(
 dotProduct	irrKlang/ik_vec3d.h	/^		T dotProduct(const vec3d<T>& other) const$/;"	f	class:irrklang::vec3d
 drive	cgut.h	/^	char path[_MAX_PATH], drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];$/;"	m	struct:module_path_t
 drop	irrKlang/ik_IRefCounted.h	/^		bool drop()$/;"	f	class:irrklang::IRefCounted
+dy_head	main.cpp	/^GLint		dy_head = 0;$/;"	v
+dy_head_path	main.cpp	/^static const char* dy_head_path = "..\/bin\/images\/dy_head.jpg";$/;"	v	file:
 eflags	stb_image.h	/^   int flags, bgindex, ratio, transparent, eflags;$/;"	m	struct:__anon22
 end	camera.h	/^	void end() { b_tracking = false; }$/;"	f	struct:camera
 end_Camera	camera.h	/^	int end_Camera() {$/;"	f	struct:camera
@@ -5338,6 +5343,8 @@ mb	stb_image.h	/^   unsigned int mr,mg,mb,ma, all_a;$/;"	m	struct:__anon19
 mem_t	cgut.h	/^struct mem_t$/;"	s
 mesh	cgut.h	/^struct mesh$/;"	s
 mg	stb_image.h	/^   unsigned int mr,mg,mb,ma, all_a;$/;"	m	struct:__anon19
+mg_head	main.cpp	/^GLint		mg_head = 0;$/;"	v
+mg_head_path	main.cpp	/^static const char* mg_head_path = "..\/bin\/images\/mg_head.jpg";$/;"	v	file:
 min	cgmath.h	71;"	d
 minor	cgut.h	/^	int minor=0;$/;"	m	struct:gl_version_t
 minor	cgut.h	/^	struct { int major=0, minor=0; } sl;$/;"	m	struct:gl_version_t::__anon1
@@ -5362,6 +5369,8 @@ model_matrix	maintheme.h	/^	mat4 model_matrix = translate_matrix;$/;"	m	struct:m
 model_matrix	numbers.h	/^	mat4 model_matrix;$/;"	m	struct:number_counter
 model_matrix	sky.h	/^	mat4	model_matrix;	\/\/ modeling transformation$/;"	m	struct:Sky
 model_matrix	sphere.h	/^	mat4	model_matrix;		\/\/ modeling transformation$/;"	m	struct:sphere_t
+model_matrix_arm	ai.h	/^	mat4 model_matrix_arm;$/;"	m	struct:ai_t
+model_matrix_arm	camera.h	/^	mat4 model_matrix_arm;	\/\/∆»$/;"	m	struct:tank_t
 model_matrix_head	ai.h	/^	mat4 model_matrix_head;$/;"	m	struct:ai_t
 model_matrix_head	camera.h	/^	mat4 model_matrix_head;	\/\/∏”∏Æ matrix$/;"	m	struct:tank_t
 mods	camera.h	/^	int		mods;$/;"	m	struct:camera
@@ -5608,7 +5617,7 @@ perspective	cgmath.h	/^	static mat4 perspective( float fovy, float aspect, float
 pixels	gl/glfw/glfw3.h	/^    unsigned char* pixels;$/;"	m	struct:GLFWimage
 play_sound	main.cpp	/^void play_sound()$/;"	f
 pos	ai.h	/^	vec3	pos;			\/\/ position of tank$/;"	m	struct:ai_t
-pos	bullet.h	/^	vec3	pos = vec3(0,-1,0);			\/\/ position of tank$/;"	m	struct:Bullet
+pos	bullet.h	/^	vec3	pos = vec3(-10,-10,-10);			\/\/ position of tank$/;"	m	struct:Bullet
 pos	camera.h	/^	vec3	pos;			\/\/ position of tank$/;"	m	struct:tank_t
 pos	cgut.h	/^    vec3 pos;	\/\/ position$/;"	m	struct:vertex
 pos	cyl.h	/^	vec3	pos;			\/\/ position of tank$/;"	m	struct:cyl
@@ -5621,6 +5630,10 @@ pos0	sky.h	/^	vec3 pos0 = 0;			\/\/√— Ω Ω√¡°ø°º≠¿« ≈ ≈© ¿ßƒ°$/;"	m	struct:Sky
 precision	cgmath.h	/^template <class T> struct precision { static const T value(){ return std::numeric_limits<T>::epsilon()*10; } };	\/\/ need to be 10x for robust practical test$/;"	s
 prefix	stb_image.h	/^   stbi__int16 prefix;$/;"	m	struct:__anon21
 print_help	main.cpp	/^void print_help()$/;"	f
+prof	main.cpp	/^GLint		prof = 0;$/;"	v
+prof_arm_path	main.cpp	/^static const char* prof_arm_path = "..\/bin\/images\/profarm.jpg";$/;"	v	file:
+prof_path	main.cpp	/^static const char* prof_path = "..\/bin\/images\/prof.jpg";$/;"	v	file:
+profarm	main.cpp	/^GLint		profarm = 0;$/;"	v
 program	main.cpp	/^GLuint	program = 0;		\/\/ ID holder for GPU program$/;"	v
 progressive	stb_image.h	/^   int            progressive;$/;"	m	struct:__anon11
 projection_matrix	camera.h	/^	mat4	projection_matrix;$/;"	m	struct:camera
@@ -5632,7 +5645,7 @@ r	cgmath.h	/^	union { struct { T x, y, z; }; struct { T r, g, b; }; struct { T s
 r	cgmath.h	/^	union{ struct { T x, y; }; struct { T r, g; }; struct { T s, t; }; };$/;"	m	struct:tvec2::__anon23::__anon25
 radians	cgmath.h	/^inline float radians( float f ){ return float(f*PI\/float(180.0)); }$/;"	f
 radius	ai.h	/^	float	radius=0.5f;	\/\/ radius$/;"	m	struct:ai_t
-radius	bullet.h	/^	float	radius=0.5f;	\/\/ radius$/;"	m	struct:Bullet
+radius	bullet.h	/^	float	radius=0.0f;	\/\/ radius$/;"	m	struct:Bullet
 radius	camera.h	/^	float	radius=0.5f;	\/\/ radius$/;"	m	struct:tank_t
 radius	cyl.h	/^	float	radius=0.5f;	\/\/ radius$/;"	m	struct:cyl
 radius	numbers.h	/^	float	radius = 0.2f;	\/\/ radius$/;"	m	struct:number_counter
@@ -5691,7 +5704,7 @@ scale_matrix	maintheme.h	/^	mat4 scale_matrix =$/;"	m	struct:button_start
 scale_matrix_col	pre-colosseum.h	/^	mat4 scale_matrix_col =$/;"	m	struct:colosseum_bottom
 scale_matrix_col	pre-colosseum.h	/^	mat4 scale_matrix_col =$/;"	m	struct:colosseum_side
 scan_n	stb_image.h	/^   int scan_n, order[4];$/;"	m	struct:__anon11
-screen_mode	main.cpp	/^int		screen_mode = 0;		\/\/≈∏¿Ã∆≤, ∞‘¿”»≠∏È, æÿµ˘»≠∏È ¿¸»ØøÎ$/;"	v
+screan_mode	main.cpp	/^int		screan_mode = 0;		\/\/≈∏¿Ã∆≤, ∞‘¿”»≠∏È, æÿµ˘»≠∏È ¿¸»ØøÎ$/;"	v
 set	cgmath.h	/^	inline void set( const tvec2<T>& v1, const tvec2<T>& v2 ){ x=v1.x;y=v1.y;z=v2.x;w=v2.y; }$/;"	f	struct:tvec4
 set	cgmath.h	/^	tvec2( T a ){ x=y=a; }						inline void set( T a ){ x=y=a; }$/;"	f	struct:tvec2
 set	cgmath.h	/^	tvec2( T a, T b ){ x=a;y=b; }				inline void set( T a, T b ){ x=a;y=b; }$/;"	f	struct:tvec2
@@ -6036,6 +6049,8 @@ stbi_zlib_decode_noheader_malloc	stb_image.h	/^STBIDEF char *stbi_zlib_decode_no
 step	stb_image.h	/^   int parse, step;$/;"	m	struct:__anon22
 strstr	cgut.h	/^inline bool strstr( const char* src, std::initializer_list<const char*> substr )$/;"	f
 student	main.cpp	/^GLint		student = 0;$/;"	v
+student_arm	main.cpp	/^GLint		student_arm = 0;$/;"	v
+student_arm_path	main.cpp	/^static const char* student_arm_path = "..\/bin\/images\/studentarm.jpg";$/;"	v	file:
 student_path	main.cpp	/^static const char* student_path = "..\/bin\/images\/student.jpg";$/;"	v	file:
 succ_high	stb_image.h	/^   int            succ_high;$/;"	m	struct:__anon11
 succ_low	stb_image.h	/^   int            succ_low;$/;"	m	struct:__anon11
@@ -6095,6 +6110,7 @@ type	stb_image.h	/^   stbi_uc size,type,channel;$/;"	m	struct:__anon20
 uint64_t	gl/glad/glad.h	/^typedef unsigned __int64 uint64_t;$/;"	t
 uint64_t	gl/glad/glad.h	/^typedef unsigned long int uint64_t;$/;"	t
 uint64_t	gl/glad/glad.h	/^typedef unsigned long long int uint64_t;$/;"	t
+unit_ai_arm_vertices	main.cpp	/^std::vector<vertex>	unit_ai_arm_vertices;				\/\/πˆ∆∞vertices$/;"	v
 unit_ai_vertices	main.cpp	/^std::vector<vertex>	unit_ai_vertices;			\/\/ ai vertices$/;"	v
 unit_bullet_vertices	main.cpp	/^std::vector<vertex>	unit_bullet_vertices;		\/\/ bullet vertices$/;"	v
 unit_colsseum_vertices	main.cpp	/^std::vector<vertex>	unit_colsseum_vertices;		\/\/ colosseum vertices$/;"	v
@@ -6106,6 +6122,7 @@ update	bullet.h	/^inline void Bullet::update(float t, const vec3& tpos)$/;"	f	cl
 update	main.cpp	/^void update()$/;"	f
 update	sky.h	/^inline void Sky::update(float t, const vec3& tpos)$/;"	f	class:Sky
 update_Camera	camera.h	/^inline void camera::update_Camera()$/;"	f	class:camera
+update_arm	ai.h	/^inline void ai_t::update_arm()$/;"	f	class:ai_t
 update_camera	main.cpp	/^void update_camera() {$/;"	f
 update_colosseum	colosseum.h	/^inline void cyl::update_colosseum()$/;"	f	class:cyl
 update_counter	numbers.h	/^inline void number_counter::update_counter(float t, const vec3& eye, const vec3& at)$/;"	f	class:number_counter
@@ -6114,11 +6131,13 @@ update_number_vertexbuffers	numbers.h	/^void update_number_vertexbuffers()$/;"	f
 update_pn	camera.h	/^inline void camera::update_pn( vec2 m )$/;"	f	class:camera
 update_rot	camera.h	/^inline void camera::update_rot( vec2 m )$/;"	f	class:camera
 update_tank	camera.h	/^inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )$/;"	f	class:tank_t
+update_tank_arm	camera.h	/^inline void	tank_t::update_tank_arm()$/;"	f	class:tank_t
 update_tank_head	camera.h	/^inline void	tank_t::update_tank_head(float t)$/;"	f	class:tank_t
 update_vertex_buffer_button	maintheme.h	/^void update_vertex_buffer_button(const std::vector<vertex>& vertices)$/;"	f
 update_vertex_buffer_colosseum	pre-colosseum.h	/^void colosseum_bottom::update_vertex_buffer_colosseum(const std::vector<vertex>& vertices)$/;"	f	class:colosseum_bottom
 update_vertex_buffer_colosseum_side	pre-colosseum.h	/^void colosseum_side::update_vertex_buffer_colosseum_side(const std::vector<vertex>& vertices)$/;"	f	class:colosseum_side
 update_vertex_buffer_cyltop_AI	cyl.h	/^void update_vertex_buffer_cyltop_AI(const std::vector<vertex>& vertices, uint N)$/;"	f
+update_vertex_buffer_cyltop_AI_arm	cyl.h	/^void update_vertex_buffer_cyltop_AI_arm(const std::vector<vertex>& vertices, uint N)$/;"	f
 update_vertex_buffer_cyltop_colosseum	cyl.h	/^void update_vertex_buffer_cyltop_colosseum(const std::vector<vertex>& vertices, uint N)$/;"	f
 update_vertex_buffer_cyltop_tank	cyl.h	/^void update_vertex_buffer_cyltop_tank(const std::vector<vertex>& vertices, uint N)$/;"	f
 update_vertex_buffer_maintheme	maintheme.h	/^void update_vertex_buffer_maintheme(const std::vector<vertex>& vertices)$/;"	f
@@ -6149,6 +6168,7 @@ vertex_array_2	sphere.h	/^GLuint	vertex_array_2 = 0;	\/\/ ID holder for vertex a
 vertex_array_3	pre-colosseum.h	/^GLuint	vertex_array_3 = 0;	\/\/∞Ê±‚¿Â vertex_array$/;"	v
 vertex_array_4	pre-colosseum.h	/^	GLuint	vertex_array_4 = 0;	\/\/ø∑∏È vertex_array$/;"	m	struct:colosseum_side
 vertex_array_AI	cyl.h	/^GLuint	vertex_array_AI = 0;	\/\/ cylinder vertex_array$/;"	v
+vertex_array_arm	cyl.h	/^GLuint	vertex_array_arm = 0;	\/\/tÏÜê$/;"	v
 vertex_array_button	maintheme.h	/^GLuint	vertex_array_button = 0;	\/\/ buttonstart vertex_array$/;"	v
 vertex_array_colosseum	cyl.h	/^GLuint	vertex_array_colosseum = 0;	\/\/ cylinder vertex_array$/;"	v
 vertex_array_maintheme	maintheme.h	/^GLuint	vertex_array_maintheme = 0;	\/\/ maintheme vertex_array$/;"	v

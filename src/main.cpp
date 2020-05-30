@@ -103,6 +103,7 @@ uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
 int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
 int		game_counter = 0;	//제한시간
 int		camer_toggle = 0;
+bool	init_flag = 0;
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -204,8 +205,8 @@ void update()
 
 		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
 		//********* 충돌 검사 **********//
-		for (int i = 0; i < 100; i++) {
-			if (ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass)) bullet_list[i].dissapear();
+		for (int i = 0; i < bullet_num; i++) {
+			if (ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass)) bullet_list[i].disappear();
 		}
 		ai.collision(tank.pos, tank.radius, tank.mass);
 
@@ -229,7 +230,7 @@ void update()
 	}
 
 	// Bullet move update
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < bullet_num; i++) {
 		bullet_list[i].update(t, tank.pos);
 	}
 	//Sky move update
@@ -265,6 +266,7 @@ void render()
 	if (screan_mode == 1)
 	{
 		Resume();
+
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
 		// bind textures
@@ -322,7 +324,7 @@ void render()
 
 
 		//Bullet 그리기
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < bullet_num; i++) {
 			glBindVertexArray(vertex_array_2);
 			glUniform1i(glGetUniformLocation(program, "TEX0"), 7);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet_list[i].model_matrix);
@@ -358,8 +360,7 @@ void render()
 
 		// swap front and back buffers, and display to screan
 
-
-
+		init_flag = 0;
 
 	}
 
@@ -368,25 +369,22 @@ void render()
 		Pause();
 		glfwSetTime(0);
 		time_buffer = t;
-		//초기화부분
-		num_death_ai = 0;		//데스 초기화
-		game_counter = 0;		//시간 카운터 초기화
 
-		for (int i = 0; i < 100; i++) {
-			bullet_list[i].dissapear();
-		}	//총알 초기화
+		// **** 초기화부분
+		if (init_flag == 0) {
+			printf("initialized\n");
+			num_death_ai = 0;		//데스 초기화
+			game_counter = 0;		//시간 카운터 초기화
 
-		ais = std::move(create_ais(anum));
+			for (int i = 0; i < bullet_num; i++) {
+				bullet_list[i].disappear();
+			}	//총알 초기화
 
-		//초기화 업데이트
-
-		
-		for (int i = 0; i < anum; i++)
-		{
-			ai_t& ai = ais[i];
-
-			ai.collision_t0 = 0;
-			ai.death = 0;
+			for (int i=ais.size(); i>0; i--) {
+				ais.pop_back();
+			}
+			
+			ais = std::move(create_ais(anum));
 		}
 
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
@@ -418,8 +416,8 @@ void render()
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 4);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 		*/
-
-
+		
+		init_flag = 1;
 
 	}
 
@@ -437,6 +435,8 @@ void render()
 
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 3);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		
+		init_flag = 0;
 	}
 
 	else if (screan_mode == 3)		//일시정지
@@ -453,6 +453,8 @@ void render()
 
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 9);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		
+		init_flag = 0;
 	}
 
 	else if (screan_mode == 4)		//클리어
@@ -469,6 +471,8 @@ void render()
 
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 10);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		
+		init_flag = 0;
 	}
 
 	else if (screan_mode == 5)		//실패
@@ -485,6 +489,8 @@ void render()
 
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 11);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+
+		init_flag = 0;
 	}
 
 	
@@ -554,7 +560,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_SPACE) {
 			engine->play2D(sound_src_1, false);
-			bullets = (bullets + 1) % 100;
+			bullets = (bullets + 1) % bullet_num;
 			bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
 		}
 
@@ -712,7 +718,7 @@ bool user_init()
 	print_help();
 
 	//bullet 생성이 잘 안되서 그냥 여기다 만들어요
-	for (int i = 0; i < 100; i++) {
+	for (int i = 0; i < bullet_num; i++) {
 		Bullet bullet = { 0.0f,  vec3(-10,-10,-10), vec4(1.0f,0.0f,0.0f,1.0f), 30 };
 		bullet_list.emplace_back(bullet);
 	}

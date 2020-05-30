@@ -2,6 +2,8 @@
 #define __BULLET_H__
 #include "cgmath.h"
 #include "cgut.h"
+#include "camera.h"
+#include "colosseum.h"
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
@@ -20,38 +22,49 @@ struct Bullet
 
 	mat4	model_matrix;	// modeling transformation
 
+	bool	disappear_flag = 1;
+
 	// public functions
 	void	update(float t, const vec3& tpos);
 	void launch(float t0, vec3 pos0, vec3 n0);
-	void dissapear();
+	void disappear();
 };
 
 std::vector<Bullet> bullet_list;
+int bullet_num = 50;
 
 //********** Bullet 움직임 파트 *************
 inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 {
-
+	disappear_flag = 0;
 	t0 = _t0;
 	pos0 = _pos0;
 	n0 = _n0;
 	radius = 0.1f;
 }
 
-inline void Bullet::dissapear()
+inline void Bullet::disappear()
 {
-	n0 = -1*cam.up;
+	disappear_flag = 1;
 	radius = 0.0f;
 }
 
 inline void Bullet::update(float t, const vec3& tpos)
 {
-	
-	float dt = t - t0; //총 쏜 시점부터 흘러간 시간.
-	pos.x = pos0.x + n0.x * speed * dt;
-	pos.y = pos0.y + n0.y * speed * dt;
-	pos.z = pos0.z + n0.z * speed * dt;
-	
+	if (disappear_flag == 0) {
+		// 불렛이 경기장 밖으로 나갔는지 검사
+		if (colosseum.radius + radius <=
+				sqrt(
+					(colosseum.pos.x-pos.x)*(colosseum.pos.x-pos.x) +
+					(colosseum.pos.z-pos.z)*(colosseum.pos.z-pos.z)
+					)
+		   ) { disappear(); printf("bullet death\n"); }
+
+		float dt = t - t0; //총 쏜 시점부터 흘러간 시간.
+		pos.x = pos0.x + n0.x * speed * dt;
+		pos.y = pos0.y + n0.y * speed * dt;
+		pos.z = pos0.z + n0.z * speed * dt;
+	}
 
 	mat4 scale_matrix =
 	{
@@ -76,9 +89,6 @@ inline void Bullet::update(float t, const vec3& tpos)
 		0, 0, 1, pos.z,
 		0, 0, 0, 1
 	};
-
-
-	
 	
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
