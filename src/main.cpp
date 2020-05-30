@@ -218,6 +218,11 @@ void update()
 	//Sky move update
 	sky.update(t, tank.pos);
 
+	if (screan_mode == 0)
+	{
+		num_death_ai = 0;		//데스 초기화
+		game_counter = 0;		//시간 카운터 초기화
+	}
 
 	if (num_death_ai == anum)	screan_mode = 4;	//승리조건
 	if (game_counter == 61)	screan_mode = 5;	//패배조건
@@ -337,8 +342,8 @@ void render()
 		Pause();
 		glfwSetTime(0);
 		time_buffer = t;
-		num_death_ai = 0;		//데스 초기화
-		game_counter = 0;		//시간 카운터 초기화
+		//num_death_ai = 0;		//데스 초기화
+		//game_counter = 0;		//시간 카운터 초기화
 		
 		for (int i = 0; i < anum; i++)
 		{
