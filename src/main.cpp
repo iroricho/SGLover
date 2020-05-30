@@ -14,6 +14,7 @@
 #include "ai.h"			// ai 헤더
 #include "maintheme.h"		//메인화면 헤더
 #include "numbers.h"		//숫자 카운터 헤더
+#include "aicount.h"		//ai 카운터 헤더
 
 
 #include "./irrKlang/irrKlang.h"
@@ -56,6 +57,7 @@ static const char* student_path = "../bin/images/student.jpg";
 static const char* student_arm_path = "../bin/images/studentarm.jpg";
 static const char* prof_path = "../bin/images/prof.jpg";
 static const char* prof_arm_path = "../bin/images/profarm.jpg";
+static const char* aicount_path = "../bin/images/aicount.jpg";
 
 
 
@@ -90,6 +92,7 @@ GLint		student = 0;
 GLint		student_arm = 0;
 GLint		prof = 0;
 GLint		profarm = 0;
+GLint		aicount = 0;
 
 
 
@@ -386,9 +389,9 @@ void render()
 				ais.pop_back();
 			}
 			
-			ais = std::move(create_ais(anum));
+			
 		}
-
+		ais = std::move(create_ais(anum));
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
@@ -401,16 +404,14 @@ void render()
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 2);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-		/*
-		처음에는 버튼식으로 구현해서 클릭하면 넘기는 걸로 하려 했는데 구현이 어려울거 같아서 일단은 키보드로 구현했습니다
-		//시작 버튼 그리기
-		glBindVertexArray(vertex_array_button);
-		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bt_start.model_matrix);
-		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, button_start);
-		glUniform1i(glGetUniformLocation(program, "TEX0"), 3);
+
+		//난이도 조절 그리기
+		glBindVertexArray(vertex_array_aicount_1+anum-1);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai_count.model_matrix);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 19);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
+		/*
 		//설명서 버튼 그리기
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bt_help.model_matrix);
 		glActiveTexture(GL_TEXTURE4);
@@ -549,11 +550,20 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			int flags;
 			flags = cam.end_Camera();
 			cam.begin_Camera('L', flags);
+			if (screan_mode == 0)
+			{
+				if (anum > 1)	anum--;
+
+			}
 		}
 		else if (key == GLFW_KEY_RIGHT) {
 			int flags;
 			flags = cam.end_Camera();
 			cam.begin_Camera('R', flags);
+			if (screan_mode == 0)
+			{
+				if (anum < 16)	anum++;
+			}
 		}
 		else if (key == GLFW_KEY_C) {
 			camer_toggle = (camer_toggle + 1) % 2;
@@ -767,6 +777,7 @@ bool user_init()
 	update_vertex_buffer_button(button_vertices);					//버튼 버퍼 생성
 	update_number_vertexbuffers();		//숫자 버퍼 생성
 	update_vertex_buffer_cyltop_AI_arm(unit_ai_arm_vertices, ais[0].NTESS);
+	update_aicount_vertexbuffers();		//ai 카운터 버퍼 생성
 	
 	/*
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
@@ -795,6 +806,7 @@ bool user_init()
 	student_arm = create_texture(student_arm_path, true);	if (student_arm == -1) return false;
 	prof = create_texture(prof_path, true);	if (prof == -1) return false;
 	profarm = create_texture(prof_arm_path, true);	if (profarm == -1) return false;
+	aicount = create_texture(aicount_path, true);	if (aicount == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -835,6 +847,8 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, prof);
 	glActiveTexture(GL_TEXTURE18);
 	glBindTexture(GL_TEXTURE_2D, profarm);
+	glActiveTexture(GL_TEXTURE19);
+	glBindTexture(GL_TEXTURE_2D, aicount);
 
 
 
