@@ -179,7 +179,9 @@ void update()
 
 		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
 		//********* 충돌 검사 **********//
-		ai.collision(bullet.pos, bullet.radius, bullet.mass);
+		for (int i = 0; i < 100; i++) {
+			ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass);
+		}
 		ai.collision(tank.pos, tank.radius, tank.mass);
 
 		for (int j = 0; j < anum; j++)
@@ -201,8 +203,9 @@ void update()
 	}
 
 	// Bullet move update
-	bullet.update(t, tank.pos);
-
+	for (int i = 0; i < 100; i++) {
+		bullet_list[i].update(t, tank.pos);
+	}
 	//Sky move update
 	sky.update(t, tank.pos);
 
@@ -250,7 +253,7 @@ void render()
 		glBindVertexArray(vertex_array_2);
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 6);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix_head);
-		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
+		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
 
 
 
@@ -273,22 +276,23 @@ void render()
 			glBindVertexArray(vertex_array_2);
 			glUniform1i(glGetUniformLocation(program, "TEX0"), 8);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix_head);
-			glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
+			glDrawElements(GL_TRIANGLES, 4 * bullet_list[i].NTESS * bullet_list[i].NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
 
 		}
 
 
 		//Bullet 그리기
-		glBindVertexArray(vertex_array_2);
-		glUniform1i(glGetUniformLocation(program, "TEX0"), 7);
-		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet.model_matrix);
-		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
-
+		for (int i = 0; i < 100; i++) {
+			glBindVertexArray(vertex_array_2);
+			glUniform1i(glGetUniformLocation(program, "TEX0"), 7);
+			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, bullet_list[i].model_matrix);
+			glDrawElements(GL_TRIANGLES, 4 * bullet_list[i].NTESS * bullet_list[i].NTESS * 3, GL_UNSIGNED_INT, nullptr);
+		}
 		//Sky 그리기
 		glBindVertexArray(vertex_array_2);
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 4);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, sky.model_matrix);
-		glDrawElements(GL_TRIANGLES, 4 * bullet.NTESS * bullet.NTESS * 3, GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);
 
 		//숫자 카운터 그리기
 	
@@ -497,7 +501,8 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_SPACE) {
 			engine->play2D(sound_src_1, false);
-			bullet.launch(t, tank.pos, (cam.at - cam.eye).normalize());
+			bullets = (bullets + 1) % 100;
+			bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
 		}
 
 		//그냥 텍스쳐매핑할떄 테스트용. 나중에 지워도 됨.
@@ -653,6 +658,13 @@ bool user_init()
 	// log hotkeys
 	print_help();
 
+	//bullet 생성이 잘 안되서 그냥 여기다 만들어요
+	for (int i = 0; i < 100; i++) {
+		Bullet bullet = { 0.0f,  vec3(-10,-10,-10), vec4(1.0f,0.0f,0.0f,1.0f), 30 };
+		bullet_list.emplace_back(bullet);
+	}
+
+
 	// init GL states
 	glLineWidth( 1.0f );
 	glClearColor( 39/255.0f, 40/255.0f, 34/255.0f, 1.0f );	// set clear color
@@ -667,7 +679,7 @@ bool user_init()
 	unit_tank_vertices = std::move( create_cyltop_vertices_tank( tank.NTESS ));
 	unit_colsseum_vertices = std::move( create_cyltop_vertices_colosseum( colosseum.NTESS ));
 	unit_ai_vertices = std::move( create_cyltop_vertices_AI( ais[0].NTESS ));
-	unit_bullet_vertices = std::move(create_sphere_vertices(bullet.NTESS));
+	unit_bullet_vertices = std::move(create_sphere_vertices(tank.NTESS));
 	unit_sky_vertices = std::move( create_sky_vertices( sky.NTESS ));
 	main_theme_vertices = std::move(create_vertices_maintheme());
 	button_vertices = std::move(create_vertices_button());
@@ -682,7 +694,7 @@ bool user_init()
 	update_vertex_buffer_cyltop_colosseum( unit_colsseum_vertices, colosseum.NTESS );
 	update_vertex_buffer_cyltop_AI( unit_ai_vertices, ais[0].NTESS);		// AI 버퍼 생성
 	update_vertex_buffer_cyltop_tank( unit_tank_vertices, tank.NTESS );
-	update_vertex_buffer_sphere(unit_bullet_vertices, bullet.NTESS);		// bullet 버퍼 생성
+	update_vertex_buffer_sphere(unit_bullet_vertices, tank.NTESS);		// bullet 버퍼 생성
 	update_vertex_buffer_sky( unit_sky_vertices, sky.NTESS);		// bullet 버퍼 생성
 	update_vertex_buffer_maintheme(main_theme_vertices);		//메인화면 버퍼 생성
 	update_vertex_buffer_button(button_vertices);					//버튼 버퍼 생성

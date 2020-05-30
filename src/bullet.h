@@ -7,8 +7,8 @@ extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
 struct Bullet
 {
-	float	radius=0.5f;	// radius
-	vec3	pos = vec3(0,-1,0);			// position of tank
+	float	radius=0.0f;	// radius
+	vec3	pos = vec3(-10,-10,-10);			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
 	float	mass=radius*radius*radius;
@@ -25,7 +25,7 @@ struct Bullet
 	void launch(float t0, vec3 pos0, vec3 n0);
 };
 
-Bullet bullet = { 0.5f,  vec3(7.0f,-1,7.0f), vec4(1.0f,0.0f,0.0f,1.0f), 30};
+std::vector<Bullet> bullet_list;
 
 //********** Bullet 움직임 파트 *************
 inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
