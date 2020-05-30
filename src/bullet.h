@@ -23,6 +23,7 @@ struct Bullet
 	// public functions
 	void	update(float t, const vec3& tpos);
 	void launch(float t0, vec3 pos0, vec3 n0);
+	void dissapear();
 };
 
 std::vector<Bullet> bullet_list;
@@ -30,11 +31,17 @@ std::vector<Bullet> bullet_list;
 //********** Bullet 움직임 파트 *************
 inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 {
-	
+
 	t0 = _t0;
 	pos0 = _pos0;
 	n0 = _n0;
 	radius = 0.1f;
+}
+
+inline void Bullet::dissapear()
+{
+	n0 = -1*cam.up;
+	radius = 0.0f;
 }
 
 inline void Bullet::update(float t, const vec3& tpos)

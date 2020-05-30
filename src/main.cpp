@@ -89,6 +89,7 @@ bool	halt = 0;
 uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
 int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
 int		game_counter = 0;	//제한시간
+int		camer_toggle = 0;
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -161,8 +162,16 @@ void update()
 
 	// camera의 eye, at, up 은 cameara 헤더에 정의된 함수들이 바꿔줍니다.
 	// 때문에 update 때만 view_matrix를 구해주면 됩니다.
-	cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
+	if (camer_toggle == 0)	cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
+	else if (camer_toggle == 1) {
+		vec3 towards = cam.at - cam.eye;
+		vec3 up = cam.up;
 
+		vec3 new_eye = cam.eye +  2*up - 0.5f* towards;
+		vec3 new_at = cam.eye - (towards + vec3(0, -0.5f, 0)).normalize();
+
+		cam.view_matrix = mat4::look_at(new_eye, new_at, cam.up);
+	}
 	GLint uloc;
 	uloc = glGetUniformLocation(program, "view_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.view_matrix);
 	uloc = glGetUniformLocation(program, "projection_matrix");	if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.projection_matrix);
@@ -180,7 +189,7 @@ void update()
 		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
 		//********* 충돌 검사 **********//
 		for (int i = 0; i < 100; i++) {
-			ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass);
+			if (ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass)) bullet_list[i].dissapear();
 		}
 		ai.collision(tank.pos, tank.radius, tank.mass);
 
@@ -496,6 +505,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			int flags;
 			flags = cam.end_Camera();
 			cam.begin_Camera('R', flags);
+		}
+		else if (key == GLFW_KEY_C) {
+			camer_toggle = (camer_toggle + 1) % 2;
 		}
 
 

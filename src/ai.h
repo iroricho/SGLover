@@ -32,8 +32,8 @@ struct ai_t
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
-	void collision(vec3 tpos, float tradius, float tmass);
-	void collision_bullet(vec3 tpos, float tradius, float tmass);
+	bool collision(vec3 tpos, float tradius, float tmass);
+	bool collision_bullet(vec3 tpos, float tradius, float tmass);
 	void	update_head(float t);
 };
 
@@ -178,16 +178,20 @@ inline void ai_t::update( float t, const vec3& tpos )
 	model_matrix = translate_matrix * rotation_matrix * scale_matrix;
 }
 
-inline void ai_t::collision(vec3 tpos, float tradius, float tmass)
+inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
 {
-	if (death == 1) return;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
+	bool hit = false;
+
+	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
 	float collision_time = 0.3f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.01f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+	float collision_speed = 0.2f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
+
 		if (collision_true == 1)
 		{
+			hit = true;
 			play_sound();
 			//printf("collision! %d\n",collision_true);
 			collision_t0 = t;
@@ -206,16 +210,20 @@ inline void ai_t::collision(vec3 tpos, float tradius, float tmass)
 	{
 		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
 	}
+
+	return hit;
 }
 
-inline void ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
+inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
 {
-	if (death == 1) return;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
+	bool hit = false;
+	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
 	float collision_time = 0.3f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.01f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+	float collision_speed = 0.2f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
+		hit = true;
 		if (collision_true == 1)
 		{
 			play_sound();
@@ -236,6 +244,8 @@ inline void ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
 	{
 		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
 	}
+
+	return hit;
 }
 
 inline void ai_t::update_head(float t)
