@@ -57,7 +57,7 @@ inline std::vector<ai_t> create_ais(int anum)
 	ai_t a;
 
 	//first ai
-	a = { 0.3f + 0.25f * abs(cosrand()), 0.3f + 0.5f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+	a = { 0.3f + 0.15f * abs(cosrand()), 0.3f + 0.3f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 	ais.push_back(a);
 
 	int canum = 1; //current ai number
@@ -67,7 +67,7 @@ inline std::vector<ai_t> create_ais(int anum)
 	//make ai
 	while (canum < anum)
 	{
-		a = { 0.3f + 0.25f * abs(cosrand()), 0.3f + 0.5f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+	a = { 0.3f + 0.15f * abs(cosrand()), 0.3f + 0.3f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 
 		tempx = a.pos.x;
 		tempz = a.pos.z;
