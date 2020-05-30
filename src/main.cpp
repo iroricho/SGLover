@@ -46,11 +46,15 @@ static const char* numbers_path = "../bin/images/numbers.jpg";
 static const char* head_path = "../bin/images/head.jpg";
 static const char* bullets_path = "../bin/images/bullet.jpg";
 static const char* hh_head_path = "../bin/images/hh_head.jpg";
+static const char* mg_head_path = "../bin/images/mg_head.jpg";
+static const char* dy_head_path = "../bin/images/dy_head.jpg";
 static const char* pause_page_path = "../bin/images/pausepage.jpg";
 static const char* clear_page_path = "../bin/images/clearpage.jpg";
 static const char* fail_page_path = "../bin/images/failpage.jpg";
 static const char* ground_path = "../bin/images/ground.jpg";
 static const char* student_path = "../bin/images/student.jpg";
+
+
 
 //*************************************
 // window objects
@@ -73,11 +77,14 @@ GLint		numbers = 0;
 GLint		head = 0;
 GLint		bullets = 0;
 GLint		hh_head = 0;
+GLint		mg_head = 0;
+GLint		dy_head = 0;
 GLint		pause_page = 0;
 GLint		clear_page = 0;
 GLint		fail_page = 0;
 GLint		ground = 0;
 GLint		student = 0;
+
 
 
 //*************************************
@@ -218,11 +225,8 @@ void update()
 	//Sky move update
 	sky.update(t, tank.pos);
 
-	if (screan_mode == 0)
-	{
-		num_death_ai = 0;		//데스 초기화
-		game_counter = 0;		//시간 카운터 초기화
-	}
+	
+
 
 	if (num_death_ai == anum)	screan_mode = 4;	//승리조건
 	if (game_counter == 61)	screan_mode = 5;	//패배조건
@@ -288,7 +292,9 @@ void render()
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix);
 			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//몸통
 			glBindVertexArray(vertex_array_2);
-			glUniform1i(glGetUniformLocation(program, "TEX0"), 8);
+			if(i%3==0)		glUniform1i(glGetUniformLocation(program, "TEX0"), 8);
+			else if(i%3==1)	glUniform1i(glGetUniformLocation(program, "TEX0"), 14);
+			else					glUniform1i(glGetUniformLocation(program, "TEX0"), 15);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix_head);
 			glDrawElements(GL_TRIANGLES, 4 * bullet_list[i].NTESS * bullet_list[i].NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
 
@@ -342,8 +348,18 @@ void render()
 		Pause();
 		glfwSetTime(0);
 		time_buffer = t;
-		//num_death_ai = 0;		//데스 초기화
-		//game_counter = 0;		//시간 카운터 초기화
+		//초기화부분
+		num_death_ai = 0;		//데스 초기화
+		game_counter = 0;		//시간 카운터 초기화
+
+		for (int i = 0; i < 100; i++) {
+			bullet_list[i].dissapear();
+		}	//총알 초기화
+
+		ais = std::move(create_ais(anum));
+
+		//초기화 업데이트
+
 		
 		for (int i = 0; i < anum; i++)
 		{
@@ -739,6 +755,8 @@ bool user_init()
 	fail_page = create_texture(fail_page_path, true);	if (fail_page == -1) return false;
 	ground = create_texture(ground_path, true);	if (ground == -1) return false;
 	student = create_texture(student_path, true);	if (student== -1) return false;
+	mg_head = create_texture(mg_head_path, true);	if (mg_head == -1) return false;
+	dy_head = create_texture(dy_head_path, true);	if (dy_head == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -769,6 +787,10 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, ground);
 	glActiveTexture(GL_TEXTURE13);
 	glBindTexture(GL_TEXTURE_2D, student);
+	glActiveTexture(GL_TEXTURE14);
+	glBindTexture(GL_TEXTURE_2D,  mg_head);
+	glActiveTexture(GL_TEXTURE15);
+	glBindTexture(GL_TEXTURE_2D, dy_head);
 
 
 
