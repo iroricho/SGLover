@@ -84,10 +84,10 @@ GLint		student = 0;
 // global variables
 float	t = 0.0f;						// t는 전체 파일에서 동일하게 쓰이길 요망
 float	time_buffer = 0;				// time buffer for resume
+float	tb = 0;
 bool	halt = 0;
 uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
 int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
-int		ai_death = 0;			//ai 사망자수
 int		game_counter = 0;	//제한시간
 
 
@@ -133,88 +133,88 @@ void update_camera() {
 	cam.update_Camera();
 }
 
+void Pause() {
+	if (halt == 0) {
+		printf("Pause\n");
+		halt = 1;
+		time_buffer = t;
+	}
+}
+
+void Resume() {
+	if (halt == 1) {
+		printf("Resume\n");
+		halt = 0;
+		tb = time_buffer;
+		glfwSetTime(time_buffer);
+	}
+}
+
 void update()
 {
-	//change texture mode
-	glUniform1i(glGetUniformLocation(program, "mode"), mode);
+	// **** update camera
+	update_camera();
 
-	if (screan_mode == 1)
+	// update projection matrix
+	cam.aspect = window_size.x / float(window_size.y);
+	cam.projection_matrix = mat4::perspective(cam.fovy, cam.aspect, cam.dnear, cam.dfar);
+
+	// camera의 eye, at, up 은 cameara 헤더에 정의된 함수들이 바꿔줍니다.
+	// 때문에 update 때만 view_matrix를 구해주면 됩니다.
+	cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
+
+	GLint uloc;
+	uloc = glGetUniformLocation(program, "view_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.view_matrix);
+	uloc = glGetUniformLocation(program, "projection_matrix");	if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.projection_matrix);
+
+	// **** update tank
+	tank.update_tank(t, cam.eye, cam.at);
+	tank.update_tank_head(t);
+	num_cnt.update_counter(t, cam.eye, cam.at);
+
+	// **** update ai
+	for (int i = 0; i < anum; i++)
 	{
-		// **** update camera
-		update_camera();
+		ai_t& ai = ais[i];
 
-		// update projection matrix
-		cam.aspect = window_size.x / float(window_size.y);
-		cam.projection_matrix = mat4::perspective(cam.fovy, cam.aspect, cam.dnear, cam.dfar);
+		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
+		//********* 충돌 검사 **********//
+		ai.collision(bullet.pos, bullet.radius, bullet.mass);
+		ai.collision(tank.pos, tank.radius, tank.mass);
 
-		// camera의 eye, at, up 은 cameara 헤더에 정의된 함수들이 바꿔줍니다.
-		// 때문에 update 때만 view_matrix를 구해주면 됩니다.
-		cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
-
-		GLint uloc;
-		uloc = glGetUniformLocation(program, "view_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.view_matrix);
-		uloc = glGetUniformLocation(program, "projection_matrix");	if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.projection_matrix);
-
-		// **** update tank
-		tank.update_tank(t, cam.eye, cam.at);
-		tank.update_tank_head(t);
-		num_cnt.update_counter(t, cam.eye, cam.at);
-
-		// **** update ai
-		int cnt = 0;
-		for (int i = 0; i < anum; i++)
+		for (int j = 0; j < anum; j++)
 		{
-			ai_t& ai = ais[i];
-
-			// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
-			//********* 충돌 검사 **********//
-			ai.collision(bullet.pos, bullet.radius, bullet.mass);
-			ai.collision(tank.pos, tank.radius, tank.mass);
-			
-			for (int j = 0; j < anum; j++)
+			if (j != i)
 			{
-				if (j != i)
-				{
-					vec3 aipos0 = ai.pos;
-					float airadius0 = ai.radius;
-					float aimass0 = ai.mass;
-					ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
-					ais[j].collision(aipos0, airadius0, aimass0);
-				}
-
-				//사망 카운트
-				
-				
+				vec3 aipos0 = ai.pos;
+				float airadius0 = ai.radius;
+				float aimass0 = ai.mass;
+				ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
+				ais[j].collision(aipos0, airadius0, aimass0);
 			}
 
-			ai.update(t, tank.pos);
-			ai.update_head(t);
-
-			if (ai.death == 1)	cnt++;
-			ai_death = cnt;
-
-		
+			//사망 카운트
 		}
 
-		// Bullet move update
-		bullet.update(t, tank.pos);
-
-		//Sky move update
-		sky.update(t, tank.pos);
-
-
-		if (ai_death == anum)	screan_mode = 4;	//승리조건
-		if (game_counter == 61)	screan_mode = 5;	//패배조건
+		ai.update(t, tank.pos);
+		ai.update_head(t);
 	}
 
-	
-	
-	
+	// Bullet move update
+	bullet.update(t, tank.pos);
+
+	//Sky move update
+	sky.update(t, tank.pos);
+
+
+	if (num_death_ai == anum)	screan_mode = 4;	//승리조건
+	if (game_counter == 61)	screan_mode = 5;	//패배조건
+
 }
 
 void render()
 {
-	// clear screen (with background color) and clear depth buffer
+	// clear screan (with background color) and clear depth buffer
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 	// notify GL that we use our own program
@@ -233,7 +233,7 @@ void render()
 
 	if (screan_mode == 1)
 	{
-		
+		Resume();
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
 		// bind textures
@@ -312,7 +312,7 @@ void render()
 		glDrawElements(GL_TRIANGLES, 10000, GL_UNSIGNED_INT, nullptr);
 		*/
 
-		// swap front and back buffers, and display to screen
+		// swap front and back buffers, and display to screan
 
 
 
@@ -321,9 +321,20 @@ void render()
 
 	else if (screan_mode == 0)		//초기화면
 	{
-		halt = 1;
-		ai_death = 0;		//데스 초기화
+		Pause();
+		glfwSetTime(0);
+		time_buffer = t;
+		num_death_ai = 0;		//데스 초기화
 		game_counter = 0;		//시간 카운터 초기화
+		
+		for (int i = 0; i < anum; i++)
+		{
+			ai_t& ai = ais[i];
+
+			ai.collision_t0 = 0;
+			ai.death = 0;
+		}
+
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
@@ -360,74 +371,66 @@ void render()
 
 	else if (screan_mode == 2)		//설명서
 	{
-	halt = 1;
-	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+		Pause();
+		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
-	//설명서 그리기
-	glBindVertexArray(vertex_array_maintheme);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+		//설명서 그리기
+		glBindVertexArray(vertex_array_maintheme);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
 
 
-	
-	glUniform1i(glGetUniformLocation(program, "TEX0"), 3);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
-
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 3);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
 
 	else if (screan_mode == 3)		//일시정지
 	{
-	halt = 1;
-	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+		Pause();
+		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
-	//일시정지 화면 그리기
-	glBindVertexArray(vertex_array_maintheme);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+		//일시정지 화면 그리기
+		glBindVertexArray(vertex_array_maintheme);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
 
 
 
-	glUniform1i(glGetUniformLocation(program, "TEX0"), 9);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 9);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
 
 	else if (screan_mode == 4)		//클리어
 	{
-	halt = 1;
-	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+		Pause();
+		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
-	//클리어 화면 그리기
-	glBindVertexArray(vertex_array_maintheme);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+		//클리어 화면 그리기
+		glBindVertexArray(vertex_array_maintheme);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
 
 
 
-	glUniform1i(glGetUniformLocation(program, "TEX0"), 10);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 10);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
 
 	else if (screan_mode == 5)		//실패
 	{
-	halt = 1;
-	glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
+		Pause();
+		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
-	//일시정지 화면 그리기
-	glBindVertexArray(vertex_array_maintheme);
-	uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
+		//일시정지 화면 그리기
+		glBindVertexArray(vertex_array_maintheme);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
 
 
 
-	glUniform1i(glGetUniformLocation(program, "TEX0"), 11);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-
-
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 11);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
 
 	
@@ -447,9 +450,6 @@ void print_help()
 	printf( "[help]\n" );
 	printf( "- press ESC or 'q' to terminate the program\n" );
 	printf( "- press F1 or 'h' to see help\n" );
-#ifndef GL_ES_VERSION_2_0
-	printf( "- press 'r' to toggle between halt and resume the game\n" );
-#endif
 	printf( "\n" );
 }
 
@@ -459,14 +459,6 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 	{
 		if (key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)	glfwSetWindowShouldClose(window, GL_TRUE);
 		else if (key == GLFW_KEY_H || key == GLFW_KEY_F1)	print_help();
-#ifndef GL_ES_VERSION_2_0
-		else if (key == GLFW_KEY_R)
-		{
-			halt = !halt;
-			if (halt) { time_buffer = t; printf("Pause\n"); }
-			else { time_buffer = float(glfwGetTime()) - time_buffer; printf("Rotate\n"); }
-		}
-#endif
 		// 동시키 문제는 자동으로 해결이 돼버림, 왜 되지?
 		// 하지만 8방향일 뿐 자연스럽지는 못 함
 		// 이동과 카메라 회전을 동시에 하면 문제가 생김
@@ -518,7 +510,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_G)
 		{
-			if (screan_mode == 0 || screan_mode == 2 || screan_mode == 3) { halt = 0;  screan_mode = 1; }
+			if (screan_mode == 0 || screan_mode == 2 || screan_mode == 3) { screan_mode = 1; }
 		}
 		else if (key == GLFW_KEY_F2)
 		{
@@ -535,7 +527,6 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		{
 			if (screan_mode == 1)		screan_mode = 3;
 			else if (screan_mode == 3)	screan_mode = 1;
-
 		}
 	
 
@@ -548,37 +539,37 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			cam.b_W = false;
 			int flags;
 			flags = cam.end_Camera();
-			cam.begin_Camera(NULL, flags);
+			cam.begin_Camera(0, flags);
 		}
 		else if (key == GLFW_KEY_A) {
 			cam.b_A = false;
 			int flags;
 			flags = cam.end_Camera();
-			cam.begin_Camera(NULL, flags);
+			cam.begin_Camera(0, flags);
 		}
 		else if (key == GLFW_KEY_S) {
 			cam.b_S = false;
 			int flags;
 			flags = cam.end_Camera();
-			cam.begin_Camera(NULL, flags);
+			cam.begin_Camera(0, flags);
 		}
 		else if (key == GLFW_KEY_D) {
 			cam.b_D = false;
 			int flags;
 			flags = cam.end_Camera();
-			cam.begin_Camera(NULL, flags);
+			cam.begin_Camera(0, flags);
 		}
 		else if (key == GLFW_KEY_LEFT) {
 			cam.b_LEFT = false;
 			int flags;
 			flags = cam.end_Camera();
-			cam.begin_Camera(NULL, flags);
+			cam.begin_Camera(0, flags);
 		}
 		else if (key == GLFW_KEY_RIGHT) {
 			cam.b_RIGHT = false;
 			int flags;
 			flags = cam.end_Camera();
-			cam.begin_Camera(NULL, flags);
+			cam.begin_Camera(0, flags);
 		}
 	}
 }
@@ -785,30 +776,24 @@ int main( int argc, char* argv[] )
 
 	t = float(glfwGetTime());	// time init
 	float spf = 0.008f;	// sec per frame
-	float tb = t;
-	
+	tb = t;
+
 	// enters rendering/event loop
 	while( !glfwWindowShouldClose(window) )
 	{
 		// update global simulation parameter
-		t = halt? t : float(glfwGetTime()) - time_buffer;
+		t = float(glfwGetTime());	// time init
 
 		glfwPollEvents();	// polling and processing of events
+		glUniform1i(glGetUniformLocation(program, "mode"), mode);	// update에서 여기로 옮김
 
-		
-		if (screan_mode != 1) { t = float(glfwGetTime());   update(); }	//시작부터 halt가 1이면 정상실행이 안되어서 수정하였습니다.
-		else
+		if (t >= tb)	// 컴퓨터가 빨라서 time interval이 작은 경우에는 문제가 안 됨
 		{
-			if (t >= tb)	// 컴퓨터가 빨라서 time interval이 작은 경우에는 문제가 안 됨
-			{
-				update();
-				tb += spf;
-			}
+			if (screan_mode == 1) update();
+			tb += spf;
 		}
-			render();			// per-frame render
+		render();			// per-frame render
 
-		
-		
 	}
 	
 	// normal termination

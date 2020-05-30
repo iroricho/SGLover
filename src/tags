@@ -2618,11 +2618,13 @@ PFNGLWAITSYNCPROC	gl/glad/glad.h	/^typedef void (APIENTRYP PFNGLWAITSYNCPROC)(GL
 PFNGLXGETPROCADDRESSPROC_PRIVATE	gl/glad/glad.c	/^typedef void* (APIENTRYP PFNGLXGETPROCADDRESSPROC_PRIVATE)(const char*);$/;"	t	file:
 PFNWGLGETPROCADDRESSPROC_PRIVATE	gl/glad/glad.c	/^typedef void* (APIENTRYP PFNWGLGETPROCADDRESSPROC_PRIVATE)(const char*);$/;"	t	file:
 PI	cgmath.h	65;"	d
+Pause	main.cpp	/^void Pause() {$/;"	f
 RM_INT_DIR	makefile	/^	RM_INT_DIR = @bash -c "rm -rf $(OBJ)"$/;"	m
 RM_INT_DIR	makefile	/^	RM_INT_DIR = @rm -rf $(OBJ)$/;"	m
 RM_TARGET	makefile	/^	RM_TARGET = @bash -c "rm -rf $(TARGET)"$/;"	m
 RM_TARGET	makefile	/^	RM_TARGET = @rm -rf $(TARGET)$/;"	m
 ReferenceCounter	irrKlang/ik_IRefCounted.h	/^		ik_s32	ReferenceCounter;$/;"	m	class:irrklang::IRefCounted
+Resume	main.cpp	/^void Resume() {$/;"	f
 SAudioStreamFormat	irrKlang/ik_SAudioStreamFormat.h	/^	struct SAudioStreamFormat$/;"	s	namespace:irrklang
 SInternalAudioInterface	irrKlang/ik_ISoundEngine.h	/^	struct SInternalAudioInterface$/;"	s	namespace:irrklang
 STBIDEF	stb_image.h	349;"	d
@@ -2782,6 +2784,7 @@ abs	cgmath.h	/^inline vec2 abs( const vec2& v ){ return vec2(fabs(v.x),fabs(v.y)
 abs	cgmath.h	/^inline vec3 abs( const vec3& v ){ return vec3(fabs(v.x),fabs(v.y),fabs(v.z)); }$/;"	f
 abs	cgmath.h	/^inline vec4 abs( const vec4& v ){ return vec4(fabs(v.x),fabs(v.y),fabs(v.z),fabs(v.w)); }$/;"	f
 access	cgut.h	35;"	d
+ai_death	main.cpp	/^int		ai_death = 0;			\/\/ai 사망자수$/;"	v
 ai_t	ai.h	/^struct ai_t$/;"	s
 ais	ai.h	/^auto ais = std::move(create_ais(anum));$/;"	v
 all_a	stb_image.h	/^   unsigned int mr,mg,mb,ma, all_a;$/;"	m	struct:__anon19
@@ -2867,6 +2870,8 @@ channel	stb_image.h	/^   stbi_uc size,type,channel;$/;"	m	struct:__anon20
 channel_order	stb_image.h	/^   int channel_order;$/;"	m	struct:__anon8
 channels	cgut.h	/^	int				channels=0;$/;"	m	struct:image
 clamp	cgmath.h	74;"	d
+clear_page	main.cpp	/^GLint		clear_page = 0;$/;"	v
+clear_page_path	main.cpp	/^static const char* clear_page_path = "..\/bin\/images\/clearpage.jpg";$/;"	v	file:
 close_gl	gl/glad/glad.c	/^void close_gl(void) {$/;"	f	file:
 code	stb_image.h	/^   stbi__uint16 code[256];$/;"	m	struct:__anon10
 code_bits	stb_image.h	/^   int            code_bits;   \/\/ number of valid bits$/;"	m	struct:__anon11
@@ -2999,6 +3004,8 @@ eye0	camera.h	/^	vec3 eye0;$/;"	m	struct:camera
 fabs	cgmath.h	/^inline vec2 fabs( const vec2& v ){ return vec2(fabs(v.x),fabs(v.y)); }$/;"	f
 fabs	cgmath.h	/^inline vec3 fabs( const vec3& v ){ return vec3(fabs(v.x),fabs(v.y),fabs(v.z)); }$/;"	f
 fabs	cgmath.h	/^inline vec4 fabs( const vec4& v ){ return vec4(fabs(v.x),fabs(v.y),fabs(v.z),fabs(v.w)); }$/;"	f
+fail_page	main.cpp	/^GLint		fail_page = 0;$/;"	v
+fail_page_path	main.cpp	/^static const char* fail_page_path = "..\/bin\/images\/failpage.jpg";$/;"	v	file:
 fast	stb_image.h	/^   stbi__uint16 fast[1 << STBI__ZFAST_BITS];$/;"	m	struct:__anon14
 fast	stb_image.h	/^   stbi_uc  fast[1 << FAST_BITS];$/;"	m	struct:__anon10
 fast_ac	stb_image.h	/^   stbi__int16 fast_ac[4][1 << FAST_BITS];$/;"	m	struct:__anon11
@@ -3024,6 +3031,7 @@ free_exts	gl/glad/glad.c	/^static void free_exts(void) {$/;"	f	file:
 g	cgmath.h	/^	union { struct { T x, y, z, w; }; struct { T r, g, b, a; }; struct { T s, t, p, q; }; };$/;"	m	struct:tvec4::__anon31::__anon33
 g	cgmath.h	/^	union { struct { T x, y, z; }; struct { T r, g, b; }; struct { T s, t, p; }; };$/;"	m	struct:tvec3::__anon27::__anon29
 g	cgmath.h	/^	union{ struct { T x, y; }; struct { T r, g; }; struct { T s, t; }; };$/;"	m	struct:tvec2::__anon23::__anon25
+game_counter	main.cpp	/^int		game_counter = 0;	\/\/제한시간$/;"	v
 getAs4Values	irrKlang/ik_vec3d.h	/^		void getAs4Values(T* array)$/;"	f	class:irrklang::vec3d
 getBytesPerSecond	irrKlang/ik_SAudioStreamFormat.h	/^		inline ik_s32 getBytesPerSecond() const$/;"	f	struct:irrklang::SAudioStreamFormat
 getDistanceFrom	irrKlang/ik_vec3d.h	/^		ik_f64 getDistanceFrom(const vec3d<T>& other) const$/;"	f	class:irrklang::vec3d
@@ -5143,6 +5151,8 @@ glsl	cgut.h	/^	int glsl() const { return sl.major*10+sl.minor;}$/;"	f	struct:gl_
 grab	irrKlang/ik_IRefCounted.h	/^		void grab() { ++ReferenceCounter; }$/;"	f	class:irrklang::IRefCounted
 green	gl/glfw/glfw3.h	/^    unsigned short* green;$/;"	m	struct:GLFWgammaramp
 greenBits	gl/glfw/glfw3.h	/^    int greenBits;$/;"	m	struct:GLFWvidmode
+ground	main.cpp	/^GLint		ground = 0;$/;"	v
+ground_path	main.cpp	/^static const char* ground_path = "..\/bin\/images\/ground.jpg";$/;"	v	file:
 h	stb_image.h	/^      int h,v;$/;"	m	struct:__anon11::__anon12
 h	stb_image.h	/^   int w,h;$/;"	m	struct:__anon22
 h2	stb_image.h	/^      int x,y,w2,h2;$/;"	m	struct:__anon11::__anon12
@@ -5378,6 +5388,7 @@ normalize	irrKlang/ik_vec3d.h	/^		vec3d<T>& normalize()$/;"	f	class:irrklang::ve
 num_bits	stb_image.h	/^   int num_bits;$/;"	m	struct:__anon15
 num_channels	stb_image.h	/^   int num_channels;$/;"	m	struct:__anon8
 num_cnt	numbers.h	/^} num_cnt;$/;"	v	typeref:struct:number_counter
+num_death_ai	ai.h	/^int num_death_ai = 0;$/;"	v
 num_exts_i	gl/glad/glad.c	/^static int num_exts_i = 0;$/;"	v	file:
 number_10_vertices	numbers.h	/^std::vector<vertex>	number_10_vertices = create_vertices_numbers(1,6);$/;"	v
 number_11_vertices	numbers.h	/^std::vector<vertex>	number_11_vertices = create_vertices_numbers(2,6);$/;"	v
@@ -5591,6 +5602,8 @@ pWinMM_HWaveOut	irrKlang/ik_ISoundEngine.h	/^		void* pWinMM_HWaveOut;$/;"	m	stru
 pal	stb_image.h	/^   stbi_uc  pal[256][4];$/;"	m	struct:__anon22
 parse	stb_image.h	/^   int parse, step;$/;"	m	struct:__anon22
 path	cgut.h	/^	char path[_MAX_PATH], drive[_MAX_DRIVE], dir[_MAX_DIR], fname[_MAX_FNAME], ext[_MAX_EXT];$/;"	m	struct:module_path_t
+pause_page	main.cpp	/^GLint		pause_page = 0;$/;"	v
+pause_page_path	main.cpp	/^static const char* pause_page_path = "..\/bin\/images\/pausepage.jpg";$/;"	v	file:
 perspective	cgmath.h	/^	static mat4 perspective( float fovy, float aspect, float dnear, float dfar ){ return mat4().set_perspective(fovy, aspect, dnear, dfar); }$/;"	f	struct:mat4
 pixels	gl/glfw/glfw3.h	/^    unsigned char* pixels;$/;"	m	struct:GLFWimage
 play_sound	main.cpp	/^void play_sound()$/;"	f
@@ -5678,7 +5691,7 @@ scale_matrix	maintheme.h	/^	mat4 scale_matrix =$/;"	m	struct:button_start
 scale_matrix_col	pre-colosseum.h	/^	mat4 scale_matrix_col =$/;"	m	struct:colosseum_bottom
 scale_matrix_col	pre-colosseum.h	/^	mat4 scale_matrix_col =$/;"	m	struct:colosseum_side
 scan_n	stb_image.h	/^   int scan_n, order[4];$/;"	m	struct:__anon11
-screan_mode	main.cpp	/^int		screan_mode = 0;		\/\/타이틀, 게임화면, 앤딩화면 전환용$/;"	v
+screen_mode	main.cpp	/^int		screen_mode = 0;		\/\/타이틀, 게임화면, 앤딩화면 전환용$/;"	v
 set	cgmath.h	/^	inline void set( const tvec2<T>& v1, const tvec2<T>& v2 ){ x=v1.x;y=v1.y;z=v2.x;w=v2.y; }$/;"	f	struct:tvec4
 set	cgmath.h	/^	tvec2( T a ){ x=y=a; }						inline void set( T a ){ x=y=a; }$/;"	f	struct:tvec2
 set	cgmath.h	/^	tvec2( T a, T b ){ x=a;y=b; }				inline void set( T a, T b ){ x=a;y=b; }$/;"	f	struct:tvec2
@@ -6022,6 +6035,8 @@ stbi_zlib_decode_noheader_buffer	stb_image.h	/^STBIDEF int stbi_zlib_decode_nohe
 stbi_zlib_decode_noheader_malloc	stb_image.h	/^STBIDEF char *stbi_zlib_decode_noheader_malloc(char const *buffer, int len, int *outlen)$/;"	f
 step	stb_image.h	/^   int parse, step;$/;"	m	struct:__anon22
 strstr	cgut.h	/^inline bool strstr( const char* src, std::initializer_list<const char*> substr )$/;"	f
+student	main.cpp	/^GLint		student = 0;$/;"	v
+student_path	main.cpp	/^static const char* student_path = "..\/bin\/images\/student.jpg";$/;"	v	file:
 succ_high	stb_image.h	/^   int            succ_high;$/;"	m	struct:__anon11
 succ_low	stb_image.h	/^   int            succ_low;$/;"	m	struct:__anon11
 suffix	stb_image.h	/^   stbi_uc suffix;$/;"	m	struct:__anon21
@@ -6035,6 +6050,7 @@ t0	camera.h	/^	float t0=0;$/;"	m	struct:camera
 t0	sky.h	/^	float t0 = 0;				\/\/ 총 쏜 시점에서의 시간$/;"	m	struct:Sky
 tank	camera.h	/^tank_t tank = {0.3f, 0.3f, vec3(0), vec4(0.5f,0.5f,0.5f,1.0f), 30};$/;"	v
 tank_t	camera.h	/^struct tank_t$/;"	s
+tb	main.cpp	/^float	tb = 0;$/;"	v
 tex	cgut.h	/^    vec2 tex;	\/\/ texture coordinate; ignore this for the moment$/;"	m	struct:vertex
 texture	cgut.h	/^	GLuint	texture = 0;$/;"	m	struct:mesh
 theme	maintheme.h	/^} theme;$/;"	v	typeref:struct:main_theme
