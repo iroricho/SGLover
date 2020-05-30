@@ -108,12 +108,23 @@ int		game_counter = 0;	//제한시간
 int		camer_toggle = 0;
 bool	init_flag = 0;
 float		spacebar_timer = 0;	//연사 조절
+bool	introbgm_flag = 0;
+bool	gamebgm_flag = 0;
+bool gameending_flag = 0;
 
 
 irrklang::ISoundEngine* engine = nullptr;
 irrklang::ISoundSource* sound_src_1 = nullptr;
 irrklang::ISoundSource* sound_src_2 = nullptr;
 irrklang::ISoundSource* sound_src_3 = nullptr;
+irrklang::ISoundSource* sound_src_gamebgm = nullptr;
+irrklang::ISoundSource* sound_src_introbgm = nullptr;
+irrklang::ISoundSource* sound_src_ouch = nullptr;
+irrklang::ISoundSource* sound_src_laser = nullptr;
+irrklang::ISoundSource* sound_src_ohno = nullptr;
+irrklang::ISoundSource* sound_src_gamewin = nullptr;
+irrklang::ISoundSource* sound_src_gamelose = nullptr;
+irrklang::ISoundSource* sound_src_beep = nullptr;
 
 
 //*************************************
@@ -260,6 +271,19 @@ void render()
 
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 업데이트
 
+		//sound change
+		if (introbgm_flag == 1)
+		{
+			engine->stopAllSoundsOfSoundSource(sound_src_introbgm);
+			introbgm_flag = 0;
+		}
+		if (gamebgm_flag == 0)
+		{
+			engine->play2D(sound_src_gamebgm, false);
+			gamebgm_flag = 1;
+			
+		}
+
 		// bind textures
 		
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
@@ -378,6 +402,19 @@ void render()
 			ais = std::move(create_ais(anum));
 			
 		}
+		//sound change
+		if (introbgm_flag == 0)
+		{
+			engine->play2D(sound_src_introbgm, true);
+			introbgm_flag = 1;
+
+		}
+		if (gamebgm_flag == 1)
+		{
+			engine->stopAllSoundsOfSoundSource(sound_src_gamebgm);
+			gamebgm_flag = 0;
+		}
+		gameending_flag = 0;
 
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
@@ -434,6 +471,7 @@ void render()
 		Pause();
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
+		
 
 		//일시정지 화면 그리기
 		glBindVertexArray(vertex_array_maintheme);
@@ -453,6 +491,17 @@ void render()
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
+		if (gamebgm_flag == 1)
+		{
+			engine->stopAllSoundsOfSoundSource(sound_src_gamebgm);
+			gamebgm_flag = 0;
+		}
+		if (gameending_flag == 0)
+		{
+			engine->play2D(sound_src_gamewin, false);
+			gameending_flag = 1;
+		}
+		
 		//클리어 화면 그리기
 		glBindVertexArray(vertex_array_maintheme);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
@@ -471,6 +520,17 @@ void render()
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
+		if (gamebgm_flag == 1)
+		{
+			engine->stopAllSoundsOfSoundSource(sound_src_gamebgm);
+			gamebgm_flag = 0;
+		}
+		if (gameending_flag == 0)
+		{
+			engine->play2D(sound_src_gamelose, false);
+			gameending_flag = 1;
+		}
+		
 		//일시정지 화면 그리기
 		glBindVertexArray(vertex_array_maintheme);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, theme.model_matrix);
@@ -541,6 +601,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			{
 				if (anum > 1)	anum--;
 				init_flag = 0;
+				engine->play2D(sound_src_beep, false);
 
 			}
 		}
@@ -552,6 +613,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			{
 				if (anum < 16)	anum++;
 				init_flag = 0;
+				engine->play2D(sound_src_beep, false);
 			}
 		}
 		else if (key == GLFW_KEY_C) {
@@ -560,14 +622,18 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 
 		else if (key == GLFW_KEY_SPACE) {
-			if (spacebar_timer < t)
+			if (screan_mode == 1)
 			{
-				engine->play2D(sound_src_1, false);
-				bullets = (bullets + 1) % bullet_num;
-				bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
-				spacebar_timer = t+0.5f;
+				if (spacebar_timer < t)
+				{
+					engine->play2D(sound_src_laser, false);
+					bullets = (bullets + 1) % bullet_num;
+					bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
+					spacebar_timer = t + 0.5f;
 
+				}
 			}
+			
 		}
 
 		//그냥 텍스쳐매핑할떄 테스트용. 나중에 지워도 됨.
@@ -580,23 +646,23 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 		else if (key == GLFW_KEY_G)
 		{
-			if (screan_mode == 0 || screan_mode == 2 || screan_mode == 3) { screan_mode = 1; }
+			if (screan_mode == 0 || screan_mode == 2 || screan_mode == 3) { engine->play2D(sound_src_beep, false); screan_mode = 1; }
 		}
 		else if (key == GLFW_KEY_F2)
 		{
-			if (screan_mode == 0 )	screan_mode = 2;
+			if (screan_mode == 0) { engine->play2D(sound_src_beep, false); screan_mode = 2; }
 			
 			
 		}
 		else if (key == GLFW_KEY_I)
 		{
-			if (screan_mode != 1 )		screan_mode = 0;
+			if (screan_mode != 1) { engine->play2D(sound_src_beep, false); screan_mode = 0; }
 
 		}
 		else if (key == GLFW_KEY_P)
 		{
-			if (screan_mode == 1)		screan_mode = 3;
-			else if (screan_mode == 3)	screan_mode = 1;
+			if (screan_mode == 1) { engine->play2D(sound_src_beep, false);  screan_mode = 3; }
+			else if (screan_mode == 3) { engine->play2D(sound_src_beep, false);  screan_mode = 1; }
 		}
 	
 
@@ -678,7 +744,7 @@ GLuint create_texture(const char* image_path, bool b_mipmap)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, b_mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-
+	
 	return texture;
 }
 
@@ -694,7 +760,15 @@ bool user_init()
 	sound_src_1 = engine->addSoundSourceFromFile("gomonster.wav");
 	sound_src_2 = engine->addSoundSourceFromFile("grandpas11month.wav");
 	sound_src_3 = engine->addSoundSourceFromFile("hit.wav");
-	engine->play2D(sound_src_2, true);
+	sound_src_gamebgm = engine->addSoundSourceFromFile("../bin/sound/gamebgm.wav");
+	sound_src_introbgm = engine->addSoundSourceFromFile("../bin/sound/introbgm.wav");
+	sound_src_ouch = engine->addSoundSourceFromFile("../bin/sound/ouch.wav");
+	sound_src_ohno = engine->addSoundSourceFromFile("../bin/sound/ohno.wav");
+	sound_src_laser = engine->addSoundSourceFromFile("../bin/sound/laser.wav");
+	sound_src_gamewin = engine->addSoundSourceFromFile("../bin/sound/gamewin.wav");
+	sound_src_gamelose = engine->addSoundSourceFromFile("../bin/sound/gamelose.wav");
+	sound_src_beep = engine->addSoundSourceFromFile("../bin/sound/beep.wav");
+	//engine->play2D(sound_src_2, true);
 
 	// log hotkeys
 	print_help();
@@ -829,7 +903,12 @@ void user_finalize()
 
 void play_sound()
 {
-	engine->play2D(sound_src_3, false);
+	engine->play2D(sound_src_ouch, false);
+}
+
+void play_death_sound()
+{
+	engine->play2D(sound_src_ohno, false);
 }
 
 int main( int argc, char* argv[] )

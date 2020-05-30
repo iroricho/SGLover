@@ -8,6 +8,7 @@
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 
 void play_sound();
+void play_death_sound();
 
 struct ai_t
 {
@@ -119,6 +120,7 @@ inline void ai_t::update( float t, const vec3& tpos )
 					)
 		   ) {
 			death = 1; num_death_ai++; t0 = t; printf("Death\n");
+			play_death_sound();
 		}
 	}
 
