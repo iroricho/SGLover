@@ -137,19 +137,6 @@ std::vector<vertex>	colosseum_side_vertices;	//∞Ê±‚¿Â ø∑∏È vertices
 */
 
 //*************************************
-// utility function
-inline vec2 cursor_to_ndc( dvec2 cursor, ivec2 window_size )
-{
-	// normalize window pos to [0,1]^2
-	vec2 npos = vec2( float(cursor.x)/float(window_size.x-1),
-					  float(cursor.y)/float(window_size.y-1) );
-	
-	// normalize window pos to [-1,1]^2 with vertical flipping
-	// vertical flipping: window coordinate system defines y from
-	// top to bottom, while the camera from bottom to top
-	return vec2(npos.x*2.0f-1.0f,1.0f-npos.y*2.0f);
-}
-
 void update_camera() {
 	cam.update_Camera();
 }
@@ -659,34 +646,10 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 void mouse( GLFWwindow* window, int button, int action, int mods )
 {
-	cam.button = button;
-	cam.mods = mods;
-
-	dvec2 pos; glfwGetCursorPos(window,&pos.x,&pos.y);
-	vec2 npos = cursor_to_ndc( pos, window_size );
-	
-	if(action==GLFW_PRESS)			cam.begin( npos );
-	else if(action==GLFW_RELEASE)	cam.end();
 }
 
 void motion( GLFWwindow* window, double x, double y )
 {
-	if (cam.is_tracking())
-	{
-		vec2 npos = cursor_to_ndc( dvec2(x,y), window_size );
-		if (cam.button==GLFW_MOUSE_BUTTON_LEFT&&cam.mods==0)
-		{
-			cam.update_rot( npos );
-		}
-		else if ((cam.button==GLFW_MOUSE_BUTTON_RIGHT)||((cam.button==GLFW_MOUSE_BUTTON_LEFT)&&(cam.mods&GLFW_MOD_SHIFT)))
-		{
-			cam.update_zm( npos );
-		}
-		else if ((cam.button==GLFW_MOUSE_BUTTON_MIDDLE)||((cam.button==GLFW_MOUSE_BUTTON_LEFT)&&(cam.mods&GLFW_MOD_CONTROL)))
-		{
-			cam.update_pn( npos );
-		}
-	}
 }
 
 GLuint create_texture(const char* image_path, bool b_mipmap)
@@ -882,8 +845,8 @@ int main( int argc, char* argv[] )
 	// register event callbacks
 	glfwSetWindowSizeCallback( window, reshape );	// callback for window resizing events
     glfwSetKeyCallback( window, keyboard );			// callback for keyboard events
-	glfwSetMouseButtonCallback( window, mouse );	// callback for mouse click inputs
-	glfwSetCursorPosCallback( window, motion );		// callback for mouse movements
+	//glfwSetMouseButtonCallback( window, mouse );	// callback for mouse click inputs
+	//glfwSetCursorPosCallback( window, motion );		// callback for mouse movements
 
 	t = float(glfwGetTime());	// time init
 	float spf = 0.008f;	// sec per frame
