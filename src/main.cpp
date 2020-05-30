@@ -388,10 +388,10 @@ void render()
 			for (int i=ais.size(); i>0; i--) {
 				ais.pop_back();
 			}
-			
+			ais = std::move(create_ais(anum));
 			
 		}
-		ais = std::move(create_ais(anum));
+
 		glUniform1i(glGetUniformLocation(program, "screan_mode"), screan_mode);		//스크린모드 uniform 최우선 update 
 
 
@@ -553,6 +553,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			if (screan_mode == 0)
 			{
 				if (anum > 1)	anum--;
+				init_flag = 0;
 
 			}
 		}
@@ -563,6 +564,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			if (screan_mode == 0)
 			{
 				if (anum < 16)	anum++;
+				init_flag = 0;
 			}
 		}
 		else if (key == GLFW_KEY_C) {
