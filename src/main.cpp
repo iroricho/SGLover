@@ -46,11 +46,15 @@ static const char* numbers_path = "../bin/images/numbers.jpg";
 static const char* head_path = "../bin/images/head.jpg";
 static const char* bullets_path = "../bin/images/bullet.jpg";
 static const char* hh_head_path = "../bin/images/hh_head.jpg";
+static const char* mg_head_path = "../bin/images/mg_head.jpg";
+static const char* dy_head_path = "../bin/images/dy_head.jpg";
 static const char* pause_page_path = "../bin/images/pausepage.jpg";
 static const char* clear_page_path = "../bin/images/clearpage.jpg";
 static const char* fail_page_path = "../bin/images/failpage.jpg";
 static const char* ground_path = "../bin/images/ground.jpg";
 static const char* student_path = "../bin/images/student.jpg";
+
+
 
 //*************************************
 // window objects
@@ -73,11 +77,14 @@ GLint		numbers = 0;
 GLint		head = 0;
 GLint		bullets = 0;
 GLint		hh_head = 0;
+GLint		mg_head = 0;
+GLint		dy_head = 0;
 GLint		pause_page = 0;
 GLint		clear_page = 0;
 GLint		fail_page = 0;
 GLint		ground = 0;
 GLint		student = 0;
+
 
 
 //*************************************
@@ -89,6 +96,7 @@ bool	halt = 0;
 uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
 int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
 int		game_counter = 0;	//제한시간
+int		camer_toggle = 0;
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -161,8 +169,16 @@ void update()
 
 	// camera의 eye, at, up 은 cameara 헤더에 정의된 함수들이 바꿔줍니다.
 	// 때문에 update 때만 view_matrix를 구해주면 됩니다.
-	cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
+	if (camer_toggle == 0)	cam.view_matrix = mat4::look_at(cam.eye, cam.at, cam.up);
+	else if (camer_toggle == 1) {
+		vec3 towards = cam.at - cam.eye;
+		vec3 up = cam.up;
 
+		vec3 new_eye = cam.eye +  2*up - 0.5f* towards;
+		vec3 new_at = cam.eye - (towards + vec3(0, -0.5f, 0)).normalize();
+
+		cam.view_matrix = mat4::look_at(new_eye, new_at, cam.up);
+	}
 	GLint uloc;
 	uloc = glGetUniformLocation(program, "view_matrix");			if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.view_matrix);
 	uloc = glGetUniformLocation(program, "projection_matrix");	if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, cam.projection_matrix);
@@ -180,7 +196,7 @@ void update()
 		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
 		//********* 충돌 검사 **********//
 		for (int i = 0; i < 100; i++) {
-			ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass);
+			if (ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass)) bullet_list[i].dissapear();
 		}
 		ai.collision(tank.pos, tank.radius, tank.mass);
 
@@ -208,6 +224,8 @@ void update()
 	}
 	//Sky move update
 	sky.update(t, tank.pos);
+
+	
 
 
 	if (num_death_ai == anum)	screan_mode = 4;	//승리조건
@@ -274,7 +292,9 @@ void render()
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix);
 			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//몸통
 			glBindVertexArray(vertex_array_2);
-			glUniform1i(glGetUniformLocation(program, "TEX0"), 8);
+			if(i%3==0)		glUniform1i(glGetUniformLocation(program, "TEX0"), 8);
+			else if(i%3==1)	glUniform1i(glGetUniformLocation(program, "TEX0"), 14);
+			else					glUniform1i(glGetUniformLocation(program, "TEX0"), 15);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix_head);
 			glDrawElements(GL_TRIANGLES, 4 * bullet_list[i].NTESS * bullet_list[i].NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
 
@@ -328,8 +348,18 @@ void render()
 		Pause();
 		glfwSetTime(0);
 		time_buffer = t;
+		//초기화부분
 		num_death_ai = 0;		//데스 초기화
 		game_counter = 0;		//시간 카운터 초기화
+
+		for (int i = 0; i < 100; i++) {
+			bullet_list[i].dissapear();
+		}	//총알 초기화
+
+		ais = std::move(create_ais(anum));
+
+		//초기화 업데이트
+
 		
 		for (int i = 0; i < anum; i++)
 		{
@@ -496,6 +526,9 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			int flags;
 			flags = cam.end_Camera();
 			cam.begin_Camera('R', flags);
+		}
+		else if (key == GLFW_KEY_C) {
+			camer_toggle = (camer_toggle + 1) % 2;
 		}
 
 
@@ -722,6 +755,8 @@ bool user_init()
 	fail_page = create_texture(fail_page_path, true);	if (fail_page == -1) return false;
 	ground = create_texture(ground_path, true);	if (ground == -1) return false;
 	student = create_texture(student_path, true);	if (student== -1) return false;
+	mg_head = create_texture(mg_head_path, true);	if (mg_head == -1) return false;
+	dy_head = create_texture(dy_head_path, true);	if (dy_head == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -752,6 +787,10 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D, ground);
 	glActiveTexture(GL_TEXTURE13);
 	glBindTexture(GL_TEXTURE_2D, student);
+	glActiveTexture(GL_TEXTURE14);
+	glBindTexture(GL_TEXTURE_2D,  mg_head);
+	glActiveTexture(GL_TEXTURE15);
+	glBindTexture(GL_TEXTURE_2D, dy_head);
 
 
 

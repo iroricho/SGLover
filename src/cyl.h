@@ -39,7 +39,7 @@ std::vector<vertex> create_cyltop_vertices_AI(uint N)
 	for (uint i = 0; i <= N; i++)
 	{
 		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.25f + 0.25f*(i * theta)/PI, 0.5f) });
-		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(theta/PI*i, 1.0f) });
+		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(theta/(2.0f*PI)*i, 1.0f) });
 	}
 
 	//downside vertices
@@ -47,7 +47,7 @@ std::vector<vertex> create_cyltop_vertices_AI(uint N)
 	for (uint i = 0; i <= N; i++)
 	{
 		//v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.25f + 0.25f*(i * theta) / PI, 0.5f) });
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(theta / PI * i , 0.0f) });
+		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(theta / (2.0f*PI) * i , 0.0f) });
 	}
 	return v;
 }
