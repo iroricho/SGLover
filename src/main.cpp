@@ -103,6 +103,7 @@ uint	mode = 0;			// texture display mode: 0=texcoord, 1=lena, 2=baboon
 int		screan_mode = 0;		//타이틀, 게임화면, 앤딩화면 전환용
 int		game_counter = 0;	//제한시간
 int		camer_toggle = 0;
+float		spacebar_timer = 0;	//연사 조절
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -553,9 +554,15 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 
 
 		else if (key == GLFW_KEY_SPACE) {
-			engine->play2D(sound_src_1, false);
-			bullets = (bullets + 1) % 100;
-			bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
+			if (spacebar_timer < t)
+			{
+				engine->play2D(sound_src_1, false);
+				bullets = (bullets + 1) % 100;
+				bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
+				spacebar_timer = t+0.5f;
+
+			}
+			
 		}
 
 		//그냥 텍스쳐매핑할떄 테스트용. 나중에 지워도 됨.
