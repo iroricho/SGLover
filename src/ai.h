@@ -6,7 +6,6 @@
 #include "camera.h"
 
 extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
-extern struct Bullet bullet; //나중에 총알 여러개 생기면 수정해줘야됨. vecter<Bullet>이라던가..
 
 void play_sound();
 
@@ -34,6 +33,7 @@ struct ai_t
 	// public functions
 	void	update( float t, const vec3& tpos );	
 	void collision(vec3 tpos, float tradius, float tmass);
+	void collision_bullet(vec3 tpos, float tradius, float tmass);
 	void	update_head(float t);
 };
 
@@ -180,25 +180,55 @@ inline void ai_t::update( float t, const vec3& tpos )
 
 inline void ai_t::collision(vec3 tpos, float tradius, float tmass)
 {
-	if ( death == 1 ) return;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
-	float n = 0.01f ;		// 충돌 후 재충돌 가능 interval
-	float collision_speed = 0.6f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+	if (death == 1) return;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
+	float collision_time = 0.3f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
+	float collision_speed = 0.01f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
-		if (collision_true==1)
+		if (collision_true == 1)
 		{
 			play_sound();
 			//printf("collision! %d\n",collision_true);
 			collision_t0 = t;
-			collision_direction0 = ( pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
+			collision_direction0 = (pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
 		}
 	}
 
-	if (t - collision_t0 < n) 
+	if (t - collision_t0 < collision_time)
 	{
-		pos.x = pos.x + collision_direction0.x*collision_speed;
-		pos.z = pos.z + collision_direction0.z*collision_speed;
+		pos.x = pos.x + collision_direction0.x * collision_speed;
+		pos.z = pos.z + collision_direction0.z * collision_speed;
+		collision_true = 0;  //collision_true 0으로 만들어서 재충돌 안일어나게.
+		//printf("settrue 0 \n");
+	}
+	else
+	{
+		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
+	}
+}
+
+inline void ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
+{
+	if (death == 1) return;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
+	float collision_time = 0.3f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
+	float collision_speed = 0.01f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+
+	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
+	{
+		if (collision_true == 1)
+		{
+			play_sound();
+			//printf("collision! %d\n",collision_true);
+			collision_t0 = t;
+			collision_direction0 = (pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
+		}
+	}
+
+	if (t - collision_t0 < collision_time)
+	{
+		pos.x = pos.x + collision_direction0.x * collision_speed;
+		pos.z = pos.z + collision_direction0.z * collision_speed;
 		collision_true = 0;  //collision_true 0으로 만들어서 재충돌 안일어나게.
 		//printf("settrue 0 \n");
 	}
