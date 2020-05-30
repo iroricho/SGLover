@@ -17,7 +17,7 @@ struct ai_t
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
 	float	mass = radius*radius*height;
-	float	speed = 0.005f / sqrt(mass);	// velocity of ai
+	float	speed = 0.01f / sqrt(mass);	// velocity of ai
 	bool	death = 0;
 	vec3	posb;			// pos buffer for rotate
 	
@@ -206,8 +206,6 @@ inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
 
 		if (collision_true == 1)
 		{
-			printf("collision! %d\n",collision_true);
-			printf("speed %f\n",collision_speed);
 			hit = true;
 			play_sound();
 			//printf("collision! %d\n",collision_true);
@@ -244,8 +242,6 @@ inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
 		if (collision_true == 1)
 		{
 			play_sound();
-			printf("collision! %d\n",collision_true);
-			printf("speed %f\n",collision_speed);
 			collision_t0 = t;
 			collision_direction0 = (pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
 		}
