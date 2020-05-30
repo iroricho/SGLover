@@ -18,10 +18,12 @@ struct tank_t
 	float	mass = radius*radius*height;	// tank Áú·®
 	mat4	model_matrix;	// modeling transformation
 	mat4 model_matrix_head;	//¸Ó¸® matrix
+	mat4 model_matrix_arm;	//ÆÈ
 
 	// public functions
 	void	update_tank( float t, const vec3& eye, const vec3& at );
 	void	update_tank_head(float t);
+	void	update_tank_arm();
 };
 
 #define cosrand() cos((float)rand()) 
@@ -416,6 +418,14 @@ inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 		0, 0, 0, 1
 	};
 
+	mat4 rotation_cloth_matrix =
+	{
+		cos(PI/2), 0, sin(PI/2), 0,
+		0, 1, 0, 0,
+		-sin(PI/2), 0, cos(PI/2), 0,
+		0, 0, 0, 1
+	};
+
 	mat4 translate_matrix =
 	{
 		1, 0, 0, pos.x,
@@ -433,7 +443,7 @@ inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 	};
 
 
-	model_matrix = translate_matrix * rotation_matrix *scale_matrix_2* scale_matrix;
+	model_matrix = translate_matrix *rotation_cloth_matrix* rotation_matrix * scale_matrix;
 }
 
 inline void	tank_t::update_tank_head(float t)
@@ -442,7 +452,7 @@ inline void	tank_t::update_tank_head(float t)
 	mat4 translate_matrix =
 	{
 		1, 0, 0, 0,
-		0, 1, 0, 0.4f,
+		0, 1, 0, height*1.2f,
 		0, 0, 1, 0,
 		0, 0, 0, 1
 	};
@@ -463,7 +473,40 @@ inline void	tank_t::update_tank_head(float t)
 		0, 0, 0, 1
 	};
 	
-	model_matrix_head = translate_matrix*model_matrix * scale_matrix * rotation_matrix;
+	model_matrix_head = translate_matrix * model_matrix * scale_matrix * rotation_matrix;
+
+
+}
+
+inline void	tank_t::update_tank_arm()
+{
+
+	mat4 translate_matrix =
+	{
+		1, 0, 0, 0,
+		0, 1, 0, height * 0.3f,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	mat4 rotation_matrix =
+	{
+		1, 0, 0, 0,
+		0, cos(PI / 2), -sin(PI / 2), 0,
+		0, sin(PI / 2), cos(PI / 2), 0,
+		0, 0, 0, 1
+	};
+
+	mat4	scale_matrix =
+	{
+		0.8f,0,0,0,
+		0,1.5f,0,0,
+		0,0,0.8f,0,
+		0,0,0,1
+
+	};
+
+	model_matrix_arm = translate_matrix * model_matrix * rotation_matrix * scale_matrix;
 
 
 }

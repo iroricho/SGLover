@@ -53,6 +53,9 @@ static const char* clear_page_path = "../bin/images/clearpage.jpg";
 static const char* fail_page_path = "../bin/images/failpage.jpg";
 static const char* ground_path = "../bin/images/ground.jpg";
 static const char* student_path = "../bin/images/student.jpg";
+static const char* student_arm_path = "../bin/images/studentarm.jpg";
+static const char* prof_path = "../bin/images/prof.jpg";
+static const char* prof_arm_path = "../bin/images/profarm.jpg";
 
 
 
@@ -84,6 +87,9 @@ GLint		clear_page = 0;
 GLint		fail_page = 0;
 GLint		ground = 0;
 GLint		student = 0;
+GLint		student_arm = 0;
+GLint		prof = 0;
+GLint		profarm = 0;
 
 
 
@@ -114,6 +120,8 @@ std::vector<vertex>	unit_bullet_vertices;		// bullet vertices
 std::vector<vertex>	unit_sky_vertices;		// skyvertices
 std::vector<vertex>	main_theme_vertices;	//메인화면vertices
 std::vector<vertex>	button_vertices;				//버튼vertices
+std::vector<vertex>	unit_ai_arm_vertices;				//버튼vertices
+
 /*
 std::vector<vertex>	colosseum_bottom_vertices;	//경기장 하부 vertices
 std::vector<vertex>	colosseum_side_vertices;	//경기장 옆면 vertices
@@ -186,6 +194,7 @@ void update()
 	// **** update tank
 	tank.update_tank(t, cam.eye, cam.at);
 	tank.update_tank_head(t);
+	tank.update_tank_arm();
 	num_cnt.update_counter(t, cam.eye, cam.at);
 
 	// **** update ai
@@ -216,6 +225,7 @@ void update()
 
 		ai.update(t, tank.pos);
 		ai.update_head(t);
+		ai.update_arm();
 	}
 
 	// Bullet move update
@@ -266,12 +276,18 @@ void render()
 
 		// update tank uniforms and draw calls
 		glBindVertexArray(vertex_array_tank); //여기.
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 17);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix);
 		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//몸통
 		glBindVertexArray(vertex_array_2);
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 6);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix_head);
 		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
+		glBindVertexArray(vertex_array_arm);
+		glUniform1i(glGetUniformLocation(program, "TEX0"), 18);
+		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, tank.model_matrix_arm);
+		glDrawElements(GL_TRIANGLES, 4 * tank.NTESS * tank.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//팔
+
 
 
 
@@ -297,6 +313,10 @@ void render()
 			else					glUniform1i(glGetUniformLocation(program, "TEX0"), 15);
 			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix_head);
 			glDrawElements(GL_TRIANGLES, 4 * bullet_list[i].NTESS * bullet_list[i].NTESS * 3, GL_UNSIGNED_INT, nullptr);	//머리
+			glBindVertexArray(vertex_array_arm);
+			glUniform1i(glGetUniformLocation(program, "TEX0"), 16);
+			uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, ai.model_matrix_arm);
+			glDrawElements(GL_TRIANGLES, 4 * ai.NTESS * ai.NTESS * 3, GL_UNSIGNED_INT, nullptr);	//팔
 
 		}
 
@@ -716,6 +736,7 @@ bool user_init()
 	unit_sky_vertices = std::move( create_sky_vertices( sky.NTESS ));
 	main_theme_vertices = std::move(create_vertices_maintheme());
 	button_vertices = std::move(create_vertices_button());
+	unit_ai_arm_vertices = std::move(create_cyltop_vertices_AI_arm(ais[0].NTESS));
 	
 
 	/*
@@ -732,6 +753,7 @@ bool user_init()
 	update_vertex_buffer_maintheme(main_theme_vertices);		//메인화면 버퍼 생성
 	update_vertex_buffer_button(button_vertices);					//버튼 버퍼 생성
 	update_number_vertexbuffers();		//숫자 버퍼 생성
+	update_vertex_buffer_cyltop_AI_arm(unit_ai_arm_vertices, ais[0].NTESS);
 	
 	/*
 	bottom.update_vertex_buffer_colosseum(colosseum_bottom_vertices);	//경기장하부 버퍼 생성
@@ -757,6 +779,9 @@ bool user_init()
 	student = create_texture(student_path, true);	if (student== -1) return false;
 	mg_head = create_texture(mg_head_path, true);	if (mg_head == -1) return false;
 	dy_head = create_texture(dy_head_path, true);	if (dy_head == -1) return false;
+	student_arm = create_texture(student_arm_path, true);	if (student_arm == -1) return false;
+	prof = create_texture(prof_path, true);	if (prof == -1) return false;
+	profarm = create_texture(prof_arm_path, true);	if (profarm == -1) return false;
 
 	//bind texture object
 	glActiveTexture(GL_TEXTURE0);
@@ -791,6 +816,12 @@ bool user_init()
 	glBindTexture(GL_TEXTURE_2D,  mg_head);
 	glActiveTexture(GL_TEXTURE15);
 	glBindTexture(GL_TEXTURE_2D, dy_head);
+	glActiveTexture(GL_TEXTURE16);
+	glBindTexture(GL_TEXTURE_2D, student_arm);
+	glActiveTexture(GL_TEXTURE17);
+	glBindTexture(GL_TEXTURE_2D, prof);
+	glActiveTexture(GL_TEXTURE18);
+	glBindTexture(GL_TEXTURE_2D, profarm);
 
 
 

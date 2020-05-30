@@ -12,6 +12,7 @@
 GLuint	vertex_array_AI = 0;	// cylinder vertex_array
 GLuint	vertex_array_colosseum = 0;	// cylinder vertex_array
 GLuint	vertex_array_tank = 0;	// cylinder vertex_array
+GLuint	vertex_array_arm = 0;	//t손
 
 struct cyl
 {
@@ -39,7 +40,7 @@ std::vector<vertex> create_cyltop_vertices_AI(uint N)
 	for (uint i = 0; i <= N; i++)
 	{
 		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.25f + 0.25f*(i * theta)/PI, 0.5f) });
-		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(theta/(2.0f*PI)*i, 1.0f) });
+		v.push_back({ vec3(0.7f*sin(i * theta),0.5f,0.7f * cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(theta/(2.0f*PI)*i, 1.0f) });
 	}
 
 	//downside vertices
@@ -47,7 +48,7 @@ std::vector<vertex> create_cyltop_vertices_AI(uint N)
 	for (uint i = 0; i <= N; i++)
 	{
 		//v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.25f + 0.25f*(i * theta) / PI, 0.5f) });
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(theta / (2.0f*PI) * i , 0.0f) });
+		v.push_back({ vec3(0.7f * sin(i * theta),-0.5f,0.7f * cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(theta / (2.0f*PI) * i , 0.0f) });
 	}
 	return v;
 }
@@ -241,14 +242,14 @@ std::vector<vertex> create_cyltop_vertices_tank(uint N)
 	v.push_back({ vec3(0,0.5f,0), vec3(0,0.5f,0), vec2(0.125f,0.625f) });	//origin of upside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.125f + 0.125f * cos(i * theta),0.625f + 0.125f * sin(i * theta)) });
+		v.push_back({vec3(0.6f * sin(i * theta),0.5f, 0.6f * cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)),  vec2(theta / (2.0f * PI) * i, 1.0f) });
 	}
 
 	//downside vertices
 	v.push_back({ vec3(0,-0.5f,0), vec3(0,-0.5f,0), vec2(0.125f,0.625f) });	//origin of downside
 	for (uint i = 0; i <= N; i++)
 	{
-		v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.125f + 0.125f * cos(i * theta),0.625f + 0.125f * sin(i * theta)) });
+		v.push_back({ vec3(0.6f * sin(i * theta),-0.5f, 0.6f * cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)), vec2(theta / (2.0f * PI) * i, 0.0f) });
 	}
 	return v;
 }
@@ -329,6 +330,106 @@ void update_vertex_buffer_cyltop_tank(const std::vector<vertex>& vertices, uint 
 }
 
 
+
+//AI 팔 원기둥//
+std::vector<vertex> create_cyltop_vertices_AI_arm(uint N)
+{
+	std::vector<vertex> v;
+
+	float theta = 2.0f * PI / N;
+
+	//upside vertices
+	v.push_back({ vec3(0,1.0f,0), vec3(0,1.0f,0), vec2(0.125f,0.875f) });	//origin of upside
+	for (uint i = 0; i <= N; i++)
+	{
+		//v.push_back({ vec3(sin(i * theta),0.5f,cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(0.25f + 0.25f*(i * theta)/PI, 0.5f) });
+		v.push_back({ vec3(0.2f*sin(i * theta),1.0f,0.2f * cos(i * theta)), vec3(sin(i * theta),0.5f,cos(i * theta)), vec2(theta / (2.0f * PI) * i, 1.0f) });
+	}
+
+	//downside vertices
+	v.push_back({ vec3(0,-1.0f,0), vec3(0,-1.0f,0), vec2(0.5f,0.5f) });	//origin of downside
+	for (uint i = 0; i <= N; i++)
+	{
+		//v.push_back({ vec3(sin(i * theta),-0.5f,cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(0.25f + 0.25f*(i * theta) / PI, 0.5f) });
+		v.push_back({ vec3(0.2f * sin(i * theta),-1.0f,0.2f * cos(i * theta)), vec3(sin(i * theta),-0.5f,cos(i * theta)),vec2(theta / (2.0f * PI) * i , 0.0f) });
+	}
+	return v;
+}
+
+void update_vertex_buffer_cyltop_AI_arm(const std::vector<vertex>& vertices, uint N)
+{
+	static GLuint vertex_buffer = 0;	// ID holder for vertex buffer
+	static GLuint index_buffer = 0;		// ID holder for index buffer
+
+	// clear and create new buffers
+	if (vertex_buffer)	glDeleteBuffers(1, &vertex_buffer);	vertex_buffer = 0;
+	if (index_buffer)	glDeleteBuffers(1, &index_buffer);	index_buffer = 0;
+
+	// check exceptions
+	if (vertices.empty()) { printf("[error] vertices is empty.\n"); return; }
+
+	// create buffers
+	std::vector<uint> indices;
+
+	// upside indices
+	for (uint i = 0; i < N; i++)
+	{
+		indices.push_back(0);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+
+		indices.push_back(0);
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+	}
+
+	// downside indices
+	for (uint i = N + 2; i < 2 * N + 2; i++)
+	{
+		indices.push_back(N + 2);
+		indices.push_back(i + 2);
+		indices.push_back(i + 1);
+
+		indices.push_back(N + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + 2);
+	}
+
+	// side indices
+	for (uint i = 1; i < N + 1; i++)
+	{
+		indices.push_back(i);
+		indices.push_back(i + 1);
+		indices.push_back(i + N + 2);
+
+		indices.push_back(i);
+		indices.push_back(i + N + 2);
+		indices.push_back(i + 1);
+
+		indices.push_back(i + N + 2);
+		indices.push_back(i + N + 3);
+		indices.push_back(i + 1);
+
+		indices.push_back(i + N + 2);
+		indices.push_back(i + 1);
+		indices.push_back(i + N + 3);
+	}
+
+	// generation of vertex buffer: use vertices as it is
+	glGenBuffers(1, &vertex_buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex) * vertices.size(), &vertices[0], GL_STATIC_DRAW);
+
+	// geneation of index buffer
+	glGenBuffers(1, &index_buffer);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(uint) * indices.size(), &indices[0], GL_STATIC_DRAW);
+
+	// generate vertex array object, which is mandatory for OpenGL 3.3 and higher
+	if (vertex_array_arm) glDeleteVertexArrays(1, &vertex_array_arm);
+	vertex_array_arm = cg_create_vertex_array(vertex_buffer, index_buffer);
+	if (!vertex_array_arm) { printf("%s(): failed to create vertex aray\n", __func__); return; }
+}
 
 
 #endif
