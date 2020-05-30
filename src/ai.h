@@ -29,12 +29,14 @@ struct ai_t
 
 	mat4	model_matrix;	// modeling transformation
 	mat4 model_matrix_head;
+	mat4 model_matrix_arm;
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
 	bool collision(vec3 tpos, float tradius, float tmass);
 	bool collision_bullet(vec3 tpos, float tradius, float tmass);
 	void	update_head(float t);
+	void	update_arm();
 };
 
 // 중복을 피해 ai를 만드는 함수, 난이도에 따라 anum을 조절하면 됨
@@ -267,6 +269,36 @@ inline void ai_t::update_head(float t)
 	};
 
 	model_matrix_head = translate_matrix * model_matrix * rotation_matrix;
+}
+
+inline void ai_t::update_arm()
+{
+	mat4 translate_matrix =
+	{
+		1, 0, 0, 0,
+		0, 1, 0, height *0.3f,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+
+	mat4 rotation_matrix =
+	{
+		1, 0, 0, 0,
+		0, cos(PI / 2), -sin(PI/2), 0,
+		0, sin(PI/2), cos(PI / 2), 0,
+		0, 0, 0, 1
+	};
+
+	mat4	scale_matrix =
+	{
+		0.8f,0,0,0,
+		0,2.0f,0,0,
+		0,0,0.8f,0,
+		0,0,0,1
+
+	};
+
+	model_matrix_arm = translate_matrix * model_matrix * rotation_matrix*scale_matrix;
 }
 
 #endif // __AI_H__
