@@ -434,6 +434,7 @@ inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 		0, 0, 0, 1
 	};
 
+	/*
 	mat4 scale_matrix_2 =
 	{
 		0.3f, 0, 0, 0,
@@ -441,6 +442,7 @@ inline void tank_t::update_tank( float t, const vec3& eye, const vec3& at )
 		0, 0, 0.3f, 0,
 		0, 0, 0, 1
 	};
+	*/
 
 
 	model_matrix = translate_matrix *rotation_cloth_matrix* rotation_matrix * scale_matrix;

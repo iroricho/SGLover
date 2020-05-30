@@ -60,7 +60,7 @@ inline std::vector<ai_t> create_ais(int anum)
 	ai_t a;
 
 	//first ai
-	a = { 0.3f + 0.15f * abs(cosrand()), 0.3f + 0.3f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+	a = { 0.5f + 0.05f * cosrand(), 0.5f + 0.05f * cosrand(), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 	ais.push_back(a);
 
 	int canum = 1; //current ai number
@@ -70,7 +70,7 @@ inline std::vector<ai_t> create_ais(int anum)
 	//make ai
 	while (canum < anum)
 	{
-	a = { 0.3f + 0.15f * abs(cosrand()), 0.3f + 0.3f * abs(cosrand()), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
+		a = { 0.5f + 0.05f * cosrand(), 0.5f + 0.05f * cosrand(), vec3(colosseum.radius / 1.4f * cosrand(), colosseum.pos.y + colosseum.height * 0.5f + 0.5f * a.height, colosseum.radius / 1.4f * cosrand()), vec4(0.5f,0.5f,0.5f,1.0f), 30};
 
 		tempx = a.pos.x;
 		tempz = a.pos.z;
@@ -198,14 +198,16 @@ inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
 	bool hit = false;
 
 	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
-	float collision_time = 0.3f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.2f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+	float collision_time = 0.2f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
+	float collision_speed = 0.1f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
 
 		if (collision_true == 1)
 		{
+			printf("collision! %d\n",collision_true);
+			printf("speed %f\n",collision_speed);
 			hit = true;
 			play_sound();
 			//printf("collision! %d\n",collision_true);
@@ -234,7 +236,7 @@ inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
 	bool hit = false;
 	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
 	float collision_time = 0.2f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.001f * sqrt(tmass) / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+	float collision_speed = 0.2f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
 
 	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
 	{
@@ -242,7 +244,8 @@ inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
 		if (collision_true == 1)
 		{
 			play_sound();
-			//printf("collision! %d\n",collision_true);
+			printf("collision! %d\n",collision_true);
+			printf("speed %f\n",collision_speed);
 			collision_t0 = t;
 			collision_direction0 = (pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
 		}

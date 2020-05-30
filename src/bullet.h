@@ -31,7 +31,7 @@ struct Bullet
 };
 
 std::vector<Bullet> bullet_list;
-int bullet_num = 50;
+int bullet_num = 20;
 
 //********** Bullet 움직임 파트 *************
 inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
@@ -41,12 +41,14 @@ inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 	pos0 = _pos0;
 	n0 = _n0;
 	radius = 0.1f;
+	mass = radius*radius*radius;
 }
 
 inline void Bullet::disappear()
 {
 	disappear_flag = 1;
 	radius = 0.0f;
+	mass = 0;
 }
 
 inline void Bullet::update(float t, const vec3& tpos)
