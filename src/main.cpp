@@ -64,6 +64,7 @@ static const char* aicount_path = "../bin/images/aicount.jpg";
 //*************************************
 // window objects
 GLFWwindow*	window = nullptr;
+GLFWmonitor* monitor = nullptr;
 ivec2		window_size = cg_default_window_size(); // initial window size
 
 //*************************************
@@ -111,6 +112,7 @@ float		spacebar_timer = 0;	//연사 조절
 bool	introbgm_flag = 0;
 bool	gamebgm_flag = 0;
 bool gameending_flag = 0;
+bool	fullscreen_toggle = 0;
 
 
 irrklang::ISoundEngine* engine = nullptr;
@@ -602,7 +604,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 				if (anum > 1)	anum--;
 				init_flag = 0;
 				engine->play2D(sound_src_beep, false);
-
+				
 			}
 		}
 		else if (key == GLFW_KEY_RIGHT) {
@@ -614,6 +616,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 				if (anum < 16)	anum++;
 				init_flag = 0;
 				engine->play2D(sound_src_beep, false);
+				
 			}
 		}
 		else if (key == GLFW_KEY_C) {
@@ -664,6 +667,13 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			if (screan_mode == 1) { engine->play2D(sound_src_beep, false);  screan_mode = 3; }
 			else if (screan_mode == 3) { engine->play2D(sound_src_beep, false);  screan_mode = 1; }
 		}
+		else if (key == GLFW_KEY_F10)
+		{
+			if (fullscreen_toggle == 0) { fullscreen_toggle = 1;  glfwSetWindowMonitor(window, monitor, 0, 0, cg_default_window_size().x, cg_default_window_size().y, GLFW_DONT_CARE); }
+			else { fullscreen_toggle = 0; glfwSetWindowMonitor(window, NULL, 30, 30, cg_default_window_size().x, cg_default_window_size().y, GLFW_DONT_CARE);}
+			
+			
+		}
 	
 
 
@@ -706,6 +716,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 			int flags;
 			flags = cam.end_Camera();
 			cam.begin_Camera(0, flags);
+			
 		}
 	}
 }
@@ -916,6 +927,7 @@ int main( int argc, char* argv[] )
 	// create window and initialize OpenGL extensions
 	if(!(window = cg_create_window( window_name, window_size.x, window_size.y ))){ glfwTerminate(); return 1; }
 	if(!cg_init_extensions( window )){ glfwTerminate(); return 1; }	// init OpenGL extensions
+	monitor = glfwGetPrimaryMonitor(); 
 
 	// initializations and validations of GLSL program
 	if(!(program=cg_create_program( vert_shader_path, frag_shader_path ))){ glfwTerminate(); return 1; }	// create and compile shaders/program
