@@ -187,7 +187,7 @@ void update()
 		vec3 towards = cam.at - cam.eye;
 		vec3 up = cam.up;
 
-		vec3 new_eye = cam.eye +  2*up - 0.5f* towards;
+		vec3 new_eye = cam.eye +  2.0f*up - 0.5f* towards;
 		vec3 new_at = cam.eye - (towards + vec3(0, -0.5f, 0)).normalize();
 
 		cam.view_matrix = mat4::look_at(new_eye, new_at, cam.up);
@@ -632,6 +632,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 					engine->play2D(sound_src_laser, false);
 					bullets = (bullets + 1) % bullet_num;
 					bullet_list[bullets].launch(t, tank.pos, (cam.at - cam.eye).normalize());
+					
 					spacebar_timer = t + 0.5f;
 
 				}
