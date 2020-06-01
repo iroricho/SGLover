@@ -668,7 +668,7 @@ void keyboard( GLFWwindow* window, int key, int scancode, int action, int mods )
 		}
 		else if (key == GLFW_KEY_I)
 		{
-			if (screan_mode != 1) { engine->play2D(sound_src_beep, false); screan_mode = 0; }
+			if (screan_mode != 1) { engine->play2D(sound_src_beep, false); camera tmp; cam = tmp;  camer_toggle = 0;  screan_mode = 0; }
 
 		}
 		else if (key == GLFW_KEY_P)
