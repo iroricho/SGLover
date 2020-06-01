@@ -36,8 +36,8 @@
 static const char*	window_name = "SGLover";
 static const char*	vert_shader_path = "../bin/shaders/circ.vert";
 static const char*	frag_shader_path = "../bin/shaders/circ.frag";
-static const char* lena_image_path = "../bin/images/lena3.jpg";
-static const char* baboon_image_path = "../bin/images/baboon.jpg";
+
+//image
 static const char* main_theme_path = "../bin/images/maintheme.jpg";
 static const char* button_start_path = "../bin/images/buttonstart.jpg";
 static const char* button_help_path = "../bin/images/buttonhelp.jpg";
@@ -72,8 +72,8 @@ ivec2		window_size = cg_default_window_size(); // initial window size
 GLuint	program = 0;		// ID holder for GPU program
 
 GLuint  vertex_array = 0;			// ID holder for vertex array object
-GLint	LENA = 0;					// texture object
-GLint	BABOON = 0;					// texture object
+
+//texture object
 GLint		main_theme = 0;		//main_theme texture object
 GLint		button_start = 0;	//button texture object
 GLint		button_help = 0;	//button texture object
@@ -116,9 +116,6 @@ bool	fullscreen_toggle = 0;
 
 
 irrklang::ISoundEngine* engine = nullptr;
-irrklang::ISoundSource* sound_src_1 = nullptr;
-irrklang::ISoundSource* sound_src_2 = nullptr;
-irrklang::ISoundSource* sound_src_3 = nullptr;
 irrklang::ISoundSource* sound_src_gamebgm = nullptr;
 irrklang::ISoundSource* sound_src_introbgm = nullptr;
 irrklang::ISoundSource* sound_src_ouch = nullptr;
@@ -252,7 +249,7 @@ void update()
 
 
 	if (num_death_ai == anum)	screan_mode = 4;	//승리조건
-	if (game_counter == 61)	screan_mode = 5;	//패배조건
+	if (game_counter == 60)	screan_mode = 5;	//패배조건
 
 }
 
@@ -289,17 +286,13 @@ void render()
 		}
 		if (gamebgm_flag == 0)
 		{
-			engine->play2D(sound_src_gamebgm, false);
+			engine->play2D(sound_src_gamebgm, true);
 			gamebgm_flag = 1;
 			
 		}
 
 		// bind textures
 		
-		glUniform1i(glGetUniformLocation(program, "TEX0"), 0);
-
-		
-		glUniform1i(glGetUniformLocation(program, "TEX1"), 1);
 
 		// update tank uniforms and draw calls
 		glBindVertexArray(vertex_array_tank); //여기.
@@ -365,7 +358,7 @@ void render()
 	
 		game_counter = (int)t;
 		
-		glBindVertexArray(vertex_array_numbers_60+1-game_counter);
+		glBindVertexArray(vertex_array_numbers_60-game_counter);
 		glUniform1i(glGetUniformLocation(program, "TEX0"), 5);
 		uloc = glGetUniformLocation(program, "model_matrix");		if (uloc > -1) glUniformMatrix4fv(uloc, 1, GL_TRUE, num_cnt.model_matrix);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
@@ -777,9 +770,6 @@ bool user_init()
 	//sound source
 	engine = irrklang::createIrrKlangDevice();
 	if (!engine)	 return false;
-	sound_src_1 = engine->addSoundSourceFromFile("gomonster.wav");
-	sound_src_2 = engine->addSoundSourceFromFile("grandpas11month.wav");
-	sound_src_3 = engine->addSoundSourceFromFile("hit.wav");
 	sound_src_gamebgm = engine->addSoundSourceFromFile("../bin/sound/gamebgm.wav");
 	sound_src_introbgm = engine->addSoundSourceFromFile("../bin/sound/introbgm.wav");
 	sound_src_ouch = engine->addSoundSourceFromFile("../bin/sound/ouch.wav");
@@ -844,8 +834,6 @@ bool user_init()
 	*/
 
 	// load the Lena image to a texture
-	LENA = create_texture(lena_image_path, true);		if (LENA == -1) return false;
-	BABOON = create_texture(baboon_image_path, true);	if (BABOON == -1) return false;
 	main_theme = create_texture(main_theme_path, true);	if (main_theme == -1) return false;
 	button_start = create_texture(button_start_path, true);	if (button_start == -1) return false;
 	button_help = create_texture(button_help_path, true);	if (button_help == -1) return false;
@@ -868,10 +856,6 @@ bool user_init()
 	aicount = create_texture(aicount_path, true);	if (aicount == -1) return false;
 
 	//bind texture object
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, LENA);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, BABOON);
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, main_theme);
 	glActiveTexture(GL_TEXTURE3);

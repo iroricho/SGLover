@@ -41,8 +41,8 @@ inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 	pos0 = _pos0;
 	n0 = _n0;
 	radius = 0.15f;
-	mass = 70.0f * radius*radius*radius;
-	speed = 2.5f / mass;
+	mass = 140.0f * radius*radius*radius;
+	speed = 10.5f / mass;
 }
 
 inline void Bullet::disappear()
