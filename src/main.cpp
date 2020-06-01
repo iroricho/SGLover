@@ -209,24 +209,32 @@ void update()
 
 		// AI move update 탱크 위치를 받기 때문에 tank update 보다 밑에 있어야 함
 		//********* 충돌 검사 **********//
-		for (int i = 0; i < bullet_num; i++) {
-			if (ai.collision_bullet(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass)) bullet_list[i].disappear();
-		}
-		ai.collision(tank.pos, tank.radius, tank.mass);
-
-		for (int j = 0; j < anum; j++)
-		{
-			if (j != i)
-			{
-				vec3 aipos0 = ai.pos;
-				float airadius0 = ai.radius;
-				float aimass0 = ai.mass;
-				ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
-				ais[j].collision(aipos0, airadius0, aimass0);
+		if (ai.is_moving == 0) {
+		
+			// by bullet
+			for (int i = 0; i < bullet_num; i++) {
+				if (ai.collision(bullet_list[i].pos, bullet_list[i].radius, bullet_list[i].mass)) bullet_list[i].disappear();
 			}
 
-			//사망 카운트
+			// by tank
+			ai.collision(tank.pos, tank.radius, tank.mass);
+			
+			// by ai
+			for (int j = 0; j < anum; j++)
+			{
+				if (j != i)
+				{
+					vec3 aipos0 = ai.pos;
+					float airadius0 = ai.radius;
+					float aimass0 = ai.mass;
+					ai.collision(ais[j].pos, ais[j].radius, ais[j].mass);
+					ais[j].collision(aipos0, airadius0, aimass0);
+				}
+
+				//사망 카운트
+			}
 		}
+		else { ai.collision_moving(); }
 
 		ai.update(t, tank.pos);
 		ai.update_head(t);

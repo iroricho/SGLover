@@ -24,10 +24,10 @@ struct ai_t
 	
 	float t0=0;				// time buffer for halt
 	
-	float collision_t0=0;
-	
-	bool collision_true = 1; // 총알이 뚫고 지나가는동안 계속 충돌 일어나는것 방지용. true 일때만 충돌함.   충돌하는 순간 0으로 바뀌고 일정 시간 후 다시 1로 바뀜.
-	vec3 collision_direction0 = vec3(0);  //충돌 시점에서의 충돌방향.
+	int		cumc = 0;		// count of update moving by collision
+	bool	is_moving = 0;
+	float	collision_speed = 0;
+	vec3 collision_direction0 = vec3(0);
 
 	mat4	model_matrix;	// modeling transformation
 	mat4 model_matrix_head;
@@ -35,10 +35,10 @@ struct ai_t
 	
 	// public functions
 	void	update( float t, const vec3& tpos );	
-	bool collision(vec3 tpos, float tradius, float tmass);
-	bool collision_bullet(vec3 tpos, float tradius, float tmass);
 	void	update_head(float t);
 	void	update_arm();
+	bool	collision(vec3 tpos, float tradius, float tmass);
+	void	collision_moving();
 };
 
 // 중복을 피해 ai를 만드는 함수, 난이도에 따라 anum을 조절하면 됨
@@ -195,75 +195,6 @@ inline void ai_t::update( float t, const vec3& tpos )
 	posb = pos;
 }
 
-inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
-{
-	bool hit = false;
-
-	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
-	float collision_time = 0.2f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.1f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
-
-	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
-	{
-
-		if (collision_true == 1)
-		{
-			hit = true;
-			play_sound();
-			//printf("collision! %d\n",collision_true);
-			collision_t0 = t;
-			collision_direction0 = (pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
-		}
-	}
-
-	if (t - collision_t0 < collision_time)
-	{
-		pos.x = pos.x + collision_direction0.x * collision_speed;
-		pos.z = pos.z + collision_direction0.z * collision_speed;
-		collision_true = 0;  //collision_true 0으로 만들어서 재충돌 안일어나게.
-		//printf("settrue 0 \n");
-	}
-	else
-	{
-		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
-	}
-
-	return hit;
-}
-
-inline bool ai_t::collision_bullet(vec3 tpos, float tradius, float tmass)
-{
-	bool hit = false;
-	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
-	float collision_time = 0.2f;		// 튕길때 얼마나 오랫동안 움직이는지  //충돌 후 재충돌 가능 interval
-	float collision_speed = 0.2f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
-
-	if (distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius))
-	{
-		hit = true;
-		if (collision_true == 1)
-		{
-			play_sound();
-			collision_t0 = t;
-			collision_direction0 = (pos - tpos); //collision direction0 을 고치면, 더 복잡한 물리구현도 가능.
-		}
-	}
-
-	if (t - collision_t0 < collision_time)
-	{
-		pos.x = pos.x + collision_direction0.x * collision_speed;
-		pos.z = pos.z + collision_direction0.z * collision_speed;
-		collision_true = 0;  //collision_true 0으로 만들어서 재충돌 안일어나게.
-		//printf("settrue 0 \n");
-	}
-	else
-	{
-		collision_true = 1;  //시간 다 지나면 다시 충돌 가능하게.
-	}
-
-	return hit;
-}
-
 inline void ai_t::update_head(float t)
 {
 	mat4 translate_matrix =
@@ -315,4 +246,46 @@ inline void ai_t::update_arm()
 	model_matrix_arm = translate_matrix * model_matrix * rotation_matrix*scale_matrix;
 }
 
+inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
+{
+	if (death == 1) return false;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
+	bool hit = false;
+	
+	if ( distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius) )
+	{
+		if ( cumc == 0 )
+		{
+			printf("start\n");
+			cumc++;
+			is_moving = 1;
+			hit = true;
+			play_sound();
+			collision_speed = 0.3f * tmass / sqrt(mass);	// 충돌 후 속도는 상대 질량 속도에 비례, 자기 질량에 반비례하게
+			collision_direction0 = (pos - tpos);
+		}
+	}
+
+	return hit;
+}
+
+inline void ai_t::collision_moving() {
+	if (death == 1) return;	// 죽은 놈 계산량 줄이려고 한 거라서 빼도 됨
+	if ( cumc != 0 )
+	{
+	int max_cumc = 40;
+		if ( cumc < max_cumc ) {
+			printf("move %d\n",cumc);
+			printf("%f %f\n",collision_direction0.x, collision_direction0.z);
+			pos.x = pos.x + collision_direction0.x * collision_speed;
+			pos.z = pos.z + collision_direction0.z * collision_speed;
+			cumc++;
+		}
+		else if ( cumc == max_cumc ) {
+			cumc = 0;
+			is_moving = 0;
+			printf("end\n");
+		}
+		else { printf("error\n"); }
+	}
+}
 #endif // __AI_H__

@@ -13,7 +13,7 @@ struct Bullet
 	vec3	pos = vec3(-10);			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
-	float	mass=radius*radius*radius;
+	float	mass=10.0f * radius*radius*radius;
 
 	float t0 = 0;				// ÃÑ ½ð ½ÃÁ¡¿¡¼­ÀÇ ½Ã°£
 	vec3 pos0 = 0;			//ÃÑ ½ð ½ÃÁ¡¿¡¼­ÀÇ ÅÊÅ© À§Ä¡

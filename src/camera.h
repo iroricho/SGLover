@@ -15,7 +15,7 @@ struct tank_t
 	vec3	pos;			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=29;
-	float	mass = radius*radius*height;	// tank 질량
+	float	mass = 7.0f * radius*radius*height;	// tank 질량
 	mat4	model_matrix;	// modeling transformation
 	mat4 model_matrix_head;	//머리 matrix
 	mat4 model_matrix_arm;	//팔
@@ -60,7 +60,7 @@ struct camera
 	vec3 at0;
 	
 	// **** speed
-	float	speed = 0.8f / sqrt(tank.mass);	// velocity of tank
+	float	speed = 2.8f / sqrt(tank.mass);	// velocity of tank
 	float	max_speed = 1.3f * speed;	// max velocity of tank
 	float	camera_speed = 1.3f;
 	//float	max_camera_speed = 1.3f * camera_speed;	// max velocity of camera
