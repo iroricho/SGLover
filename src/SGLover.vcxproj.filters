@@ -35,9 +35,6 @@
     <ClInclude Include="cgut.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="defs.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="sphere.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
@@ -65,10 +62,30 @@
     <ClInclude Include="aicount.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="stb_image.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="cyl.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile" />
     <None Include="..\bin\shaders\circ.frag" />
     <None Include="..\bin\shaders\circ.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="gomonster.wav">
+      <Filter>리소스 파일</Filter>
+    </Media>
+    <Media Include="grandpas11month.wav">
+      <Filter>리소스 파일</Filter>
+    </Media>
+    <Media Include="hit.wav">
+      <Filter>리소스 파일</Filter>
+    </Media>
+    <Media Include="wheel.wav">
+      <Filter>리소스 파일</Filter>
+    </Media>
   </ItemGroup>
 </Project>

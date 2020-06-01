@@ -249,6 +249,8 @@ inline void ai_t::update_arm()
 inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
 {
 	if (death == 1) return false;	// Á×Àº ³ğ °è»ê·® ÁÙÀÌ·Á°í ÇÑ °Å¶ó¼­ »©µµ µÊ
+	if (tradius == 0) return false;
+	
 	bool hit = false;
 	
 	if ( distance(vec4(tpos, 1), vec4(pos, 1)) < (tradius + radius) )

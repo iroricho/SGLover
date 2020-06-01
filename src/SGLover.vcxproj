@@ -170,19 +170,26 @@
     <ClInclude Include="cgmath.h" />
     <ClInclude Include="cgut.h" />
     <ClInclude Include="colosseum.h" />
-    <ClInclude Include="defs.h" />
     <ClInclude Include="bullet.h" />
+    <ClInclude Include="cyl.h" />
     <ClInclude Include="gl\glad\glad.h" />
     <ClInclude Include="gl\glfw\glfw3.h" />
     <ClInclude Include="maintheme.h" />
     <ClInclude Include="numbers.h" />
     <ClInclude Include="sky.h" />
     <ClInclude Include="sphere.h" />
+    <ClInclude Include="stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\circ.frag" />
     <None Include="..\bin\shaders\circ.vert" />
     <None Include="makefile" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="gomonster.wav" />
+    <Media Include="grandpas11month.wav" />
+    <Media Include="hit.wav" />
+    <Media Include="wheel.wav" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
