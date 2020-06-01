@@ -10,14 +10,14 @@ extern float t;	// 전체 시간, 단 정지 기능을 위해 buffer가 빠진 값
 struct Bullet
 {
 	float	radius=0.0f;	// radius
-	vec3	pos = vec3(-10);			// position of tank
+	vec3	pos = vec3(0, -10.0f, 0);			// position of tank
 	vec4	color;			// RGBA color in [0,1]
 	uint	NTESS=30;
 	float	mass=10.0f * radius*radius*radius;
 
 	float t0 = 0;				// 총 쏜 시점에서의 시간
 	vec3 pos0 = 0;			//총 쏜 시점에서의 탱크 위치
-	vec3 n0 = vec3(-10, -10, -10);   //총 쏜 시점에서의 방향. camera의 n방향. 
+	vec3 n0 = vec3(0);   //총 쏜 시점에서의 방향. camera의 n방향. 
 	float speed = 10.0f;	// velocity of Bullet
 
 	mat4	model_matrix;	// modeling transformation
@@ -40,17 +40,15 @@ inline void Bullet::launch(float _t0, vec3 _pos0, vec3 _n0)
 	t0 = _t0;
 	pos0 = _pos0;
 	n0 = _n0;
-	radius = 0.1f;
-	mass = radius*radius*radius;
-	speed = 0.01f / mass;
+	radius = 0.15f;
+	mass = 70.0f * radius*radius*radius;
+	speed = 2.5f / mass;
 }
 
 inline void Bullet::disappear()
 {
 	disappear_flag = 1;
 	radius = 0.0f;
-	mass = 0;
-	speed = 0;
 }
 
 inline void Bullet::update(float t, const vec3& tpos)
@@ -62,7 +60,7 @@ inline void Bullet::update(float t, const vec3& tpos)
 					(colosseum.pos.x-pos.x)*(colosseum.pos.x-pos.x) +
 					(colosseum.pos.z-pos.z)*(colosseum.pos.z-pos.z)
 					)
-		   ) { disappear(); printf("bullet disappear\n"); }
+		   ) { disappear(); }
 
 		float dt = t - t0; //총 쏜 시점부터 흘러간 시간.
 		pos.x = pos0.x + n0.x * speed * dt;

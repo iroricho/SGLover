@@ -255,7 +255,7 @@ inline bool ai_t::collision(vec3 tpos, float tradius, float tmass)
 	{
 		if ( cumc == 0 )
 		{
-			printf("start\n");
+			//printf("start\n");
 			cumc++;
 			is_moving = 1;
 			hit = true;
@@ -274,8 +274,8 @@ inline void ai_t::collision_moving() {
 	{
 	int max_cumc = 40;
 		if ( cumc < max_cumc ) {
-			printf("move %d\n",cumc);
-			printf("%f %f\n",collision_direction0.x, collision_direction0.z);
+			//printf("move %d\n",cumc);
+			//printf("%f %f\n",collision_direction0.x, collision_direction0.z);
 			pos.x = pos.x + collision_direction0.x * collision_speed;
 			pos.z = pos.z + collision_direction0.z * collision_speed;
 			cumc++;
@@ -283,7 +283,7 @@ inline void ai_t::collision_moving() {
 		else if ( cumc == max_cumc ) {
 			cumc = 0;
 			is_moving = 0;
-			printf("end\n");
+			//printf("end\n");
 		}
 		else { printf("error\n"); }
 	}

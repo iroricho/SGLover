@@ -795,7 +795,7 @@ bool user_init()
 
 	//bullet 생성이 잘 안되서 그냥 여기다 만들어요
 	for (int i = 0; i < bullet_num; i++) {
-		Bullet bullet = { 0.0f,  vec3(-10,-10,-10), vec4(1.0f,0.0f,0.0f,1.0f), 30 };
+		Bullet bullet = { 0.0f,  vec3(0, -10.0f, 0), vec4(1.0f,0.0f,0.0f,1.0f), 30 };
 		bullet_list.emplace_back(bullet);
 	}
 
